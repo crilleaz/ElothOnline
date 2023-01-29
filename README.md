@@ -19,7 +19,7 @@ ElothOnline is a Webbased (textbased) Dungeon MMO!
 
 
 # Disclaimer
-I went into this project by myself, thinking I would finish it, I grew tired.
+I went into this project by myself, thinking I would finish it, I grew tired.<br>
 It's sloppy and unfinished, but rather good start or if you would like to continue building!
 
 # Ingame screenshots
@@ -33,11 +33,11 @@ It's sloppy and unfinished, but rather good start or if you would like to contin
 
 
 # Installation
-Upload the files to your webserver
-Import the sql-file
-Edit: engine.php, register.php, chat.php, login.php, server.php and log.php with your details
-Run or cronjob the server.php
-Register your account/character at register.php
+* Upload the files to your webserver
+* Import the sql-file
+* Edit: engine.php, register.php, chat.php, login.php, server.php and log.php with your details
+* Run or cronjob the server.php
+* Register your account/character at register.php
 
 # Discord
 Crille#6623
