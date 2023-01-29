@@ -1,5 +1,5 @@
 # ElothOnline
-ElothOnline is a Webbased (textbased) Dungeon MMO!
+ElothOnline is a Webbased (textbased) Dungeon MMORPG!
 
 # Features
 * Login
