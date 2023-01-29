@@ -16,6 +16,8 @@ ElothOnline is a Webbased (textbased) Dungeon MMO!
 * Hitpoints system
 * Combat system
 * Item system
+* Ban system
+* GM system
 
 
 # Disclaimer
@@ -23,7 +25,7 @@ I went into this project by myself, thinking I would finish it, I grew tired.<br
 It's sloppy and unfinished, but rather good start or if you would like to continue building!
 
 # Ingame screenshots
-![UI_1](https://user-images.githubusercontent.com/20803604/215297009-55400bcc-03ad-45eb-8a28-61ea321247a2.PNG)
+![UI_1](https://user-images.githubusercontent.com/20803604/215297319-a4ef0dac-6c14-4132-8d45-76578b8b35bd.PNG)
 ![UI_2](https://user-images.githubusercontent.com/20803604/215297010-5bcecc3d-4763-4912-bd8c-6ca30edbd37c.PNG)
 ![highscores](https://user-images.githubusercontent.com/20803604/215297301-d61704c9-7e1a-4df0-b1d4-0cbea936ab0f.PNG)
 ![inventory](https://user-images.githubusercontent.com/20803604/215297005-508d0f90-c858-46a0-a3cb-887129f34eef.PNG)
