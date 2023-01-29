@@ -2,20 +2,20 @@
 ElothOnline is a Webbased (textbased) Dungeon MMO!
 
 # Features
-Login
-Register
-Chat
-Combatlog
-Dungeon system with 4 dungeons
-Experience and level system
-Inventory system
-Monsters
-Highscores
-Loot system
-Stamina system
-Hitpoints system
-Combat system
-Item system
+* Login
+* Register
+* Chat
+* Combatlog
+* Dungeon system with 4 dungeons
+* Experience and level system
+* Inventory system
+* Monsters
+* Highscores
+* Loot system
+* Stamina system
+* Hitpoints system
+* Combat system
+* Item system
 
 
 # Disclaimer
