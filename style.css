@@ -1,0 +1,93 @@
+.body {
+   background-color: rgb(236, 238, 244);
+}
+
+    .myStickyListGroup{
+    position: absolute;
+    left: 15px;
+    right: 15px;
+  }
+  .navbar .navbar-nav {
+  float:none;
+  margin:0 auto;
+  display: block;
+  text-align: center
+  }
+  .navbar-nav > li {
+      display: inline-block;
+      float:none;
+  }
+  .navbar-brand {
+    left: 25%;
+    position: absolute;
+  }
+
+  .list-group-item{
+      word-break: break-all;
+  }
+  
+  hr {
+  top: 20px;
+}
+
+.chat {
+width: 100%;
+height: 100%;
+border: 1px solid black;
+overflow: scroll;
+overflow-x: hidden; 
+overflow-y: hidden; 
+}
+
+.card-title{
+  font-size: 10px;
+}
+
+.card{
+  margin: 10px;
+}
+
+.card-text{
+  font-size: 10px;
+}
+
+.invisible{
+  top: 20px;
+}
+
+x{
+  font-size: 12px;
+}
+#myInput {
+background-image: url('search.png'); /* Add a search icon to input */
+background-position: 10px 12px; /* Position the search icon */
+background-repeat: no-repeat; /* Do not repeat the icon image */
+width: 100%; /* Full-width */
+font-size: 16px; /* Increase font-size */
+padding: 12px 20px 12px 40px; /* Add some padding */
+border: 1px solid #ddd; /* Add a grey border */
+margin-bottom: 12px; /* Add some space below the input */
+}
+
+#myTable {
+border-collapse: collapse; /* Collapse borders */
+width: 100%; /* Full-width */
+border: 1px solid #ddd; /* Add a grey border */
+font-size: 18px; /* Increase font-size */
+}
+
+#myTable th, #myTable td {
+text-align: left; /* Left-align text */
+padding: 12px; /* Add padding */
+}
+
+#myTable tr {
+/* Add a bottom border to all table rows */
+border-bottom: 1px solid #ddd;
+}
+
+#myTable tr.header, #myTable tr:hover {
+/* Add a grey background color to the table header and on hover */
+background-color: #f1f1f1;
+}
+
