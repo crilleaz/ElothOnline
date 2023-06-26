@@ -42,4 +42,4 @@ It's sloppy and unfinished, but rather good start or if you would like to contin
 * Register your account/character at register.php
 
 # Discord
-Crille#6623
+Crilleaz
