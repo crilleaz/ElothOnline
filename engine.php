@@ -53,7 +53,7 @@ function getDungeonId(){
 
 function getDungeonName($dungeonId){
     global $db;
-    
+
         $result = mysqli_query($db,"SELECT name FROM dungeons WHERE id = {$dungeonId}");
         while($row = mysqli_fetch_array($result)){
         $dungeonName = $row['name'];
@@ -92,17 +92,6 @@ function getMonsterExp($monsterId){
         $monsterExperience = $row['experience'];
     
             return $monsterExperience;
-    }
-}
-
-function getHuntingDungeonId(){
-    global $db;
-    global $username;
-        $result = mysqli_query($db,"SELECT dungeon_id FROM hunting WHERE username = '{$username}'");
-        while($row = mysqli_fetch_array($result)){
-        $dungeonHuntingId = $row['dungeon_id'];
-    
-            return $dungeonHuntingId;
     }
 }
 
@@ -283,7 +272,7 @@ function giveLoot(){
                 $playerNames = $row['username'];
                 $timestamp = $row['tid'];
                 $dungeonIds = $row['dungeon_id'];
-                $fetch_name = getDungeonName($dungeonId = $row['dungeon_id']);
+                $fetch_name = getDungeonName($row['dungeon_id']);
                 // echo $playerNames;
                 // random gold
                 //tier1

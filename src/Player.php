@@ -37,6 +37,13 @@ class Player
         return !$this->isFighting();
     }
 
+    public function getHuntingDungeonId(): int
+    {
+        $dungeon = $this->connection->fetchRow("SELECT dungeon_id FROM hunting WHERE username = '{$this->getName()}'");
+
+        return (int) ($dungeon['dungeon_id'] ?? 0);
+    }
+
     public function isAdmin(): bool
     {
         return $this->getName() === 'crilleaz';

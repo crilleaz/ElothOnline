@@ -133,7 +133,7 @@
                                         $result = mysqli_query($db,"SELECT username FROM hunting WHERE username = '{$player->getName()}'");
                                         if ($result->num_rows === 0) {
                                           echo '<a class="btn btn-primary" href="?tab=dungeons&hunt=' . $dungeonId . '"' . 'role="button">Start</a><br>';
-                                        }elseif(getHuntingDungeonId() == $row['id']){
+                                        }elseif($player->getHuntingDungeonId() == $row['id']){
                                           echo '<a class="btn btn-danger" href="?tab=dungeons&leave=' . $dungeonId . '"' . 'role="button">Leave</a><br>';
                                         }else{
                                           echo '<a class="btn btn-primary" href="?tab=dungeons&hunt=' . $dungeonId . '"' . 'role="button">Start</a><br>';
@@ -159,7 +159,7 @@
                                         $result = mysqli_query($db,"SELECT username FROM hunting WHERE username = '{$player->getName()}'");
                                         if ($result->num_rows === 0) {
                                           echo '<a class="btn btn-primary" href="?tab=dungeons&hunt=' . $dungeonId . '"' . 'role="button">Start</a><br>';
-                                        }elseif(getHuntingDungeonId() == $row['id']){
+                                        }elseif($player->getHuntingDungeonId() == $row['id']){
                                           echo '<a class="btn btn-danger" href="?tab=dungeons&leave=' . $dungeonId . '"' . 'role="button">Leave</a><br>';
                                         }else{
                                           echo '<a class="btn btn-primary" href="?tab=dungeons&hunt=' . $dungeonId . '"' . 'role="button">Start</a><br>';
@@ -184,7 +184,7 @@
                                             $result = mysqli_query($db,"SELECT username FROM hunting WHERE username = '{$player->getName()}'");
                                             if ($result->num_rows === 0) {
                                               echo '<a class="btn btn-primary" href="?tab=dungeons&hunt=' . $dungeonId . '"' . 'role="button">Start</a><br>';
-                                            }elseif(getHuntingDungeonId() == $row['id']){
+                                            }elseif($player->getHuntingDungeonId() == $row['id']){
                                               echo '<a class="btn btn-danger" href="?tab=dungeons&leave=' . $dungeonId . '"' . 'role="button">Leave</a><br>';
                                             }else{
                                               echo '<a class="btn btn-primary" href="?tab=dungeons&hunt=' . $dungeonId . '"' . 'role="button">Start</a><br>';
