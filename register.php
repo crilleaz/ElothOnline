@@ -34,7 +34,7 @@ if (isset($_POST['register'])) {
       $db->query("INSERT INTO players (id, name, level, experience, stamina, health, health_max, magic, strength, defense, woodcutting, mining, gathering, harvesting, blacksmith, herbalism, gold, crystals, in_combat) VALUES (NULL, '{$username}', '1', '0', '100', '15', '15', '0', '10', '10', '0', '0', '0', '0', '0', '0', '10', '0', '0')");
       $db->query("INSERT INTO chat (id, username, messages) VALUES (NULL, 'System', 'Registration: New member joined!')");
       $db->query("INSERT INTO inventory (username, item_id, amount, worth) VALUES ('{$username}', '1', '10', '0')");
-      $db->query("INSERT INTO log (username, message) VALUES ('{$username}', '[System] Welcome {$username}! <br> This is your Combat log, right now its empty :( <br> Visit <a href=\'dungeons.php\'>Dungeons to start your adventure!</a>')");
+      $db->query("INSERT INTO log (username, message) VALUES ('{$username}', '[System] Welcome {$username}! <br> This is your Combat log, right now its empty :( <br> Visit <a href=\'/launcher?tab=dungeons\'>Dungeons to start your adventure!</a>')");
       
 
 
