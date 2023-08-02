@@ -1,206 +1,19 @@
 <?php
-session_start();
-$db = mysqli_connect("localhost", "user", "password", "db");
+require_once __DIR__.'/src/Game.php';
 
+session_start();
+
+$db = include 'db.php';
 
 // Global variabler
-$username = $_SESSION['username'];
+try {
+    $player = \Game\Game::instance()->getCurrentPlayer();
+} catch (Throwable $e) {
+    // TODO relevant to src/Game.php::21
+    $player = null;
+}
 // ini_set('short_open_tag', 'On');
 
-function getUsername(){
-global $db;
-global $username;
-
-    $result = mysqli_query($db,"SELECT name FROM players WHERE name = '{$username}'");
-    while($row = mysqli_fetch_array($result)){
-    $playerName = $row['name'];
-
-        return $playerName;
-}
-mysqli_close($db);
-}
-
-function getPlayerExp(){
-    global $db;
-    global $username;
-    
-        $result = mysqli_query($db,"SELECT experience FROM players WHERE name = '{$username}'");
-        while($row = mysqli_fetch_array($result)){
-        $playerExp = $row['experience'];
-    
-            return $playerExp;
-    }
-    mysqli_close($db);
-}
-
-function getPlayerStamina(){
-    global $db;
-    global $username;
-    
-        $result = mysqli_query($db,"SELECT stamina FROM players WHERE name = '{$username}'");
-        while($row = mysqli_fetch_array($result)){
-        $playerStamina = $row['stamina'];
-    
-            return $playerStamina;
-    }
-    mysqli_close($db);
-}
-
-function getPlayerHealthMax(){
-    global $db;
-    global $username;
-    
-        $result = mysqli_query($db,"SELECT health_max FROM players WHERE name = '{$username}'");
-        while($row = mysqli_fetch_array($result)){
-        $playerHealthMax = $row['health_max'];
-    
-            return $playerHealthMax;
-    }
-    mysqli_close($db);
-}
-
-function getPlayerMagic(){
-    global $db;
-    global $username;
-    
-        $result = mysqli_query($db,"SELECT magic FROM players WHERE name = '{$username}'");
-        while($row = mysqli_fetch_array($result)){
-        $playerMagic = $row['magic'];
-    
-            return $playerMagic;
-    }
-    mysqli_close($db);
-}
-
-function getPlayerStrength(){
-    global $db;
-    global $username;
-    
-        $result = mysqli_query($db,"SELECT strength FROM players WHERE name = '{$username}'");
-        while($row = mysqli_fetch_array($result)){
-        $playerStrength = $row['strength'];
-    
-            return $playerStrength;
-    }
-    mysqli_close($db);
-}
-
-function getPlayerDefense(){
-    global $db;
-    global $username;
-    
-        $result = mysqli_query($db,"SELECT defense FROM players WHERE name = '{$username}'");
-        while($row = mysqli_fetch_array($result)){
-        $playerDefense = $row['defense'];
-    
-            return $playerDefense;
-    }
-    mysqli_close($db);
-}
-
-function getPlayerWoodcutting(){
-    global $db;
-    global $username;
-    
-        $result = mysqli_query($db,"SELECT woodcutting FROM players WHERE name = '{$username}'");
-        while($row = mysqli_fetch_array($result)){
-        $playerWoodcutting = $row['woodcutting'];
-    
-            return $playerWoodcutting;
-    }
-    mysqli_close($db);
-}
-
-function getPlayerMining(){
-    global $db;
-    global $username;
-    
-        $result = mysqli_query($db,"SELECT mining FROM players WHERE name = '{$username}'");
-        while($row = mysqli_fetch_array($result)){
-        $playerMining = $row['mining'];
-    
-            return $playerMining;
-    }
-    mysqli_close($db);
-}
-
-function getPlayerGathering(){
-    global $db;
-    global $username;
-    
-        $result = mysqli_query($db,"SELECT gathering FROM players WHERE name = '{$username}'");
-        while($row = mysqli_fetch_array($result)){
-        $playerGathering = $row['gathering'];
-    
-            return $playerGathering;
-    }
-    mysqli_close($db);
-}
-
-function getPlayerHarvesting(){
-    global $db;
-    global $username;
-    
-        $result = mysqli_query($db,"SELECT harvesting FROM players WHERE name = '{$username}'");
-        while($row = mysqli_fetch_array($result)){
-        $playerHarvesting = $row['harvesting'];
-    
-            return $playerHarvesting;
-    }
-    mysqli_close($db);
-}
-
-function getPlayerBlacksmith(){
-    global $db;
-    global $username;
-    
-        $result = mysqli_query($db,"SELECT blacksmith FROM players WHERE name = '{$username}'");
-        while($row = mysqli_fetch_array($result)){
-        $playerBlacksmith = $row['blacksmith'];
-    
-            return $playerBlacksmith;
-    }
-    mysqli_close($db);
-}
-
-function getPlayerHerbalism(){
-    global $db;
-    global $username;
-    
-        $result = mysqli_query($db,"SELECT herbalism FROM players WHERE name = '{$username}'");
-        while($row = mysqli_fetch_array($result)){
-        $playerHerbalism = $row['herbalism'];
-    
-            return $playerHerbalism;
-    }
-    mysqli_close($db);
-}
-
-function getPlayerGold(){
-    global $db;
-    global $username;
-    
-        $result = mysqli_query($db,"SELECT amount FROM inventory WHERE item_id = '1' AND username = '{$username}'");
-        while($row = mysqli_fetch_array($result)){
-        $playerGold = $row['amount'];
-    
-            return $playerGold;
-    }
-    mysqli_close($db);
-}
-
-function getPlayerCrystals(){
-    global $db;
-    global $username;
-    
-        $result = mysqli_query($db,"SELECT crystals FROM players WHERE name = '{$username}'");
-        while($row = mysqli_fetch_array($result)){
-        $playerCrystals = $row['crystals'];
-    
-            return $playerCrystals;
-    }
-    mysqli_close($db);
-}
 
 function getPlayerLogs($num){
     global $db;
@@ -212,40 +25,10 @@ function getPlayerLogs($num){
     
             echo $playerMessage . '<br>';
     }
-    // mysqli_close($db);
 }
-
-
-function getPlayerStatus(){
-    global $db;
-    global $username;
-    
-        $result = mysqli_query($db,"SELECT in_combat FROM players WHERE name = '{$username}'");
-        while($row = mysqli_fetch_array($result)){
-        $playerCombat = $row['in_combat'];
-    
-            return $playerCombat;
-            echo 'status' . $playerCombat;
-    }
-    mysqli_close($db);
-}
-
-function getPlayerId(){
-    global $db;
-    global $username;
-    
-        $result = mysqli_query($db,"SELECT id FROM users WHERE anv = '{$username}'");
-        while($row = mysqli_fetch_array($result)){
-        $playerId = $row['id'];
-    
-            return $playerId;
-    }
-    mysqli_close($db);
-}
-
 
 if (isset($_GET['ban'])) {
-    if(getUsername() == 'crilleaz'){
+    if($player->isAdmin()){
         $userToBan = $_GET['ban'];
         $db->query("UPDATE users set banned = 1 WHERE anv = '{$userToBan}'");
         $db->query("INSERT INTO chat (username, messages) VALUES ('System', 'User \"{$_GET['ban']}\" has been banned.')");
@@ -254,32 +37,6 @@ if (isset($_GET['ban'])) {
     }
 }
 
-function getPlayerInventory(){
-    global $db;
-    global $username;
-    
-        $result = mysqli_query($db,"SELECT item_id FROM inventory WHERE username = '{$username}'");
-        while($row = mysqli_fetch_array($result)){
-        $itemId = $row['item_id'];
-    
-            echo $itemId;
-    }
-    mysqli_close($db);
-}
-
-function getItemId(){
-    global $db;
-    
-        $result = mysqli_query($db,"SELECT * FROM items");
-        while($row = mysqli_fetch_array($result)){
-        $itemIds = $row['item_id'];
-        $itemName = $row['name'];
-    
-            echo $itemIds . '<br>';
-            echo $itemName . '<br>';
-    }
-    mysqli_close($db);
-}
 
 function getItemName($itemId){
     global $db;
@@ -290,7 +47,6 @@ function getItemName($itemId){
     
             echo $itemName . '<br>';
     }
-    // mysqli_close($db);
 }
 
 function getDungeonId(){
@@ -302,7 +58,6 @@ function getDungeonId(){
     
             return $dungeonId;
     }
-      mysqli_close($db);
 }
 
 function getDungeonName($dungeonId){
@@ -314,7 +69,6 @@ function getDungeonName($dungeonId){
     
             return $dungeonName;
     }
-     mysqli_close($db);
 }
 
 function getMonsterName($monsterId){
@@ -326,7 +80,6 @@ function getMonsterName($monsterId){
     
             return $monsterName;
     }
-     mysqli_close($db);
 }
 
 function getMonsterId($monsterId){
@@ -338,7 +91,6 @@ function getMonsterId($monsterId){
     
             return $monsterId;
     }
-     mysqli_close($db);
 }
 
 function getMonsterExp($monsterId){
@@ -350,7 +102,6 @@ function getMonsterExp($monsterId){
     
             return $monsterExperience;
     }
-     mysqli_close($db);
 }
 
 function getHuntingDungeonId(){
@@ -362,7 +113,6 @@ function getHuntingDungeonId(){
     
             return $dungeonHuntingId;
     }
-     mysqli_close($db);
 }
 
 function getHuntingDungeonForStartHunt($getId){
@@ -373,7 +123,6 @@ function getHuntingDungeonForStartHunt($getId){
             
             return $dungeonStartHunting;
     }
-     mysqli_close($db);
 }
 
 function startHunting(){
@@ -382,15 +131,13 @@ function startHunting(){
         $result = mysqli_query($db,"SELECT dungeon_id FROM hunting WHERE username = '{$username}'");
         if ($result->num_rows === 0) {
             echo 'You went to hunt.';
-            $db->query("INSERT INTO hunting (username, dungeon_id, tid) VALUES ('{$username}', '1', NULL)");
+            $db->query("INSERT INTO hunting (username, dungeon_id) VALUES ('{$username}', '1')");
             return true;
         } else {
             echo time();
             echo 'You\'re already hunting.';
             return false;
         }
-        
-     mysqli_close($db);
 }
 
 function giveExperience(){
@@ -415,15 +162,20 @@ function giveExperience(){
                 if ($time_difference >= 60) {
                   $timestamp = time();
                   // Update the user's score and timestamp in the database
-                    $db->query("UPDATE players SET experience = experience + 100 WHERE name = '{$playerNames}'");
-                    $db->query("UPDATE hunting SET tid = NULL WHERE username = '{$playerNames}'");
+                    $hunter = \Game\Game::instance()->findPlayer($playerNames);
+                    if ($hunter === null) {
+                        echo 'Player ' . $playerNames . ' does not exist yet is present in hunting list!';
+
+                        continue;
+                    }
+                    $hunter->addExp(100);
+                    $db->query("UPDATE hunting SET tid = NOW() WHERE username = '{$playerNames}'");
                 }else{
                     // echo 'inte högre';
                 }
             }
             return false;
         }
-        mysqli_close($db);
 }
 
 function resetTimestamp(){
@@ -448,7 +200,7 @@ function resetTimestamp(){
                 if ($time_difference >= 60) {
                   $timestamp = time();
                   // Update the user's score and timestamp in the database
-                    $db->query("UPDATE hunting SET tid = NULL WHERE username = '{$playerNames}'");
+                    $db->query("UPDATE hunting SET tid = NOW() WHERE username = '{$playerNames}'");
                     $db->query("UPDATE players SET stamina = stamina -1 WHERE name = '{$playerNames}'");
                     echo '[resetTimestamp] ' . 'User: ' . $playerNames . ' had their timestamp resetted.' . PHP_EOL;
                     echo '[reduceStamina] ' . 'User: ' . $playerNames . ' had their stamina reduced by 1.' . PHP_EOL;
@@ -456,7 +208,6 @@ function resetTimestamp(){
             }
             return false;
         }
-        mysqli_close($db);
 }
 
 //2023-01-02 04:06 slutade här för dagen
@@ -483,6 +234,7 @@ function giveExperience2(){
                 //Runda ner till senaste minut
                 $minutes_past = floor(($current_timestamp - $reference_timestamp) / 60);
                 //Ge exp
+                $points_earned = 0;
                 if($row['dungeon_id'] == 1){
                     $points_earned = $minutes_past * 30; 
                 }elseif($row['dungeon_id'] == 2){
@@ -492,17 +244,19 @@ function giveExperience2(){
                 // check stamina
 
                   // Update the user's exp and timestamp in the database
-                    $db->query("UPDATE players SET experience = experience + $points_earned WHERE name = '{$playerNames}'");
-                    if(mysqli_affected_rows($db) >0 ){
-                        $db->query("INSERT INTO log (username, message, tid) VALUES ('{$playerNames}', '[Dungeon] You gained $points_earned experience points.', NULL)");
-                    }
+                $hunter = \Game\Game::instance()->findPlayer($playerNames);
+                if ($hunter === null) {
+                    echo 'Player ' . $playerNames . ' does not exist yet is present in hunting list!';
+
+                    continue;
+                }
+                $hunter->addExp($points_earned);
+                $db->query("INSERT INTO log (username, message) VALUES ('{$playerNames}', '[Dungeon] You gained $points_earned experience points.')");
                     // $db->query("UPDATE hunting SET tid = NULL WHERE username = '{$playerNames}'");
                     echo '[giveExperience] ' . 'User: ' . $playerNames . ' were given ' . $points_earned . ' exp' . PHP_EOL;
-                
             }
             return false;
         }
-        mysqli_close($db);
 }
 
 function getHuntingPlayers(){
@@ -513,7 +267,6 @@ function getHuntingPlayers(){
         $playersHunting = $row['username'];
         return $playersHunting;
     }
-    mysqli_close($db);
 }
 
 
@@ -568,11 +321,11 @@ function giveLoot(){
                 if($fetch_name == 'Rat Cave'){
                     $random_number = rand(1, 2);
                     checkIfExist($item = 1, $amount = $random_tier1_gold, $worth = 0, $player = $playerNames);
-                    $db->query("INSERT INTO log (username, message, tid) VALUES ('{$playerNames}', '[Dungeon] You looted a dead rat, found $random_tier1_gold gold.', NULL)");
+                    $db->query("INSERT INTO log (username, message) VALUES ('{$playerNames}', '[Dungeon] You looted a dead rat, found $random_tier1_gold gold.')");
                     echo '[Loot] ' . 'User: ' . $playerNames . ' were given, item1' . PHP_EOL;
                     if ($random_number == 2) {
                         checkIfExist($item = 2, $amount = 1, $worth = 4, $player = $playerNames);
-                        $db->query("INSERT INTO log (username, message, tid) VALUES ('{$playerNames}', '[Dungeon] You looted a dead rat, found $amount cheese.', NULL)");
+                        $db->query("INSERT INTO log (username, message) VALUES ('{$playerNames}', '[Dungeon] You looted a dead rat, found $amount cheese.')");
                         echo '[Loot] ' . 'User: ' . $playerNames . ' were given, item2' . PHP_EOL;
                     }                    
                 }elseif($fetch_name == 'Rotworm Cave'){
@@ -588,60 +341,6 @@ function giveLoot(){
             }
             return false;
         }
-        // mysqli_close($db);
-}
-
-function getPlayerLevel(){
-    global $db;
-    global $username;
-
-    $user_experience = getPlayerExp();
-
-    // Select level that corresponds to user's experience points
-    $sql = "SELECT level FROM exp_table WHERE experience<=$user_experience ORDER BY level DESC LIMIT 1";
-    $result = mysqli_query($db, $sql);
-    
-    if (mysqli_num_rows($result) > 0) {
-        // output data of each row
-        while($row = mysqli_fetch_assoc($result)) {
-            $user_level = $row['level'];
-            $db->query("UPDATE players SET level = $user_level WHERE name = '{$username}'");
-        }
-    } else {
-        echo "Level not found";
-    }
-    
-    return $user_level;
-
-    mysqli_close($db);
-}
-
-function getPlayerHealth(){
-    global $db;
-    global $username;
-    
-        $result = mysqli_query($db,"SELECT health FROM players WHERE name = '{$username}'");
-        while($row = mysqli_fetch_array($result)){
-        $playerHealth = $row['health'];
-            $amountToAdd = '15';
-            $calculateHealth = getPlayerLevel() * $amountToAdd;
-            $db->query("UPDATE players SET health_max = $calculateHealth WHERE name = '{$username}'");
-            return $playerHealth;
-    }
-    mysqli_close($db);
-}
-
-function getPlayerNeedExp(){
-        global $db;
-
-        $expNeeded = getPlayerLevel() + 1;
-            $result = mysqli_query($db,"SELECT experience FROM exp_table WHERE level = $expNeeded");
-            while($row = mysqli_fetch_array($result)){
-            $nextExp = $row['experience'];
-        
-                return $nextExp;
-        }
-        mysqli_close($db);
 }
 
 function forceStopHuntingWithNoStamina(){
@@ -695,13 +394,14 @@ function generateStamina(){
             // echo $row['stamina'];
             if($minutes_past >= 1){
                 giveStamina();
-                $db->query("UPDATE timetable SET tid = NULL");
+                $db->query("UPDATE timetable SET tid = NOW()");
             }
 
 
     }
 }
 
+// TODO likely leftovers? should be removed due to security reasons
 function db($arg1, $arg2, $arg3, $arg4, $arg5){
     global $db;
     $result = mysqli_query($db,"SELECT $arg1 FROM $arg2 WHERE $arg4 = '{$arg5}'");
@@ -710,7 +410,6 @@ function db($arg1, $arg2, $arg3, $arg4, $arg5){
         
         echo $level;
     }
-    mysqli_close($db);
 }
 
         //    print_r(getMonsterExp($monsterId = 2));

@@ -73,43 +73,43 @@ if (!isset($_SESSION['username'])) {
             <div class="col-lg-3 d-none d-lg-block">
                <ul class="list-group myStickyListGroup shadow bg-white rounded">
                   <li class="list-group-item rounded">
-				  <font size="5"><b><?php echo $_SESSION['username']; ?></b></font> Lv. <?php print_r(getPlayerLevel()) ?><br>
-				  <font size="2">HP: <?php print_r(getPlayerHealth()) ?>/<?php print_r(getPlayerHealthMax()) ?></font>
+				  <font size="5"><b><?php echo $_SESSION['username']; ?></b></font> Lv. <?php print_r($player->getLevel()) ?><br>
+				  <font size="2">HP: <?php print_r($player->getCurrentHealth()) ?>/<?php print_r($player->getMaxHealth()) ?></font>
 				  |
                   <?php
-              if(getPlayerStamina() < 50){
-               echo '<font size="2">Stamina: ' .'<font color="yellow">' . getPlayerStamina() . '</font>' . '/100</font>';
-              }elseif(getPlayerStamina() < 10){
-               echo '<font size="2">Stamina: ' .'<font color="red">' . getPlayerStamina() . '</font>' . '/100</font>';
+              if($player->getStamina() < 50){
+               echo '<font size="2">Stamina: ' .'<font color="yellow">' . $player->getStamina() . '</font>' . '/100</font>';
+              }elseif($player->getStamina() < 10){
+               echo '<font size="2">Stamina: ' .'<font color="red">' . $player->getStamina() . '</font>' . '/100</font>';
               }else{
-               echo '<font size="2">Stamina: ' . getPlayerStamina() . '/100</font>';
+               echo '<font size="2">Stamina: ' . $player->getStamina() . '/100</font>';
               }
 				  ?>
 				  <hr>
 				  <center><pre>Skills</pre></center>
-				  <font size="2">Experience: <?php print_r(getPlayerExp()) ?> <?php echo " / " ?> <?php print_r(getPlayerNeedExp())?><br>
-				  Magic: <?php print_r(getPlayerMagic()) ?> <br>
-				  Strength: <?php print_r(getPlayerStrength()) ?> <br>
-				  Defense: <?php print_r(getPlayerDefense()) ?> <br>
+				  <font size="2">Experience: <?php print_r($player->getExp()) ?> <?php echo " / " ?> <?php print_r($player->getNextLevelExp())?><br>
+				  Magic: <?php print_r($player->getMagic()) ?> <br>
+				  Strength: <?php print_r($player->getStrength()) ?> <br>
+				  Defense: <?php print_r($player->getDefense()) ?> <br>
 				  
 				  </font>
 				  </li>
                   <li class="list-group-item rounded">
 				  <center><pre>Abilities</pre></center>
 				  <font size="2">
-				  Woodcutting: <?php print_r(getPlayerWoodcutting()) ?><br>
-				  Mining: <?php print_r(getPlayerMining()) ?> <br>
-				  Gathering: <?php print_r(getPlayerGathering()) ?> <br>
-				  Harvesting: <?php print_r(getPlayerHarvesting()) ?> <br>
-				  Blacksmith: <?php print_r(getPlayerBlacksmith()) ?> <br>
-				  Herbalism: <?php print_r(getPlayerHerbalism()) ?> <br>
+				  Woodcutting: <?php print_r($player->getWoodcutting()) ?><br>
+				  Mining: <?php print_r($player->getMining()) ?> <br>
+				  Gathering: <?php print_r($player->getGathering()) ?> <br>
+				  Harvesting: <?php print_r($player->getHarvesting()) ?> <br>
+				  Blacksmith: <?php print_r($player->getBlacksmith()) ?> <br>
+				  Herbalism: <?php print_r($player->getHerbalism()) ?> <br>
 				  </font>
 				  </li>
                   <li class="list-group-item rounded">
 				  <center><pre>Bank</pre></center>
 				  <font size="2">
-				  Gold: <?php print_r(getPlayerGold()) ?><br>
-				  Crystals: <?php print_r(getPlayerCrystals()) ?> <br>
+				  Gold: <?php print_r($player->getGold()) ?><br>
+				  Crystals: <?php print_r($player->getCrystals()) ?> <br>
 				  </font>
 				  </li>
                   <li class="list-group-item rounded">
@@ -167,10 +167,10 @@ if (!isset($_SESSION['username'])) {
                   <li class="list-group-item rounded">
                   <center><pre>Status</pre></center>
                   <?php
-                  if(getPlayerStatus() == '1'){
+                  if($player->isFighting()){
                      echo '<font size="2">Combat: <img src="./combat.gif" title="Currently fighting"><br>';
                      echo 'Dungeon: ' . getDungeonName($dungeonId = getHuntingDungeonId());
-                  }elseif(getPlayerStatus() == '0'){
+                  }elseif($player->isInProtectiveZone()){
                      echo '<font size="2">Combat: <img src="./pz.gif" title="In protective zone"><br>';
                      echo 'Dungeon: ' . 'In protective zone';
                   }else{

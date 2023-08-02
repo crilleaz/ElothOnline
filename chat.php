@@ -1,6 +1,5 @@
 <?php
-session_start();
-$db = mysqli_connect("localhost", "user", "password", "db");
+$db = include 'db.php';
         // Check if the form has been submitted
         if (isset($_POST['message'])) {
             // Escape the input to protect against SQL injection attacks

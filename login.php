@@ -1,7 +1,7 @@
 <?php
 
 // Connect to the database
-$db = mysqli_connect("localhost", "user", "password", "db");
+$db = include 'db.php';
 
 // Check if the login form has been submitted
 if (isset($_POST['login'])) {

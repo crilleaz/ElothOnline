@@ -2,7 +2,7 @@
 session_start();
 
 $username = $_SESSION['username'];
-$db = mysqli_connect("localhost", "user", "password", "db");
+$db = include 'db.php';
 function getPlayerLogs($num){
     global $db;
     global $username;
