@@ -112,8 +112,8 @@ CREATE TABLE `hunting` (
 -- Dumping data for table `hunting`
 --
 
-INSERT INTO `hunting` (`id`, `username`, `dungeon_id`, `tid`) VALUES
-(86, 'crilleaz', 1, '2023-01-29 00:01:20');
+-- this entry can not exist since there is no player with such name. Likely forgot to dump that one
+--  INSERT INTO `hunting` (`id`, `username`, `dungeon_id`, `tid`) VALUES (86, 'crilleaz', 1, '2023-01-29 00:01:20');
 
 -- --------------------------------------------------------
 
