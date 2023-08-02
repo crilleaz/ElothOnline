@@ -19,7 +19,7 @@ if (isset($_POST['login'])) {
     session_start();
     $_SESSION['username'] = $row['anv'];
     // Redirect the user to the dashboard
-    header("Location: index.php");
+    header("Location: launcher.php");
     exit;
   } else {
     // Login is unsuccessful

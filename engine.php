@@ -1,17 +1,8 @@
 <?php
 require_once __DIR__.'/src/Game.php';
 
-session_start();
-
 $db = include 'db.php';
 
-// Global variabler
-try {
-    $player = \Game\Game::instance()->getCurrentPlayer();
-} catch (Throwable $e) {
-    // TODO relevant to src/Game.php::21
-    $player = null;
-}
 // ini_set('short_open_tag', 'On');
 
 
@@ -112,16 +103,6 @@ function getHuntingDungeonId(){
         $dungeonHuntingId = $row['dungeon_id'];
     
             return $dungeonHuntingId;
-    }
-}
-
-function getHuntingDungeonForStartHunt($getId){
-    global $db;
-        $result = mysqli_query($db,"SELECT id FROM dungeons WHERE id = '{$getId}'");
-        while($row = mysqli_fetch_array($result)){
-        $dungeonStartHunting = $row['id'];
-            
-            return $dungeonStartHunting;
     }
 }
 

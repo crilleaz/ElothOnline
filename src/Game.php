@@ -21,11 +21,6 @@ class Game
         }
         $this->db = new DBConnection("127.0.0.1", 'db', 'user', 'password');
 
-        if (!isset($_SESSION['username'])) {
-            // TODO this is out of the normal flow and such state is required by a few scripts which must not be coupled with the main flow
-            return;
-        }
-
         $this->currentPlayer = Player::loadCurrentPlayer($this->db);
     }
 
@@ -36,11 +31,6 @@ class Game
         }
 
         return self::$instance;
-    }
-
-    public function getCurrentPlayer(): Player
-    {
-        return $this->currentPlayer;
     }
 
     public function findPlayer(string $name): ?Player
