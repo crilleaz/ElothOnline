@@ -1,6 +1,6 @@
 <?php
-session_start();
-$db = mysqli_connect("localhost", "user", "password", "db");
+$userName = $player->getName();
+$db = include __DIR__ . '/../db.php';
         // Check if the form has been submitted
         if (isset($_POST['message'])) {
             // Escape the input to protect against SQL injection attacks
@@ -8,7 +8,7 @@ $db = mysqli_connect("localhost", "user", "password", "db");
             if($_POST['message'] != NULL){
                 $message = $db->real_escape_string($_POST['message']);
                 // Insert the message into the database
-                $db->query("INSERT INTO chat (username, messages) VALUES ('$username', '$message')");
+                $db->query("INSERT INTO chat (username, messages) VALUES ('$userName', '$message')");
                 header('Location: index.php');
             }
         }
@@ -60,5 +60,3 @@ $db = mysqli_connect("localhost", "user", "password", "db");
                         }
                     }
         }
-
-            ?>

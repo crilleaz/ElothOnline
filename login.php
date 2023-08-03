@@ -1,7 +1,7 @@
 <?php
 
 // Connect to the database
-$db = mysqli_connect("localhost", "user", "password", "db");
+$db = include 'db.php';
 
 // Check if the login form has been submitted
 if (isset($_POST['login'])) {
@@ -19,7 +19,7 @@ if (isset($_POST['login'])) {
     session_start();
     $_SESSION['username'] = $row['anv'];
     // Redirect the user to the dashboard
-    header("Location: index.php");
+    header("Location: launcher.php");
     exit;
   } else {
     // Login is unsuccessful

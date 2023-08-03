@@ -1,6 +1,7 @@
 <?php
 include("engine.php");
-$db = mysqli_connect("localhost", "user", "password", "db");
+$db = include 'db.php';
+
 // cron
 echo '<Experience>' . PHP_EOL;
 giveExperience2();
