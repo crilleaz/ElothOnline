@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__.'/src/Game.php';
+require_once __DIR__.'/vendor/autoload.php';
 
 $db = include 'db.php';
 

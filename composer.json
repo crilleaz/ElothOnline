@@ -1,0 +1,12 @@
+{
+  "name": "crilleaz/eloth_online",
+  "description": "Web based, web browser MMORPG",
+  "autoload": {
+    "psr-4": {
+      "Game\\": "src/"
+    }
+  },
+  "require": {
+    "php": "^8.2"
+  }
+}
