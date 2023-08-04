@@ -12,28 +12,3 @@ if (isset($_GET['ban'])) {
         echo '<center><font color="red">Sorry, you\'re not admin.</font></center>';
     }
 }
-
-function getMonsterName($monsterId)
-{
-    global $db;
-
-    $result = mysqli_query($db, "SELECT name FROM monster WHERE id = {$monsterId}");
-    while ($row = mysqli_fetch_array($result)) {
-        $monsterName = $row['name'];
-
-        return $monsterName;
-    }
-}
-
-function getMonsterExp($monsterId)
-{
-    global $db;
-
-    $result = mysqli_query($db, "SELECT experience FROM monster WHERE monster_id = $monsterId");
-    while ($row = mysqli_fetch_array($result)) {
-        $monsterExperience = $row['experience'];
-
-        return $monsterExperience;
-    }
-}
-

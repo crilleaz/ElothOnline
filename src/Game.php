@@ -5,16 +5,19 @@ namespace Game;
 
 class Game
 {
+    public readonly Engine $engine;
+
+    public readonly Wiki $wiki;
+
     private static ?self $instance = null;
 
     private readonly DBConnection $db;
-
-    public readonly Engine $engine;
 
     private function __construct()
     {
         $this->db = new DBConnection("127.0.0.1", 'db', 'user', 'password');
         $this->engine = new Engine($this->db);
+        $this->wiki = new Wiki($this->db);
     }
 
     public static function instance(): self

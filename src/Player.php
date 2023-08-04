@@ -42,11 +42,13 @@ class Player
         return !$this->isFighting();
     }
 
-    public function getHuntingDungeonId(): int
+    public function isInDungeon(Dungeon $dungeon): bool
     {
-        $dungeon = $this->connection->fetchRow("SELECT dungeon_id FROM hunting WHERE username = '{$this->getName()}'");
+        $hunt = $this->connection->fetchRow("SELECT dungeon_id FROM hunting WHERE username = '{$this->getName()}'");
 
-        return (int) ($dungeon['dungeon_id'] ?? 0);
+        $currentDungeonId = (int) ($hunt['dungeon_id'] ?? 0);
+
+        return $currentDungeonId === $dungeon->id;
     }
 
     public function getHuntingDungeonName(): string
