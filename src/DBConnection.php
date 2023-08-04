@@ -26,6 +26,13 @@ readonly class DBConnection
         return $statement->fetch_assoc() ?? [];
     }
 
+    public function fetchRows(string $query): iterable
+    {
+        $statement = $this->connection->query($query);
+
+        return $statement->getIterator();
+    }
+
     public function execute(string $query): void
     {
         $this->connection->query($query);

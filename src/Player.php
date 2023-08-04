@@ -44,6 +44,18 @@ class Player
         return (int) ($dungeon['dungeon_id'] ?? 0);
     }
 
+    public function getHuntingDungeonName(): string
+    {
+        $dungeonId = $this->getHuntingDungeonId();
+        if ($dungeonId === 0) {
+            return '';
+        }
+
+        $dungeon = $this->connection->fetchRow("SELECT name FROM dungeons WHERE id = {$dungeonId}");
+
+        return $dungeon['name'];
+    }
+
     public function isAdmin(): bool
     {
         return $this->getName() === 'crilleaz';
