@@ -14,6 +14,9 @@ if (isset($_POST['login'])) {
   $result = mysqli_query($db, $query);
   $row  = mysqli_fetch_array($result);
   if (mysqli_num_rows($result) == 1) {
+      if ((int)$row['banned'] === 1) {
+          exit('You are banned.');
+      }
     // Login is successful
     // Start a session and set a session variable to indicate that the user is logged in
     session_start();
