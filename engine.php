@@ -13,19 +13,6 @@ if (isset($_GET['ban'])) {
     }
 }
 
-
-function getItemName($itemId)
-{
-    global $db;
-
-    $result = mysqli_query($db, "SELECT name FROM items WHERE item_id = {$itemId}");
-    while ($row = mysqli_fetch_array($result)) {
-        $itemName = $row['name'];
-
-        echo $itemName . '<br>';
-    }
-}
-
 function getMonsterName($monsterId)
 {
     global $db;

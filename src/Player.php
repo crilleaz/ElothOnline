@@ -189,13 +189,24 @@ class Player
         return (int) $this->getProperty('blacksmith');
     }
 
-
     /**
      * @return iterable<string>
      */
     public function getLogs(int $amount): iterable
     {
         return $this->logger->readLogs($this->name, $amount);
+    }
+
+    /**
+     * @return iterable<Item>
+     */
+    public function getInventory(): iterable
+    {
+        $entries = $this->connection->fetchRows("SELECT * FROM inventory WHERE username = '{$this->name}'");
+
+        foreach ($entries as $entry) {
+            yield new Item(ItemId::from((int)$entry['item_id']), (int) $entry['amount'], (int) $entry['worth']);
+        }
     }
 
     private function getProperty(string $property): string

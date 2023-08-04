@@ -23,28 +23,24 @@
                             <th style="width:20%;">Action</th>
                         </tr>
                         <?php
-                        
-                            $get_inventory = mysqli_query($db,"SELECT * FROM inventory WHERE username = '{$player->getName()}'");
-                            while($row = mysqli_fetch_array($get_inventory))
-                            {
-                                if($row['item_id'] == '1'){
-                                    echo '<tr title="' . 'Cannot be sold' . '">';
-                                    echo '<td>';
-                                    echo getItemName($itemId = $row['item_id']);
-                                    echo '</td>';
-                                    echo '<td>' . $row['amount'] . '</td>';
-                                    echo '<td><button type="button" class="btn btn-danger">Sell</button></td>';
-                                    echo '</tr>';
-                                }else{
-                                  echo '<tr title="' . 'Worth ' . $row['worth'] . ' GP each' . '">';
-                                  echo '<td>';
-                                  echo getItemName($itemId = $row['item_id']);
-                                  echo '</td>';
-                                  echo '<td>' . $row['amount'] . '</td>';
-                                  echo '<td><button type="button" class="btn btn-success">Sell</button>  <button type="button" class="btn btn-success">Use</button></td>';
-                                  echo '</tr>';
-                                }
-                            } 
+                        foreach ($player->getInventory() as $item) {
+                            if ($item->isSellable()) {
+                                echo '<tr title="' . 'Worth ' . $item->worth . ' GP each' . '">';
+                            } else {
+                                echo '<tr title="' . 'Cannot be sold' . '">';
+                            }
+
+                            echo '<td>';
+                            echo $item->name;
+                            echo '</td>';
+                            echo '<td>' . $item->quantity . '</td>';
+                            if ($item->isSellable()) {
+                                echo '<td><button type="button" class="btn btn-success">Sell</button>  <button type="button" class="btn btn-success">Use</button></td>';
+                            } else {
+                                echo '<td><button type="button" class="btn btn-danger">Sell</button></td>';
+                            }
+                            echo '</tr>';
+                        }
                         ?>
                         </table>
                         </div>
