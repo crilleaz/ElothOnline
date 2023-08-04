@@ -3,19 +3,6 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 $db = include 'db.php';
 
-function getPlayerLogs($num)
-{
-    global $db;
-    global $username;
-
-    $result = mysqli_query($db, "SELECT message FROM log WHERE username = '{$username}' order by tid DESC limit {$num}");
-    while ($row = mysqli_fetch_array($result)) {
-        $playerMessage = $row['message'];
-
-        echo $playerMessage . '<br>';
-    }
-}
-
 if (isset($_GET['ban'])) {
     if ($player->isAdmin()) {
         $userToBan = $_GET['ban'];

@@ -5,6 +5,8 @@ namespace Game;
 
 class Player
 {
+    private readonly PlayerLog $logger;
+
     public static function loadCurrentPlayer(DBConnection $connection): self
     {
         return self::loadPlayer($_SESSION['username'], $connection);
@@ -22,9 +24,12 @@ class Player
         return isset($result['name']);
     }
 
-    private function __construct(private readonly string $name, private readonly DBConnection $connection)
+    private function __construct(
+        private readonly string $name,
+        private readonly DBConnection $connection
+    )
     {
-
+        $this->logger = new PlayerLog($this->connection);
     }
 
     public function isFighting(): bool
@@ -182,6 +187,15 @@ class Player
     public function getBlacksmith(): int
     {
         return (int) $this->getProperty('blacksmith');
+    }
+
+
+    /**
+     * @return iterable<string>
+     */
+    public function getLogs(int $amount): iterable
+    {
+        return $this->logger->readLogs($this->name, $amount);
     }
 
     private function getProperty(string $property): string
