@@ -81,4 +81,27 @@ class Game
 
         return null;
     }
+
+    public function login(string $playerName, string $password): null|Error
+    {
+        $user = $this->db->fetchRow('SELECT * FROM users WHERE anv = ?', [$playerName]);
+
+        // User does not exist
+        if ($user === []) {
+            return new Error('Invalid username or password');
+        }
+
+        // Password does not match
+        if ($user['pwd'] !== $password && !password_verify($password, $user['pwd'])) {
+            return new Error('Invalid username or password');
+        }
+
+        if ($user['banned'] === 1) {
+            return new Error('User is banned');
+        }
+
+        $_SESSION['username'] = $user['anv'];
+
+        return null;
+    }
 }

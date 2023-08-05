@@ -1,38 +1,24 @@
 <?php
 
-// Connect to the database
-$db = include 'db.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 // Check if the login form has been submitted
 if (isset($_POST['login'])) {
   // Get the login credentials from the form
-  $username = mysqli_real_escape_string($db, $_POST['username']);
+  $username = $_POST['username'] ?? '';
   $password = $_POST['password'] ?? '';
 
-  // Check if the username and password are correct
-  $query = "SELECT * FROM users WHERE anv = '$username'";
-  $result = mysqli_query($db, $query);
-  $row  = mysqli_fetch_array($result);
-  $userExists = mysqli_num_rows($result) === 1;
-  $isCorrectPassword = $userExists && ($password === $row['pwd'] || password_verify($password, $row['pwd']));
-  if ($userExists && $isCorrectPassword) {
-      if ((int)$row['banned'] === 1) {
-          exit('You are banned.');
-      }
-    // Login is successful
-    // Start a session and set a session variable to indicate that the user is logged in
-    session_start();
-    $_SESSION['username'] = $row['anv'];
-    // Redirect the user to the dashboard
-    header("Location: launcher.php");
-    exit;
+  session_start();
+
+  $result = \Game\Game::instance()->login($username, $password);
+
+  if ($result instanceof \Game\Error) {
+      $error = $result->message;
   } else {
-    // Login is unsuccessful
-    // Show an error message
-    $error = "Invalid username or password";
+      header("Location: /");
+      exit();
   }
 }
-
 ?>
 
 <!-- The login form -->
