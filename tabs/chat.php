@@ -77,6 +77,7 @@
 
             let messagesContent = '';
             for(const message of response.data) {
+                const sentAt = new Date(message.sentAt);
                 let sender;
                 if (message.isFromAdmin) {
                     sender = '<font color="red">[' + message.sender + ']:</font>';
@@ -84,7 +85,7 @@
                     sender = '<font title="Ban this user" color="blue" onclick="banUser(\'' + message.sender + '\')">[' + message.sender + ']:</font>';
                 }
 
-                messagesContent += '[' + message.sentAt + ']' + sender + ' ' + message.message + '<br>';
+                messagesContent += '[' + sentAt.toLocaleString() + ']' + sender + ' ' + message.message + '<br>';
             }
 
             document.getElementById('chat-messages').innerHTML = messagesContent;
