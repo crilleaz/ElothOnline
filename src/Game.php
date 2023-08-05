@@ -45,9 +45,40 @@ class Game
     {
         $this->db->execute("UPDATE users set banned = 1 WHERE anv = ?", [$name]);
 
-        $this->chat->addMessage(
-            Player::loadPlayer('System', $this->db),
-            sprintf('User "%s" has been banned', $name)
+        $this->chat->addSystemMessage(sprintf('User "%s" has been banned', $name));
+    }
+
+    public function register(string $playerName, string $password, ?string $ip = ''): null|Error
+    {
+        if ($playerName === '') {
+            return new Error('Username can not be empty');
+        }
+
+        if (mb_strlen($password) < 8) {
+            return new Error('Password must be at least 8 characters long');
+        }
+
+        if (Player::exists($playerName, $this->db)) {
+            return new Error('Username is already taken');
+        }
+
+        $ip = $ip ?? $_SERVER['REMOTE_ADDR'];
+
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+        $this->db->execute('INSERT INTO users (anv, pwd, last_ip) VALUES (?, ?, ?)', [$playerName, $hashedPassword, $ip]);
+        $this->db->execute(
+            "INSERT INTO players(name, experience, health, health_max)
+                            VALUES (?, '0', 15, 15)",
+            [$playerName]
         );
+
+        $this->chat->addSystemMessage('Registration: New member joined!');
+        $this->engine->addToInventory(ItemId::GOLD, 10, 0, $playerName);
+        $this->engine->playerLog->add(
+            $playerName,
+            "[System] Welcome $playerName! <br> This is your Combat log, right now its empty :( <br> Visit <a href='/?tab=dungeons'>Dungeons to start your adventure!</a>"
+        );
+
+        return null;
     }
 }

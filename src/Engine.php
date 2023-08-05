@@ -5,9 +5,13 @@ namespace Game;
 
 class Engine
 {
+    /**
+     * @TODO law of Demeter violated. Access to player log has to be performed in a more suitable place.
+     */
+    public PlayerLog $playerLog;
+
     private array $logs = [];
 
-    private PlayerLog $playerLog;
 
     public function __construct(private readonly DBConnection $db)
     {
@@ -202,7 +206,7 @@ class Engine
     }
 
     // TODO move to player inventory or something like that. former checkIfExists
-    private function addToInventory(ItemId $itemId, $amount, $worth, $player): void
+    public function addToInventory(ItemId $itemId, $amount, $worth, $player): void
     {
         $item = $itemId->value;
 

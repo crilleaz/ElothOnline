@@ -29,7 +29,7 @@ readonly class DBConnection
     {
         $result = $this->connection->executeQuery($query, $params);
 
-        return $result->fetchAssociative() ?? [];
+        return $result->fetchAssociative() ?: [];
     }
 
     public function fetchRows(string $query, array $params = []): iterable

@@ -7,13 +7,15 @@ $db = include 'db.php';
 if (isset($_POST['login'])) {
   // Get the login credentials from the form
   $username = mysqli_real_escape_string($db, $_POST['username']);
-  $password = mysqli_real_escape_string($db, $_POST['password']);
+  $password = $_POST['password'] ?? '';
 
   // Check if the username and password are correct
-  $query = "SELECT * FROM users WHERE anv = '$username' AND pwd = '$password'";
+  $query = "SELECT * FROM users WHERE anv = '$username'";
   $result = mysqli_query($db, $query);
   $row  = mysqli_fetch_array($result);
-  if (mysqli_num_rows($result) == 1) {
+  $userExists = mysqli_num_rows($result) === 1;
+  $isCorrectPassword = $userExists && ($password === $row['pwd'] || password_verify($password, $row['pwd']));
+  if ($userExists && $isCorrectPassword) {
       if ((int)$row['banned'] === 1) {
           exit('You are banned.');
       }
@@ -42,3 +44,9 @@ if (isset($_POST['login'])) {
   <input type="submit" name="login" value="Log In">
 </form>
 <a href="register.php">Register</a>
+
+<?php
+// Check if there is an error message and display it
+if (isset($error)) {
+    echo "<p style='color:red'>$error</p>";
+}

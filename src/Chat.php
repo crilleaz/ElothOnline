@@ -12,6 +12,11 @@ readonly class Chat
         $this->db->execute("INSERT INTO chat (username, messages) VALUES (?, ?)", [$player->getName(), $message]);
     }
 
+    public function addSystemMessage(string $message): void
+    {
+        $this->db->execute("INSERT INTO chat (username, messages) VALUES ('System', ?)", [$message]);
+    }
+
     /**
      * @param int $amount
      * @return iterable<ChatMessage>
