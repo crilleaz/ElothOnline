@@ -8,7 +8,6 @@ if (isset($_GET['hunt'])) {
     // Escape the input to protect against SQL injection attacks
     if ($selectedDungeon) {
         // GET är INT
-        global $db;
         $result = mysqli_query($db, "SELECT username FROM hunting WHERE username = '{$player->getName()}'");
         if ($result->num_rows === 0) {
             //Huntar inte
@@ -27,7 +26,6 @@ if (isset($_GET['leave'])) {
     // Escape the input to protect against SQL injection attacks
     if ((int)$_GET['leave']) {
         // GET är INT
-        global $db;
         $result = mysqli_query($db, "SELECT username FROM hunting WHERE username = '{$player->getName()}'");
         if ($result->num_rows === 0) {
             //Huntar inte
