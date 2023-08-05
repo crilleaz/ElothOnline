@@ -17,7 +17,8 @@ class PlayerLog
      */
     public function readLogs(string $playerName, int $amount): iterable
     {
-        $logs = $this->db->fetchRows("SELECT message FROM log WHERE username='$playerName' ORDER BY tid DESC LIMIT $amount");
+        $logs = $this->db
+            ->fetchRows("SELECT message FROM log WHERE username=? ORDER BY tid DESC LIMIT ?", [$playerName, $amount]);
 
         foreach ($logs as $log) {
             yield $log['message'];

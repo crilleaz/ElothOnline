@@ -8,6 +8,7 @@
   },
   "require": {
     "php": "^8.2",
-    "ext-mysqli": "*"
+    "ext-mysqli": "*",
+    "doctrine/dbal": "^3.6"
   }
 }

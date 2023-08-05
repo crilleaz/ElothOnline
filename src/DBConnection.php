@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace Game;
 
-/**
- * TODO has to be replaced with some vendor wrapper. Currently contains SQL-injections vulnerabilities
- */
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\DriverManager;
+
 readonly class DBConnection
 {
-    private \mysqli $connection;
+    private Connection $connection;
 
     public function __construct(
         string $host,
@@ -16,30 +16,31 @@ readonly class DBConnection
         string $user,
         string $pass
     ) {
-        $this->connection = new \mysqli($host, $user, $pass, $db);
+        $this->connection = DriverManager::getConnection([
+            'dbname' => $db,
+            'driver' => 'mysqli',
+            'host' => $host,
+            'user' => $user,
+            'password' => $pass,
+        ]);
     }
 
-    public function fetchRow(string $query): array
+    public function fetchRow(string $query, array $params = []): array
     {
-        $statement = $this->connection->query($query);
+        $result = $this->connection->executeQuery($query, $params);
 
-        return $statement->fetch_assoc() ?? [];
+        return $result->fetchAssociative() ?? [];
     }
 
-    public function fetchRows(string $query): iterable
+    public function fetchRows(string $query, array $params = []): iterable
     {
-        $statement = $this->connection->query($query);
+        $result = $this->connection->executeQuery($query, $params);
 
-        return $statement->getIterator();
+        return $result->iterateAssociative();
     }
 
     public function execute(string $query, array $params = []): void
     {
-        if ($params === []) {
-            $this->connection->query($query);
-        } else {
-            $statement = $this->connection->prepare($query);
-            $statement->execute($params);
-        }
+        $this->connection->executeQuery($query, $params);
     }
 }

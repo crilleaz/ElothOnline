@@ -200,16 +200,16 @@ class Player
      */
     public function getInventory(): iterable
     {
-        $entries = $this->connection->fetchRows("SELECT * FROM inventory WHERE username = '{$this->name}'");
+        $entries = $this->connection->fetchRows("SELECT * FROM inventory WHERE username = ?", [$this->name]);
 
         foreach ($entries as $entry) {
             yield new Item(ItemId::from((int)$entry['item_id']), (int) $entry['amount'], (int) $entry['worth']);
         }
     }
 
-    private function getProperty(string $property): string
+    private function getProperty(string $property): string|int|float|null
     {
-        $result = $this->connection->fetchRow("SELECT {$property} FROM players WHERE name = '{$this->name}'");
+        $result = $this->connection->fetchRow("SELECT {$property} FROM players WHERE name = ?", [$this->name]);
         if ($result === []) {
             throw new \RuntimeException('Player does not exist');
         }
@@ -219,7 +219,7 @@ class Player
 
     private function getItemQuantity(ItemId $itemId): int
     {
-        $result = $this->connection->fetchRow("SELECT amount FROM inventory WHERE item_id = {$itemId->value} AND username = '{$this->name}'");
+        $result = $this->connection->fetchRow("SELECT amount FROM inventory WHERE item_id = {$itemId->value} AND username = ?", [$this->name]);
         if ($result === []) {
             return 0;
         }
@@ -229,7 +229,7 @@ class Player
 
     private function getHuntingDungeonId(): int
     {
-        $hunt = $this->connection->fetchRow("SELECT dungeon_id FROM hunting WHERE username = '{$this->getName()}'");
+        $hunt = $this->connection->fetchRow("SELECT dungeon_id FROM hunting WHERE username = ?", [$this->name]);
 
         return (int) ($hunt['dungeon_id'] ?? 0);
     }
