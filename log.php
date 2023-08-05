@@ -1,8 +1,8 @@
 <?php
 
-session_start();
+require_once __DIR__ . '/vendor/autoload.php';
 
-require_once 'engine.php';
+session_start();
 
 $username = $_SESSION['username'] ?? '';
 if ($username == '') {

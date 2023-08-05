@@ -33,8 +33,13 @@ readonly class DBConnection
         return $statement->getIterator();
     }
 
-    public function execute(string $query): void
+    public function execute(string $query, array $params = []): void
     {
-        $this->connection->query($query);
+        if ($params === []) {
+            $this->connection->query($query);
+        } else {
+            $statement = $this->connection->prepare($query);
+            $statement->execute($params);
+        }
     }
 }

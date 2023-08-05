@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/engine.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 enum Tab: string
 {
@@ -15,11 +15,12 @@ enum Tab: string
     public function load(): void
     {
         // TODO temporary. needs to be removed and replaced with appropriate services/models
-        global $db;
+        $db = include 'db.php';;
 
         $currentUserName = $_SESSION['username'] ?? '';
         if ($currentUserName === '') {
             header('Location: /login.php');
+            exit();
         }
 
         $player = \Game\Game::instance()->findPlayer($currentUserName);

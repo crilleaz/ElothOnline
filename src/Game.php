@@ -9,6 +9,8 @@ class Game
 
     public readonly Wiki $wiki;
 
+    public readonly Chat $chat;
+
     private static ?self $instance = null;
 
     private readonly DBConnection $db;
@@ -18,6 +20,7 @@ class Game
         $this->db = new DBConnection("127.0.0.1", 'db', 'user', 'password');
         $this->engine = new Engine($this->db);
         $this->wiki = new Wiki($this->db);
+        $this->chat = new Chat($this->db);
     }
 
     public static function instance(): self
@@ -36,5 +39,15 @@ class Game
         }
 
         return Player::loadPlayer($name, $this->db);
+    }
+
+    public function banPlayer(string $name): void
+    {
+        $this->db->execute("UPDATE users set banned = 1 WHERE anv = ?", [$name]);
+
+        $this->chat->addMessage(
+            Player::loadPlayer('System', $this->db),
+            sprintf('User "%s" has been banned', $name)
+        );
     }
 }

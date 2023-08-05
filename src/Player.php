@@ -44,11 +44,7 @@ class Player
 
     public function isInDungeon(Dungeon $dungeon): bool
     {
-        $hunt = $this->connection->fetchRow("SELECT dungeon_id FROM hunting WHERE username = '{$this->getName()}'");
-
-        $currentDungeonId = (int) ($hunt['dungeon_id'] ?? 0);
-
-        return $currentDungeonId === $dungeon->id;
+        return $this->getHuntingDungeonId() === $dungeon->id;
     }
 
     public function getHuntingDungeonName(): string
@@ -65,7 +61,7 @@ class Player
 
     public function isAdmin(): bool
     {
-        return $this->getName() === 'crilleaz';
+        return $this->name === 'crilleaz' || $this->name === 'GM Crille';
     }
 
     // TODO likely unused. remove if so
@@ -229,5 +225,12 @@ class Player
         }
 
         return (int) $result['amount'];
+    }
+
+    private function getHuntingDungeonId(): int
+    {
+        $hunt = $this->connection->fetchRow("SELECT dungeon_id FROM hunting WHERE username = '{$this->getName()}'");
+
+        return (int) ($hunt['dungeon_id'] ?? 0);
     }
 }

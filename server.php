@@ -1,5 +1,6 @@
 <?php
-include("engine.php");
+
+require_once __DIR__ . '/vendor/autoload.php';
 
 $resultLogs = \Game\Game::instance()->engine->performTasks();
 

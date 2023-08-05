@@ -30,12 +30,7 @@
                         <h5 class="card-title">Chat</h5>
                         <p class="card-text">
                         <div class="mdb-lightbox">
-                        <div id="chat">
-                        <?php include("chat.php"); ?>
-                     </div>
-                     <form method="post" action=""><br>
-                     <input type="text" name="message" placeholder="Write something.." autofocus><br>
-                     </form>
+                         <?php include("chat.php"); ?>
                         </div>
                         </p>
                      </div>
@@ -50,17 +45,7 @@
       </div>
    </body>
    <script>
-  function refreshDiv() {
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) {
-        document.getElementById('chat').innerHTML = this.responseText;
-      }
-    };
-    xhttp.open('GET', '?tab=chat', true);
-    xhttp.send();
-  }
-  setInterval(refreshDiv, 3000);
+
 
   if ( window.history.replaceState ) {
         window.history.replaceState( null, null, window.location.href );
