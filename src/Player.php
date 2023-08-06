@@ -44,7 +44,12 @@ class Player
 
     public function isInDungeon(Dungeon $dungeon): bool
     {
-        return $this->getHuntingDungeonId() === $dungeon->id;
+        $huntingDungeon = $this->getHuntingDungeon();
+        if ($huntingDungeon === null) {
+            return false;
+        }
+
+        return $huntingDungeon->id === $dungeon->id;
     }
 
     public function getHuntingDungeon(): ?Dungeon
@@ -68,6 +73,30 @@ class Player
             new Monster($dungeon['monsterName'], $dungeon['health'], $dungeon['experience'], $dungeon['attack'], $dungeon['defense']),
             (int)$dungeon['difficult']
         );
+    }
+
+    public function enterDungeon(int $id): null|Error
+    {
+        $currentDungeon = $this->getHuntingDungeon();
+        if ($currentDungeon !== null) {
+            return new Error('You are already hunting at ' . $currentDungeon->name);
+        }
+
+        $dungeon = Dungeon::loadById($id, $this->connection);
+        if ($dungeon === null) {
+            return new Error(sprintf('Dungeon with id "%d" does not exist', $id));
+        }
+
+        $this->connection->execute('INSERT INTO hunting (username, dungeon_id) VALUES (?, ?)', [$this->name, $id]);
+        $this->connection->execute('UPDATE players SET in_combat = 1 WHERE name = ?', [$this->name]);
+
+        return null;
+    }
+
+    public function leaveDungeon(): void
+    {
+        $this->connection->execute('DELETE from hunting WHERE username = ?', [$this->name]);
+        $this->connection->execute('UPDATE players SET in_combat = 0  WHERE name = ?', [$this->name]);
     }
 
     public function isAdmin(): bool
@@ -236,12 +265,5 @@ class Player
         }
 
         return (int) $result['amount'];
-    }
-
-    private function getHuntingDungeonId(): int
-    {
-        $hunt = $this->connection->fetchRow("SELECT dungeon_id FROM hunting WHERE username = ?", [$this->name]);
-
-        return (int) ($hunt['dungeon_id'] ?? 0);
     }
 }

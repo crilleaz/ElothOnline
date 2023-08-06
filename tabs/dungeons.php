@@ -5,45 +5,23 @@
 
 if (isset($_GET['hunt'])) {
     $selectedDungeon = (int)$_GET['hunt'];
-    // Escape the input to protect against SQL injection attacks
-    if ($selectedDungeon) {
-        // GET är INT
-        $result = mysqli_query($db, "SELECT username FROM hunting WHERE username = '{$player->getName()}'");
-        if ($result->num_rows === 0) {
-            //Huntar inte
-            $db->query("INSERT INTO hunting (username, dungeon_id) VALUES ('{$player->getName()}', '$selectedDungeon')");
-            $db->query("UPDATE players SET in_combat = 1 WHERE name = '{$player->getName()}'");
-            echo '<meta http-equiv="Refresh" content="0; url=launcher.php?tab=dungeons&success=hunting">';
 
-        } else {
-            //Huntar redan
-            echo '<meta http-equiv="Refresh" content="0; url=launcher.php?tab=dungeons&?error=hunting">';
-        }
+    $result = $player->enterDungeon($selectedDungeon);
+    if ($result instanceof Game\Error) {
+        echo '<meta http-equiv="Refresh" content="0; url=?tab=dungeons&error='.$result->message.'">';
+    } else {
+        echo '<meta http-equiv="Refresh" content="0; url=?tab=dungeons&success=hunting">';
     }
 }
 
 if (isset($_GET['leave'])) {
-    // Escape the input to protect against SQL injection attacks
-    if ((int)$_GET['leave']) {
-        // GET är INT
-        $result = mysqli_query($db, "SELECT username FROM hunting WHERE username = '{$player->getName()}'");
-        if ($result->num_rows === 0) {
-            //Huntar inte
-            // Behövs inte tas bort
-            echo 'huntar inte';
-        } else {
-            //Huntar redan
-            // Tas bort
-            $db->query("DELETE from hunting WHERE username = '{$player->getName()}'");
-            $db->query("UPDATE players SET in_combat = 0  WHERE name = '{$player->getName()}'");
-            echo '<meta http-equiv="Refresh" content="0; url=launcher.php?tab=dungeons&?left=success">';
-        }
-    }
+    $player->leaveDungeon();
+    echo '<meta http-equiv="Refresh" content="0; url=launcher.php?tab=dungeons&left=success">';
 }
 
-if (isset($_GET['error'])) {
+if (isset($_GET['error']) && is_string($_GET['error'])) {
     //your html for error message
-    $errorMsg = 'You are already hunting';
+    $errorMsg = htmlspecialchars($_GET['error']);
 } elseif (isset($_GET['success'])) {
     //your html for error message
     $infoMsg = 'You started hunting.';
