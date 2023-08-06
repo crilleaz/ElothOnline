@@ -123,24 +123,15 @@ class Player
     public function getNextLevelExp(): int
     {
         $nextLvl = $this->getLevel() + 1;
-        $expGrid = $this->connection->fetchRow("SELECT experience FROM exp_table WHERE level = $nextLvl");
-        if ($expGrid === []) {
-            throw new \RuntimeException('Level not found');
-        }
 
-        return (int) $expGrid['experience'];
+        return LvlCalculator::minExpRequired($nextLvl);
     }
 
     public function addExp(int $amount): void
     {
         $this->connection->execute("UPDATE players SET experience = experience + $amount WHERE name = '{$this->name}'");
 
-        // TODO belongs to some separate exp-grid class
-        $expGrid = $this->connection->fetchRow("SELECT level FROM exp_table WHERE experience<={$this->getExp()} ORDER BY level DESC LIMIT 1");
-        if ($expGrid === []) {
-            throw new \RuntimeException('Level not found');
-        }
-        $level = (int) $expGrid['level'];
+        $level = LvlCalculator::convertExpToLvl($this->getExp());
 
         // Update max level
         $this->connection->execute("UPDATE players SET level = {$level} WHERE name = '{$this->name}'");
