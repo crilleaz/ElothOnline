@@ -19,16 +19,31 @@ readonly class Wiki
         }
     }
 
+    public function getMonsters(): iterable
+    {
+        $monsters = $this->connection->fetchRows('SELECT name, health, experience, attack, defense FROM monster');
+
+        foreach ($monsters as $monsterData) {
+            yield new Monster(
+                $monsterData['name'],
+                $monsterData['health'],
+                $monsterData['experience'],
+                $monsterData['attack'],
+                $monsterData['defense']
+            );
+        }
+    }
+
     private function getMonster(int $monsterId): Monster
     {
         $monsterData = $this->connection->fetchRow('SELECT * FROM monster WHERE id = ' . $monsterId);
 
         return new Monster(
             $monsterData['name'],
-            (int)$monsterData['health'],
-            (int)$monsterData['experience'],
-            (int)$monsterData['attack'],
-            (int)$monsterData['defense']
+            $monsterData['health'],
+            $monsterData['experience'],
+            $monsterData['attack'],
+            $monsterData['defense']
         );
     }
 }

@@ -11,7 +11,7 @@
                         <h5 class="card-titles">Monster library</h5>
                         <div class="container">
                         <div class="row">
-                        <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for monster..">
+                        <input type="text" id="myInput" onkeyup="searchForMonster()" placeholder="Search for monster..">
                         <table id="myTable">
                         <tr class="header">
                             <th style="width:10%;">Name</th>
@@ -22,16 +22,15 @@
                         </tr>
                         <?php
                         
-                            $get_highscore = mysqli_query($db,"SELECT name, health, experience, attack, defense FROM monster");
-                            while($row = mysqli_fetch_array($get_highscore))
+                            foreach (\Game\Game::instance()->wiki->getMonsters() as $monster)
                             {
                                     echo '<td>';
-                                    echo $row['name'];
+                                    echo $monster->name;
                                     echo '</td>';
-                                    echo '<td>' . $row['health'] . '</td>';
-                                    echo '<td>' . $row['experience'] . '</td>';
-                                    echo '<td>' . $row['attack'] . '</td>';
-                                    echo '<td>' . $row['defense'] . '</td>';
+                                    echo '<td>' . $monster->health . '</td>';
+                                    echo '<td>' . $monster->exp . '</td>';
+                                    echo '<td>' . $monster->attack . '</td>';
+                                    echo '<td>' . $monster->defence . '</td>';
                                     echo '</tr>';
                             } 
                         ?>
@@ -49,7 +48,7 @@
       </div>
    </body>
 <script>
-function myFunction() {
+function searchForMonster() {
   // Declare variables
   var input, filter, table, tr, td, i, txtValue;
   input = document.getElementById("myInput");
