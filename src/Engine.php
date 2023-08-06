@@ -10,12 +10,15 @@ class Engine
      */
     public PlayerLog $playerLog;
 
+    private readonly Wiki $wiki;
+
     private array $logs = [];
 
 
     public function __construct(private readonly DBConnection $db)
     {
         $this->playerLog = new PlayerLog($this->db);
+        $this->wiki = new Wiki($this->db);
     }
 
     /**
@@ -162,46 +165,46 @@ class Engine
         }
     }
 
-    // TODO calculation must take stamina into account. Currently, if there were pauses in cron server.php, 1 stamina player
-    // will receive time() - (delay/60) amount of experience.
     private function giveExperience(): void
     {
         $this->logs[] = '<Experience>';
 
+        $dungeons = [];
+        foreach ($this->wiki->getDungeons() as $dungeonWiki) {
+            $dungeons[$dungeonWiki->id] = $dungeonWiki;
+        }
+
         foreach ($this->getHunters() as $row) {
-            $playerNames = $row['username'];
-            // TODO likely has to be used to determine exp multiplier (currently hardcoded as 30,100)
-            $dungeonId = $row['dungeon_id'];
-            // $timestamp = $row['tid'];
+            $playerName = $row['username'];
+            $hunter = Game::instance()->findPlayer($playerName);
+            if ($hunter === null) {
+                $this->logs[] = 'Player ' . $playerName . ' does not exist yet is present in hunting list!';
+
+                continue;
+            }
+
+            $prey = $dungeons[$row['dungeon_id']]->inhabitant;
             //Gör om timestamp i DB till unix
             $reference_timestamp = strtotime($row['tid']);
             //Hämta lokal tid
             $current_timestamp = time();
             //Runda ner till senaste minut
-            $minutes_past = floor(($current_timestamp - $reference_timestamp) / 60);
-            //Ge exp
-            $points_earned = 0;
-            if ($row['dungeon_id'] == 1) {
-                $points_earned = $minutes_past * 30;
-            } elseif ($row['dungeon_id'] == 2) {
-                $points_earned = $minutes_past * 100;
+            $minutesPassed = (int)floor(($current_timestamp - $reference_timestamp) / 60);
+
+            // Prevents overrewarding the player (1 stamina for 1 minute is how it should be).
+            // Thus, it decreases the passed time for a player as if he has left the dungeon after depleting the stamina
+            $stamina = $hunter->getStamina();
+            if ($stamina < $minutesPassed) {
+                $minutesPassed = $stamina;
             }
 
-            $points_earned = (int) $points_earned;
+            $pointsEarned = $prey->exp * $minutesPassed;
 
-            // check stamina
-
-            $hunter = Game::instance()->findPlayer($playerNames);
-            if ($hunter === null) {
-                $this->logs[] = 'Player ' . $playerNames . ' does not exist yet is present in hunting list!';
-
-                continue;
-            }
             // Update the user's exp and timestamp in the database
-            $hunter->addExp($points_earned);
+            $hunter->addExp($pointsEarned);
             // TODO likely has to be performed within Player::addExp
-            $this->playerLog->add($playerNames, "[Dungeon] You gained $points_earned experience points.')");
-            $this->logs[] = '[giveExperience] ' . 'User: ' . $playerNames . ' were given ' . $points_earned . ' exp' . PHP_EOL;
+            $this->playerLog->add($playerName, "[Dungeon] You gained $pointsEarned experience points.')");
+            $this->logs[] = '[giveExperience] ' . 'User: ' . $playerName . ' were given ' . $pointsEarned . ' exp' . PHP_EOL;
         }
     }
 
