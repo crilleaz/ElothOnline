@@ -30,7 +30,7 @@
                         <h5 class="card-title">Chat</h5>
                         <p class="card-text">
                         <div class="mdb-lightbox">
-                         <?php include("chat.php"); ?>
+                         <?php include("_chat.php"); ?>
                         </div>
                         </p>
                      </div>
