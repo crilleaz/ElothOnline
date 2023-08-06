@@ -13,9 +13,6 @@ enum Tab: string
 
     public function load(): void
     {
-        // TODO temporary. needs to be removed and replaced with appropriate services/models
-        $db = include 'db.php';;
-
         $currentUserName = $_SESSION['username'] ?? '';
         if ($currentUserName === '') {
             header('Location: /login.php');

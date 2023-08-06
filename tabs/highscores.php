@@ -24,26 +24,17 @@
                         </tr>
                         <?php
                         
-                            $get_highscore = mysqli_query($db,"SELECT name, level, experience FROM players ORDER by level desc LIMIT 100");
-                            while($row = mysqli_fetch_array($get_highscore))
-                            {
-                                if($row['name'] == 'crilleaz' || $row['name'] == 'GM Crille'){
-                                    echo '<tr title="' . 'This player is a gamemaster.' . '">';
-                                    echo '<td>';
-                                    echo '<font color="red">' . $row['name'] . '</font>';
-                                    echo '</td>';
-                                    echo '<td>' . $row['level'] . '</td>';
-                                    echo '<td>' . $row['experience'] . '</td>';
-                                    echo '</tr>';
+                            foreach (\Game\Game::instance()->listTopPlayers(100) as $topPlayer) {
+                                if($topPlayer->isAdmin()){
+                                    echo '<tr title="This player is a gamemaster.">';
+                                    echo '<td><font color="red">' . $topPlayer->getName() . '</font></td>';
                                 }else{
-                                    echo '<td>';
-                                    echo $row['name'];
-                                    echo '</td>';
-                                    echo '<td>' . $row['level'] . '</td>';
-                                    echo '<td>' . $row['experience'] . '</td>';
-                                    echo '</tr>';
+                                    echo '<tr>';
+                                    echo '<td>' . $topPlayer->getName() . '</td>';
                                 }
-
+                                echo '<td>' . $topPlayer->getLevel() . '</td>';
+                                echo '<td>' . $topPlayer->getExp() . '</td>';
+                                echo '</tr>';
                             } 
                         ?>
                         </table>

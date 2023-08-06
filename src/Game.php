@@ -104,4 +104,13 @@ class Game
 
         return null;
     }
+
+    public function listTopPlayers(int $amount): iterable
+    {
+        $topPlayers = $this->db->fetchRows('SELECT name FROM players ORDER BY level DESC LIMIT ' . $amount);
+
+        foreach ($topPlayers as $topPlayer) {
+            yield Player::loadPlayer($topPlayer['name'], $this->db);
+        }
+    }
 }
