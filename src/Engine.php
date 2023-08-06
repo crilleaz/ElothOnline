@@ -123,7 +123,7 @@ class Engine
             $somebodyIsHunting = true;
             $playerNames = $row['username'];
             $player = Player::loadPlayer($playerNames, $this->db);
-            $fetch_name = $player->getHuntingDungeonName();
+            $fetch_name = $player->getHuntingDungeon()->name;
 
             //items_ids
             // 1 = gold worth 0

@@ -5,7 +5,7 @@
             <?php
             if($player->isFighting()){
                 echo '<font size="2">Combat: <img src="./combat.gif" title="Currently fighting"><br>';
-                echo 'Dungeon: ' . $player->getHuntingDungeonName();
+                echo 'Dungeon: ' . $player->getHuntingDungeon()->name;
             }elseif($player->isInProtectiveZone()){
                 echo '<font size="2">Combat: <img src="./pz.gif" title="In protective zone"><br>';
                 echo 'Dungeon: ' . 'In protective zone';

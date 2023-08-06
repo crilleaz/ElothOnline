@@ -47,16 +47,27 @@ class Player
         return $this->getHuntingDungeonId() === $dungeon->id;
     }
 
-    public function getHuntingDungeonName(): string
+    public function getHuntingDungeon(): ?Dungeon
     {
-        $dungeonId = $this->getHuntingDungeonId();
-        if ($dungeonId === 0) {
-            return '';
+        $dungeon = $this->connection->fetchRow('
+                        SELECT h.dungeon_id as id, d.name, d.description, d.difficult, m.name as monsterName, m.health, m.attack, m.defense, m.experience
+                                 FROM hunting h
+                                    INNER JOIN dungeons d ON d.id=h.dungeon_id
+                                    INNER JOIN monster m ON d.monster_id = m.id
+                                 WHERE h.username = ?
+        ',[$this->name]);
+
+        if ($dungeon === []) {
+            return null;
         }
 
-        $dungeon = $this->connection->fetchRow("SELECT name FROM dungeons WHERE id = {$dungeonId}");
-
-        return $dungeon['name'];
+        return new Dungeon(
+            $dungeon['id'],
+            $dungeon['name'],
+            $dungeon['description'],
+            new Monster($dungeon['monsterName'], $dungeon['health'], $dungeon['experience'], $dungeon['attack'], $dungeon['defense']),
+            (int)$dungeon['difficult']
+        );
     }
 
     public function isAdmin(): bool
