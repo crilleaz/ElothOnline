@@ -5,6 +5,8 @@ namespace Game;
 
 class Player
 {
+    private readonly PlayerLog $logger;
+
     public static function loadCurrentPlayer(DBConnection $connection): self
     {
         return self::loadPlayer($_SESSION['username'], $connection);
@@ -22,9 +24,12 @@ class Player
         return isset($result['name']);
     }
 
-    private function __construct(private readonly string $name, private readonly DBConnection $connection)
+    private function __construct(
+        private readonly string $name,
+        private readonly DBConnection $connection
+    )
     {
-
+        $this->logger = new PlayerLog($this->connection);
     }
 
     public function isFighting(): bool
@@ -37,16 +42,66 @@ class Player
         return !$this->isFighting();
     }
 
-    public function getHuntingDungeonId(): int
+    public function isInDungeon(Dungeon $dungeon): bool
     {
-        $dungeon = $this->connection->fetchRow("SELECT dungeon_id FROM hunting WHERE username = '{$this->getName()}'");
+        $huntingDungeon = $this->getHuntingDungeon();
+        if ($huntingDungeon === null) {
+            return false;
+        }
 
-        return (int) ($dungeon['dungeon_id'] ?? 0);
+        return $huntingDungeon->id === $dungeon->id;
+    }
+
+    public function getHuntingDungeon(): ?Dungeon
+    {
+        $dungeon = $this->connection->fetchRow('
+                        SELECT h.dungeon_id as id, d.name, d.description, d.difficult, m.name as monsterName, m.health, m.attack, m.defense, m.experience
+                                 FROM hunting h
+                                    INNER JOIN dungeons d ON d.id=h.dungeon_id
+                                    INNER JOIN monster m ON d.monster_id = m.id
+                                 WHERE h.username = ?
+        ',[$this->name]);
+
+        if ($dungeon === []) {
+            return null;
+        }
+
+        return new Dungeon(
+            $dungeon['id'],
+            $dungeon['name'],
+            $dungeon['description'],
+            new Monster($dungeon['monsterName'], $dungeon['health'], $dungeon['experience'], $dungeon['attack'], $dungeon['defense']),
+            (int)$dungeon['difficult']
+        );
+    }
+
+    public function enterDungeon(int $id): null|Error
+    {
+        $currentDungeon = $this->getHuntingDungeon();
+        if ($currentDungeon !== null) {
+            return new Error('You are already hunting at ' . $currentDungeon->name);
+        }
+
+        $dungeon = Dungeon::loadById($id, $this->connection);
+        if ($dungeon === null) {
+            return new Error(sprintf('Dungeon with id "%d" does not exist', $id));
+        }
+
+        $this->connection->execute('INSERT INTO hunting (username, dungeon_id) VALUES (?, ?)', [$this->name, $id]);
+        $this->connection->execute('UPDATE players SET in_combat = 1 WHERE name = ?', [$this->name]);
+
+        return null;
+    }
+
+    public function leaveDungeon(): void
+    {
+        $this->connection->execute('DELETE from hunting WHERE username = ?', [$this->name]);
+        $this->connection->execute('UPDATE players SET in_combat = 0  WHERE name = ?', [$this->name]);
     }
 
     public function isAdmin(): bool
     {
-        return $this->getName() === 'crilleaz';
+        return $this->name === 'crilleaz' || $this->name === 'GM Crille';
     }
 
     // TODO likely unused. remove if so
@@ -68,24 +123,15 @@ class Player
     public function getNextLevelExp(): int
     {
         $nextLvl = $this->getLevel() + 1;
-        $expGrid = $this->connection->fetchRow("SELECT experience FROM exp_table WHERE level = $nextLvl");
-        if ($expGrid === []) {
-            throw new \RuntimeException('Level not found');
-        }
 
-        return (int) $expGrid['experience'];
+        return LvlCalculator::minExpRequired($nextLvl);
     }
 
     public function addExp(int $amount): void
     {
         $this->connection->execute("UPDATE players SET experience = experience + $amount WHERE name = '{$this->name}'");
 
-        // TODO belongs to some separate exp-grid class
-        $expGrid = $this->connection->fetchRow("SELECT level FROM exp_table WHERE experience<={$this->getExp()} ORDER BY level DESC LIMIT 1");
-        if ($expGrid === []) {
-            throw new \RuntimeException('Level not found');
-        }
-        $level = (int) $expGrid['level'];
+        $level = LvlCalculator::convertExpToLvl($this->getExp());
 
         // Update max level
         $this->connection->execute("UPDATE players SET level = {$level} WHERE name = '{$this->name}'");
@@ -172,9 +218,29 @@ class Player
         return (int) $this->getProperty('blacksmith');
     }
 
-    private function getProperty(string $property): string
+    /**
+     * @return iterable<string>
+     */
+    public function getLogs(int $amount): iterable
     {
-        $result = $this->connection->fetchRow("SELECT {$property} FROM players WHERE name = '{$this->name}'");
+        return $this->logger->readLogs($this->name, $amount);
+    }
+
+    /**
+     * @return iterable<Item>
+     */
+    public function getInventory(): iterable
+    {
+        $entries = $this->connection->fetchRows("SELECT * FROM inventory WHERE username = ?", [$this->name]);
+
+        foreach ($entries as $entry) {
+            yield new Item(ItemId::from((int)$entry['item_id']), (int) $entry['amount'], (int) $entry['worth']);
+        }
+    }
+
+    private function getProperty(string $property): string|int|float|null
+    {
+        $result = $this->connection->fetchRow("SELECT {$property} FROM players WHERE name = ?", [$this->name]);
         if ($result === []) {
             throw new \RuntimeException('Player does not exist');
         }
@@ -184,7 +250,7 @@ class Player
 
     private function getItemQuantity(ItemId $itemId): int
     {
-        $result = $this->connection->fetchRow("SELECT amount FROM inventory WHERE item_id = {$itemId->value} AND username = '{$this->name}'");
+        $result = $this->connection->fetchRow("SELECT amount FROM inventory WHERE item_id = {$itemId->value} AND username = ?", [$this->name]);
         if ($result === []) {
             return 0;
         }

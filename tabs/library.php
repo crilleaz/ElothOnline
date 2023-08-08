@@ -2,57 +2,7 @@
    <body style="background-color: #eceef4">
       <div class="container" style="position:relative; margin-top:10px">
          <div class="row">
-            <div class="col-lg-3 d-none d-lg-block">
-               <ul class="list-group myStickyListGroup shadow bg-white rounded">
-                  <li class="list-group-item rounded">
-				  <font size="5"><b><?php echo $_SESSION['username']; ?></b></font> Lv. <?php print_r($player->getLevel()) ?><br>
-				  <font size="2">HP: <?php print_r($player->getCurrentHealth()) ?>/<?php print_r($player->getMaxHealth()) ?></font>
-				  |
-                  <?php
-              if($player->getStamina() < 50){
-               echo '<font size="2">Stamina: ' .'<font color="yellow">' . $player->getStamina() . '</font>' . '/100</font>';
-              }elseif($player->getStamina() < 10){
-               echo '<font size="2">Stamina: ' .'<font color="red">' . $player->getStamina() . '</font>' . '/100</font>';
-              }else{
-               echo '<font size="2">Stamina: ' . $player->getStamina() . '/100</font>';
-              }
-				  ?>
-				  <hr>
-				  <center><pre>Skills</pre></center>
-				  <font size="2">Experience: <?php print_r($player->getExp()) ?> <?php echo " / " ?> <?php print_r($player->getNextLevelExp())?><br>
-				  Magic: <?php print_r($player->getMagic()) ?> <br>
-				  Strength: <?php print_r($player->getStrength()) ?> <br>
-				  Defense: <?php print_r($player->getDefense()) ?> <br>
-				  
-				  </font>
-				  </li>
-                  <li class="list-group-item rounded">
-				  <center><pre>Abilities</pre></center>
-				  <font size="2">
-				  Woodcutting: <?php print_r($player->getWoodcutting()) ?><br>
-				  Mining: <?php print_r($player->getMining()) ?> <br>
-				  Gathering: <?php print_r($player->getGathering()) ?> <br>
-				  Harvesting: <?php print_r($player->getHarvesting()) ?> <br>
-				  Blacksmith: <?php print_r($player->getBlacksmith()) ?> <br>
-				  Herbalism: <?php print_r($player->getHerbalism()) ?> <br>
-				  </font>
-				  </li>
-                  <li class="list-group-item rounded">
-				  <center><pre>Bank</pre></center>
-				  <font size="2">
-				  Gold: <?php print_r($player->getGold()) ?><br>
-				  Crystals: <?php print_r($player->getCrystals()) ?> <br>
-				  </font>
-				  </li>
-                  <li class="list-group-item rounded">
-				  <center><pre>Log</pre></center>
-				  <font size="1">
-              <?php getPlayerLogs($num = 3) ?>
-				  </font>
-				  </li>
-               </ul>
-               <hr class="d-sm-none">
-            </div>
+             <?php include '_info.php'; ?>
             <div class="col-lg-6">
                <div class="card shadow bg-white rounded">
                   <div class="card-body">
@@ -61,7 +11,7 @@
                         <h5 class="card-titles">Monster library</h5>
                         <div class="container">
                         <div class="row">
-                        <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for monster..">
+                        <input type="text" id="myInput" onkeyup="searchForMonster()" placeholder="Search for monster..">
                         <table id="myTable">
                         <tr class="header">
                             <th style="width:10%;">Name</th>
@@ -72,16 +22,15 @@
                         </tr>
                         <?php
                         
-                            $get_highscore = mysqli_query($db,"SELECT name, health, experience, attack, defense FROM monster");
-                            while($row = mysqli_fetch_array($get_highscore))
+                            foreach (\Game\Game::instance()->wiki->getMonsters() as $monster)
                             {
                                     echo '<td>';
-                                    echo $row['name'];
+                                    echo $monster->name;
                                     echo '</td>';
-                                    echo '<td>' . $row['health'] . '</td>';
-                                    echo '<td>' . $row['experience'] . '</td>';
-                                    echo '<td>' . $row['attack'] . '</td>';
-                                    echo '<td>' . $row['defense'] . '</td>';
+                                    echo '<td>' . $monster->health . '</td>';
+                                    echo '<td>' . $monster->exp . '</td>';
+                                    echo '<td>' . $monster->attack . '</td>';
+                                    echo '<td>' . $monster->defence . '</td>';
                                     echo '</tr>';
                             } 
                         ?>
@@ -98,25 +47,8 @@
          </div>
       </div>
    </body>
-   <script>
-  function refreshDiv() {
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) {
-        document.getElementById('chat').innerHTML = this.responseText;
-      }
-    };
-    xhttp.open('GET', '?tab=chat', true);
-    xhttp.send();
-  }
-  setInterval(refreshDiv, 3000);
-
-  if ( window.history.replaceState ) {
-        window.history.replaceState( null, null, window.location.href );
-    }
-</script>
 <script>
-function myFunction() {
+function searchForMonster() {
   // Declare variables
   var input, filter, table, tr, td, i, txtValue;
   input = document.getElementById("myInput");

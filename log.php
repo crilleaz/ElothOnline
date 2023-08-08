@@ -1,20 +1,17 @@
 <?php
+
+require_once __DIR__ . '/vendor/autoload.php';
+
 session_start();
 
-$username = $_SESSION['username'];
-$db = include 'db.php';
-function getPlayerLogs($num){
-    global $db;
-    global $username;
-    
-        $result = mysqli_query($db,"SELECT message FROM log WHERE username = '{$username}' order by tid DESC limit {$num}");
-        while($row = mysqli_fetch_array($result)){
-        $playerMessage = $row['message'];
-    
-            echo $playerMessage . '<br>';
-    }
-    // mysqli_close($db);
+$username = $_SESSION['username'] ?? '';
+if ($username == '') {
+    header('Location: /');
+
+    exit();
 }
 
-getPlayerLogs($num = 5);
-?>
+$player = \Game\Game::instance()->findPlayer($username);
+foreach ($player->getLogs(5) as $log) {
+    echo $log . '<br>';
+}
