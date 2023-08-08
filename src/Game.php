@@ -17,7 +17,9 @@ class Game
 
     private function __construct()
     {
-        $this->db = new DBConnection("127.0.0.1", 'db', 'user', 'password');
+        $config = require __DIR__ .'/../config.php';
+
+        $this->db = new DBConnection($config['dbHost'], $config['dbName'], $config['dbUser'], $config['dbPass']);
         $this->engine = new Engine($this->db);
         $this->wiki = new Wiki($this->db);
         $this->chat = new Chat($this->db);

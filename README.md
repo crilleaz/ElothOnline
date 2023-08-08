@@ -33,13 +33,10 @@ It's sloppy and unfinished, but rather good start or if you would like to contin
 ![server](https://user-images.githubusercontent.com/20803604/215297008-bcb9b38d-bcce-4f67-ab9b-7f913d657b32.PNG)
 
 
-
 # Installation
-* Upload the files to your webserver
-* Import the sql-file
-* Edit: engine.php, register.php, chat.php, login.php, server.php and log.php with your details
-* Run or cronjob the server.php
-* Register your account/character at register.php
+* Upload the files to your webserver so that `./www/` should be exposed as the root folder. 
+* Run ```php install.php```
+* Cronjob the server.php
 
 # Discord
 Crilleaz

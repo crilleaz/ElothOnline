@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/../bootstrap.php';
 
 // Check if the login form has been submitted
 if (isset($_POST['login'])) {

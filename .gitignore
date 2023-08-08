@@ -1,3 +1,6 @@
 .idea
 Makefile
 vendor
+installed
+installed.tmp
+

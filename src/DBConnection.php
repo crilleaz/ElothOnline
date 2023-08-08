@@ -43,4 +43,9 @@ readonly class DBConnection
     {
         $this->connection->executeQuery($query, $params);
     }
+
+    public function transaction(callable $procedure): void
+    {
+        $this->connection->transactional(fn() => $procedure($this));
+    }
 }

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/../bootstrap.php';
 
 enum Tab: string
 {
@@ -21,7 +21,7 @@ enum Tab: string
 
         $player = \Game\Game::instance()->findPlayer($currentUserName);
 
-        require __DIR__ . '/tabs/' . $this->value . '.php';
+        require PROJECT_ROOT . '/tabs/' . $this->value . '.php';
     }
 }
 
