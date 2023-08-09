@@ -1,7 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Game;
+namespace Game\Dungeon;
+
+use Game\Engine\DBConnection;
 
 readonly class Dungeon
 {

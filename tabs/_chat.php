@@ -5,7 +5,7 @@
 
 <script>
     <?php
-        /** @var \Game\Player $player */
+        /** @var \Game\Player\Player $player */
         echo 'const isAdmin = '. ($player->isAdmin() ? 'true;': 'false;');
     ?>
 

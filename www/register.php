@@ -16,7 +16,7 @@ if (isset($_POST['register'])) {
     $error = "Passwords do not match";
   } else {
       $result = \Game\Game::instance()->register($username, $password);
-      if (!$result instanceof \Game\Error) {
+      if (!$result instanceof \Game\Engine\Error) {
         header("Location: login.php");
         exit;
       } else {

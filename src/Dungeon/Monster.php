@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Game;
+namespace Game\Dungeon;
 
 readonly class Monster
 {

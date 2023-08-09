@@ -8,7 +8,7 @@ function sendApiResponse(array $responseData, bool $success = true): void {
     echo json_encode(['success' => $success, 'data' => $responseData]);
 }
 
-function getCurrentPlayer(): \Game\Player {
+function getCurrentPlayer(): \Game\Player\Player {
     return \Game\Game::instance()->findPlayer($_SESSION['username']);
 }
 

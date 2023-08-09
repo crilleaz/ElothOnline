@@ -1,7 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Game;
+namespace Game\Player;
+
+use Game\Dungeon\Dungeon;
+use Game\Dungeon\Monster;
+use Game\Engine\DBConnection;
+use Game\Engine\Error;
+use Game\ItemId;
 
 class Player
 {

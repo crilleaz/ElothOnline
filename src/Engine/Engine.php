@@ -1,7 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Game;
+namespace Game\Engine;
+
+use Game\Game;
+use Game\ItemId;
+use Game\Player\Player;
+use Game\Player\PlayerLog;
+use Game\Wiki;
 
 class Engine
 {
@@ -203,7 +209,7 @@ class Engine
             // Update the user's exp and timestamp in the database
             $hunter->addExp($pointsEarned);
             // TODO likely has to be performed within Player::addExp
-            $this->playerLog->add($playerName, "[Dungeon] You gained $pointsEarned experience points.')");
+            $this->playerLog->add($playerName, "[Dungeon] You gained $pointsEarned experience points.");
             $this->logs[] = '[giveExperience] ' . 'User: ' . $playerName . ' were given ' . $pointsEarned . ' exp' . PHP_EOL;
         }
     }

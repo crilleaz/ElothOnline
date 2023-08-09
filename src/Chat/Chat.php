@@ -1,7 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Game;
+namespace Game\Chat;
+
+use Game\Engine\DBConnection;
+use Game\Player\Player;
 
 readonly class Chat
 {

@@ -1,7 +1,7 @@
 <?php
 /**
- * @var \Game\Dungeon $dungeon
- * @var \Game\Player $player
+ * @var \Game\Dungeon\Dungeon $dungeon
+ * @var \Game\Player\Player $player
  */
 ?>
 <div class="col card ">

@@ -1,13 +1,13 @@
 <?php include '_header.php'; ?>
 <?php
 
-/** @var \Game\Player $player */
+/** @var \Game\Player\Player $player */
 
 if (isset($_GET['hunt'])) {
     $selectedDungeon = (int)$_GET['hunt'];
 
     $result = $player->enterDungeon($selectedDungeon);
-    if ($result instanceof Game\Error) {
+    if ($result instanceof \Game\Engine\Error) {
         echo '<meta http-equiv="Refresh" content="0; url=?tab=dungeons&error='.$result->message.'">';
     } else {
         echo '<meta http-equiv="Refresh" content="0; url=?tab=dungeons&success=hunting">';

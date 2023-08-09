@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Game;
+namespace Game\Engine;
 
 // TODO contains functions which were likely designed for debugging purposes and thus unused at the moment
 class Debug

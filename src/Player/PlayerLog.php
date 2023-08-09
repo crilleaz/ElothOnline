@@ -1,7 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Game;
+namespace Game\Player;
+
+use Game\Engine\DBConnection;
 
 readonly class PlayerLog
 {

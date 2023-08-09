@@ -12,7 +12,7 @@ if (isset($_POST['login'])) {
 
   $result = \Game\Game::instance()->login($username, $password);
 
-  if ($result instanceof \Game\Error) {
+  if ($result instanceof \Game\Engine\Error) {
       $error = $result->message;
   } else {
       header("Location: /");

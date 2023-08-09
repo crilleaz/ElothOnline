@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace Game;
 
+use Game\Dungeon\Dungeon;
+use Game\Dungeon\Monster;
+use Game\Engine\DBConnection;
+
 readonly class Wiki
 {
     public function __construct(private DBConnection $connection) {}

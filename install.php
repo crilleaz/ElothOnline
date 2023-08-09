@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-use Game\DBConnection;
+use Game\Engine\DBConnection;
 
 final readonly class Installer
 {

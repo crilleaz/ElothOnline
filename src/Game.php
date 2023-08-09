@@ -3,6 +3,12 @@ declare(strict_types=1);
 
 namespace Game;
 
+use Game\Chat\Chat;
+use Game\Engine\DBConnection;
+use Game\Engine\Engine;
+use Game\Engine\Error;
+use Game\Player\Player;
+
 class Game
 {
     public readonly Engine $engine;
