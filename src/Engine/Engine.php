@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace Game\Engine;
 
+use Game\Dungeon\DropRepository;
+use Game\Dungeon\RewardCalculator;
 use Game\Game;
-use Game\ItemId;
-use Game\Player\Player;
+use Game\Item\ItemId;
 use Game\Player\PlayerLog;
 use Game\Wiki;
 
@@ -14,17 +15,20 @@ class Engine
     /**
      * @TODO law of Demeter violated. Access to player log has to be performed in a more suitable place.
      */
-    public PlayerLog $playerLog;
+    public readonly PlayerLog $playerLog;
 
     private readonly Wiki $wiki;
 
     private array $logs = [];
+
+    private readonly RewardCalculator $rewardCalculator;
 
 
     public function __construct(private readonly DBConnection $db)
     {
         $this->playerLog = new PlayerLog($this->db);
         $this->wiki = new Wiki($this->db);
+        $this->rewardCalculator = new RewardCalculator(new DropRepository($this->db));
     }
 
     /**
@@ -36,8 +40,7 @@ class Engine
     {
         $this->logs = [];
 
-        $this->giveExperience();
-        $this->giveLoot();
+        $this->giveRewards();
         $this->tickGameTime();
 
         $logs = $this->logs;
@@ -122,59 +125,8 @@ class Engine
         }
     }
 
-    private function giveLoot(): void
+    private function giveRewards(): void
     {
-        $this->logs[] = '<Loot>';
-
-        $somebodyIsHunting = false;
-        foreach ($this->getHunters() as $row) {
-            // echo 'Some players hunting.';
-            $somebodyIsHunting = true;
-            $playerNames = $row['username'];
-            $player = Player::loadPlayer($playerNames, $this->db);
-            $fetch_name = $player->getHuntingDungeon()->name;
-
-            //items_ids
-            // 1 = gold worth 0
-            // 2 = cheese worth 4
-
-            // Lootable
-            // TODO can be issued through strategies. Will greatly simplify new and old rewards
-            if ($fetch_name == 'Rat Cave') {
-                $random_tier1_gold = rand(2, 7);
-                $random_number = rand(1, 2);
-                $this->addToInventory(ItemId::GOLD, $random_tier1_gold, 0, $playerNames);
-
-                $this->playerLog->add($playerNames, "[Dungeon] You looted a dead rat, found $random_tier1_gold gold.");
-                $this->logs[] = '[Loot] ' . 'User: ' . $playerNames . ' were given, item1' . PHP_EOL;
-                if ($random_number == 2) {
-                    $amount = 1;
-                    $this->addToInventory(ItemId::CHEESE, $amount, 4, $playerNames);
-                    $this->playerLog->add($playerNames, "[Dungeon] You looted a dead rat, found $amount cheese.");
-                    $this->logs[] = '[Loot] ' . 'User: ' . $playerNames . ' were given, item2';
-                }
-            } elseif ($fetch_name == 'Rotworm Cave') {
-                echo 'rats';
-            } elseif ($fetch_name == 'Dragon Lair') {
-                //tier2
-                $random_tier2_gold = rand(10, 20);
-                echo 'Dragon Alir';
-            } elseif ($fetch_name == 'Hatchling Cave') {
-                echo 'nope';
-                //tier3
-                $random_tier3_gold = rand(25, 50);
-            }
-        }
-
-        if (!$somebodyIsHunting) {
-            $this->logs[] = 'Nobody hunting.';
-        }
-    }
-
-    private function giveExperience(): void
-    {
-        $this->logs[] = '<Experience>';
-
         $dungeons = [];
         foreach ($this->wiki->getDungeons() as $dungeonWiki) {
             $dungeons[$dungeonWiki->id] = $dungeonWiki;
@@ -189,28 +141,21 @@ class Engine
                 continue;
             }
 
-            $prey = $dungeons[$row['dungeon_id']]->inhabitant;
-            //Gör om timestamp i DB till unix
-            $reference_timestamp = strtotime($row['tid']);
-            //Hämta lokal tid
-            $current_timestamp = time();
-            //Runda ner till senaste minut
-            $minutesPassed = (int)floor(($current_timestamp - $reference_timestamp) / 60);
+            $huntingZone = $dungeons[$row['dungeon_id']];
+            $timeSpentInDungeon = new TimeInterval(time() - strtotime($row['tid']));
+            $reward = $this->rewardCalculator->calculate($huntingZone, $hunter, $timeSpentInDungeon);
 
-            // Prevents overrewarding the player (1 stamina for 1 minute is how it should be).
-            // Thus, it decreases the passed time for a player as if he has left the dungeon after depleting the stamina
-            $stamina = $hunter->getStamina();
-            if ($stamina < $minutesPassed) {
-                $minutesPassed = $stamina;
-            }
-
-            $pointsEarned = $prey->exp * $minutesPassed;
-
-            // Update the user's exp and timestamp in the database
-            $hunter->addExp($pointsEarned);
+            $hunter->addExp($reward->exp);
             // TODO likely has to be performed within Player::addExp
-            $this->playerLog->add($playerName, "[Dungeon] You gained $pointsEarned experience points.");
-            $this->logs[] = '[giveExperience] ' . 'User: ' . $playerName . ' were given ' . $pointsEarned . ' exp' . PHP_EOL;
+            $this->playerLog->add($playerName, "[Dungeon] You gained $reward->exp experience points.");
+            $this->logs[] = '[giveExperience] ' . 'User: ' . $playerName . ' were given ' . $reward->exp . ' exp' . PHP_EOL;
+
+
+            foreach ($reward->items as $item) {
+                $this->addToInventory($item->id, $item->quantity, $item->worth, $playerName);
+                $this->playerLog->add($playerName, sprintf("[Dungeon] You looted a dead %s, found %d %s.", $huntingZone->inhabitant->name, $item->quantity, $item->name));
+                $this->logs[] = sprintf('[Loot] User: %s were given, %s', $playerName, $item->name) . PHP_EOL;
+            }
         }
     }
 

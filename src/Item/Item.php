@@ -1,9 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Game\Player;
-
-use Game\ItemId;
+namespace Game\Item;
 
 readonly class Item
 {

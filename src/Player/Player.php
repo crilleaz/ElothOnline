@@ -7,7 +7,8 @@ use Game\Dungeon\Dungeon;
 use Game\Dungeon\Monster;
 use Game\Engine\DBConnection;
 use Game\Engine\Error;
-use Game\ItemId;
+use Game\Item\Item;
+use Game\Item\ItemId;
 
 class Player
 {
@@ -240,6 +241,7 @@ class Player
         $entries = $this->connection->fetchRows("SELECT * FROM inventory WHERE username = ?", [$this->name]);
 
         foreach ($entries as $entry) {
+            // TODO player shall operate with his own Item model since it represents different domain
             yield new Item(ItemId::from((int)$entry['item_id']), (int) $entry['amount'], (int) $entry['worth']);
         }
     }

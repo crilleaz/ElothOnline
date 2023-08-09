@@ -7,6 +7,7 @@ use Game\Chat\Chat;
 use Game\Engine\DBConnection;
 use Game\Engine\Engine;
 use Game\Engine\Error;
+use Game\Item\ItemId;
 use Game\Player\Player;
 
 class Game
