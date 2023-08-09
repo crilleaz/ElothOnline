@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 use Game\Engine\DBConnection;
 
-final readonly class Installer
+final class Installer
 {
     private const DIR_LIB = __DIR__ . '/vendor';
     private const FILE_LIB_LOADER = self::DIR_LIB . '/autoload.php';
@@ -16,6 +16,8 @@ final readonly class Installer
      * @var array{dbHost:string, dbName: string, dbUser: string, dbPass:string}
      */
     private array $config;
+
+    private string $currentVersion = '';
 
     public function __construct()
     {
@@ -32,11 +34,7 @@ final readonly class Installer
             throw new RuntimeException('Installation is in progress');
         }
 
-        if (file_exists(self::LOCK_FILE)) {
-            throw new RuntimeException('Installation has already been performed');
-        }
-
-        $tmpLock = fopen(self::LOCK_FILE_TMP, 'a');
+        $tmpLock = fopen(self::LOCK_FILE_TMP, 'w');
         if ($tmpLock === false) {
             throw new RuntimeException("Couldn't start installation");
         }
@@ -50,7 +48,7 @@ final readonly class Installer
         try {
             $this->installDependencies();
             $this->installDatasource();
-            file_put_contents(self::LOCK_FILE, 'complete');
+            file_put_contents(self::LOCK_FILE, $this->currentVersion);
         } finally {
             fclose($tmpLock);
             unlink(self::LOCK_FILE_TMP);
@@ -64,12 +62,6 @@ final readonly class Installer
 
     private function installDependencies(): void
     {
-        if ($this->dependenciesAreInstalled()) {
-            require_once self::FILE_LIB_LOADER;
-
-            return;
-        }
-
         $output = [];
         $resultCode = 0;
         exec('php composer.phar install --no-interaction', $output, $resultCode);
@@ -107,7 +99,23 @@ final readonly class Installer
         ksort($dataSources, SORT_NATURAL);
 
         $db->transaction(function(DBConnection $dbConnection) use ($dataSources) {
+            $isUpdate = [] !== $dbConnection->fetchRow("SHOW TABLES LIKE 'version'");
+            if ($isUpdate) {
+                $currentVersionDetails = $dbConnection->fetchRow('SELECT current from version LIMIT 1');
+                if ($currentVersionDetails === []) {
+                    throw new RuntimeException('Version system does not contain current version information!');
+                }
+                $this->currentVersion = $currentVersionDetails['current'];
+            }
+
             foreach ($dataSources as $sourceVersion => $dataSource) {
+                $sourceVersion = (string) $sourceVersion;
+                if ($this->isAlreadyInstalled($sourceVersion)) {
+                    continue;
+                }
+
+                $this->currentVersion = $sourceVersion;
+
                 try {
                     foreach(explode(';'. PHP_EOL, file_get_contents($dataSource)) as $query) {
                         $query = trim($query);
@@ -133,6 +141,11 @@ final readonly class Installer
     private function dependenciesAreInstalled(): bool
     {
         return file_exists(self::FILE_LIB_LOADER);
+    }
+
+    private function isAlreadyInstalled(string $version): bool
+    {
+        return strnatcmp($version, $this->currentVersion) <= 0;
     }
 }
 
