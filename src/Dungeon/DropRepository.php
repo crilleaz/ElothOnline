@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Game\Dungeon;
 
 use Game\Engine\DBConnection;
-use Game\Item\Item;
+use Game\Item\ItemPrototype;
 use Game\Item\ItemId;
 
 readonly class DropRepository
@@ -35,7 +35,7 @@ readonly class DropRepository
 
     public function __construct(private DBConnection $db) {}
 
-    public function getMonsterDrop(Monster $monster): Item
+    public function getMonsterDrop(Monster $monster): Drop
     {
         if (!isset(self::DROP[$monster->name])) {
             throw new \RuntimeException(sprintf('Monster %s does not have drop info', $monster->name));
@@ -47,6 +47,9 @@ readonly class DropRepository
             throw new \RuntimeException('Unknown item present in drop list');
         }
 
-        return new Item($dropDetails['id'], $dropDetails['quantity'], $itemDetails['worth']);
+        return new Drop(
+            new ItemPrototype($dropDetails['id'], $itemDetails['name'], $itemDetails['worth']),
+            $dropDetails['quantity']
+        );
     }
 }

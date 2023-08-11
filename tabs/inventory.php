@@ -24,7 +24,7 @@
                         </tr>
                         <?php
                         foreach ($player->getInventory() as $item) {
-                            if ($item->isSellable()) {
+                            if ($item->isSellable) {
                                 echo '<tr title="' . 'Worth ' . $item->worth . ' GP each' . '">';
                             } else {
                                 echo '<tr title="' . 'Cannot be sold' . '">';
@@ -34,7 +34,7 @@
                             echo $item->name;
                             echo '</td>';
                             echo '<td>' . $item->quantity . '</td>';
-                            if ($item->isSellable()) {
+                            if ($item->isSellable) {
                                 echo '<td><button type="button" class="btn btn-success">Sell</button>  <button type="button" class="btn btn-success">Use</button></td>';
                             } else {
                                 echo '<td><button type="button" class="btn btn-danger">Sell</button></td>';

@@ -6,6 +6,7 @@ namespace Game\Engine;
 use Game\Dungeon\DropRepository;
 use Game\Dungeon\RewardCalculator;
 use Game\Game;
+use Game\Item\Item;
 use Game\Item\ItemId;
 use Game\Player\PlayerLog;
 use Game\Wiki;
@@ -40,7 +41,7 @@ class Engine
     {
         $this->logs = [];
 
-        $this->giveRewards();
+        $this->db->transaction(fn () => $this->giveRewards());
         $this->tickGameTime();
 
         $logs = $this->logs;
@@ -150,29 +151,10 @@ class Engine
             $this->playerLog->add($playerName, "[Dungeon] You gained $reward->exp experience points.");
             $this->logs[] = '[giveExperience] ' . 'User: ' . $playerName . ' were given ' . $reward->exp . ' exp' . PHP_EOL;
 
-
-            foreach ($reward->items as $item) {
-                $this->addToInventory($item->id, $item->quantity, $item->worth, $playerName);
-                $this->playerLog->add($playerName, sprintf("[Dungeon] You looted a dead %s, found %d %s.", $huntingZone->inhabitant->name, $item->quantity, $item->name));
-                $this->logs[] = sprintf('[Loot] User: %s were given, %s', $playerName, $item->name) . PHP_EOL;
+            foreach ($reward->items as $drop) {
+                $hunter->pickUp($drop);
+                $this->logs[] = sprintf('[Loot] User: %s were given, %s', $playerName, $drop->item->name) . PHP_EOL;
             }
-        }
-    }
-
-    // TODO move to player inventory or something like that. former checkIfExists
-    public function addToInventory(ItemId $itemId, $amount, $worth, $player): void
-    {
-        $item = $itemId->value;
-
-        $entry = $this->db->fetchRow("SELECT amount FROM inventory WHERE item_id = $item AND username = '{$player}'");
-        if ($entry === []) {
-            $this->logs[] = '[checkIfItemExist] ' . 'Drop for: ' . $player . ' was not found, adding to DB' . PHP_EOL;
-            // Användare hade inte i inventory
-            $this->db->execute("INSERT INTO inventory (username, item_id, amount, worth) VALUES ('{$player}', '$item', '$amount', '$worth')");
-        } else {
-            $this->logs[] = '[checkIfItemExist] ' . 'Drop for: ' . $player . ' were found, updating DB' . PHP_EOL;
-            // Användaren hade redan i inventory
-            $this->db->execute("UPDATE inventory SET amount = amount + $amount WHERE item_id = $item AND username = '$player'");
         }
     }
 

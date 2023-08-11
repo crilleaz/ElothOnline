@@ -3,21 +3,18 @@ declare(strict_types=1);
 
 namespace Game\Player;
 
+use Game\Dungeon\Drop;
 use Game\Dungeon\Dungeon;
 use Game\Dungeon\Monster;
 use Game\Engine\DBConnection;
 use Game\Engine\Error;
 use Game\Item\Item;
 use Game\Item\ItemId;
+use Game\Item\ItemPrototype as ItemPrototype;
 
 class Player
 {
     private readonly PlayerLog $logger;
-
-    public static function loadCurrentPlayer(DBConnection $connection): self
-    {
-        return self::loadPlayer($_SESSION['username'], $connection);
-    }
 
     public static function loadPlayer(string $name, DBConnection $connection): self
     {
@@ -233,16 +230,38 @@ class Player
         return $this->logger->readLogs($this->name, $amount);
     }
 
+    public function pickUp(Drop $drop): void
+    {
+        $item = new Item($drop->item, $drop->quantity);
+        $this->obtain($item);
+        $this->logger->add($this->name, sprintf("You picked up %d %s", $item->quantity, $item->name));
+    }
+
+    public function obtain(Item $item): void
+    {
+        $entry = $this->connection
+            ->fetchRow('SELECT amount FROM inventory WHERE item_id = ? AND username = ?', [$item->id, $this->name]);
+
+        if ($entry === []) {
+            $this->connection
+                ->execute('INSERT INTO inventory (username, item_id, amount) VALUES (?, ?, ?)', [$this->name, $item->id, $item->quantity]);
+        } else {
+            $this->connection
+                ->execute('UPDATE inventory SET amount = amount + ? WHERE item_id = ? AND username = ?', [$item->quantity, $item->id, $this->name]);
+        }
+    }
+
     /**
      * @return iterable<Item>
      */
     public function getInventory(): iterable
     {
-        $entries = $this->connection->fetchRows("SELECT * FROM inventory WHERE username = ?", [$this->name]);
-
+        $entries = $this->connection->fetchRows('SELECT inv.*, ip.name FROM inventory inv INNER JOIN items ip ON ip.id = inv.item_id WHERE username = ?', [$this->name]);
         foreach ($entries as $entry) {
-            // TODO player shall operate with his own Item model since it represents different domain
-            yield new Item(ItemId::from((int)$entry['item_id']), (int) $entry['amount'], (int) $entry['worth']);
+            yield new Item(
+                new ItemPrototype(ItemId::from((int)$entry['item_id']), $entry['name'], (int) $entry['worth']),
+                $entry['amount']
+            );
         }
     }
 

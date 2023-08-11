@@ -7,7 +7,9 @@ use Game\Chat\Chat;
 use Game\Engine\DBConnection;
 use Game\Engine\Engine;
 use Game\Engine\Error;
+use Game\Item\Item;
 use Game\Item\ItemId;
+use Game\Item\ItemPrototypeRepository;
 use Game\Player\Player;
 
 class Game
@@ -21,6 +23,7 @@ class Game
     private static ?self $instance = null;
 
     private readonly DBConnection $db;
+    private readonly ItemPrototypeRepository $itemPrototypeRepository;
 
     private function __construct()
     {
@@ -30,6 +33,7 @@ class Game
         $this->engine = new Engine($this->db);
         $this->wiki = new Wiki($this->db);
         $this->chat = new Chat($this->db);
+        $this->itemPrototypeRepository = new ItemPrototypeRepository($this->db);
     }
 
     public static function instance(): self
@@ -80,9 +84,12 @@ class Game
                             VALUES (?, '0', 15, 15)",
             [$playerName]
         );
+        $gold = $this->itemPrototypeRepository->getById(ItemId::GOLD);
 
-        $this->chat->addSystemMessage('Registration: New member joined!');
-        $this->engine->addToInventory(ItemId::GOLD, 10, 0, $playerName);
+        $player = $this->findPlayer($playerName);
+        $player->obtain(new Item($gold, 10));
+
+        $this->chat->addSystemMessage(sprintf('Registration: New member %s joined!', $playerName));
         $this->engine->playerLog->add(
             $playerName,
             "[System] Welcome $playerName! <br> This is your Combat log, right now its empty :( <br> Visit <a href='/?tab=dungeons'>Dungeons to start your adventure!</a>"
