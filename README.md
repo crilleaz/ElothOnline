@@ -37,7 +37,7 @@ It's sloppy and unfinished, but rather good start or if you would like to contin
 * Upload the files to your webserver so that `./www/` should be exposed as the root folder. 
 * Set db properties in `config.php`
 * Run ```php install.php```
-* Cronjob the server.php
+* Run ```php server.php``` (it's react-driven loop process)
 
 
 # Updates
