@@ -138,9 +138,9 @@ class Engine
             $hunter->addExp($reward->exp);
             $this->logs[] = '[giveExperience] ' . 'User: ' . $playerName . ' were given ' . $reward->exp . ' exp' . PHP_EOL;
 
-            foreach ($reward->items as $drop) {
+            foreach ($reward->listDrop() as $drop) {
                 $hunter->pickUp($drop);
-                $this->logs[] = sprintf('[Loot] User: %s were given, %s', $playerName, $drop->item->name) . PHP_EOL;
+                $this->logs[] = sprintf('[Loot] Player: %s picked up %d %s', $playerName, $drop->quantity, $drop->item->name) . PHP_EOL;
             }
 
             $this->db->execute('UPDATE hunting SET tid = NOW() WHERE username = ?', [$playerName]);

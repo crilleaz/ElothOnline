@@ -3,31 +3,46 @@ declare(strict_types=1);
 
 namespace Game\Dungeon;
 
-readonly class Reward
+class Reward
 {
     /**
      * @var Drop[]
      */
-    public array $items;
+    private array $drop = [];
 
     public static function none(): self
     {
         return new self(0, []);
     }
 
-    public function __construct(public int $exp, array $items)
+    public function __construct(public readonly int $exp, array $drop)
     {
-        foreach ($items as $item) {
-            if (!$item instanceof Drop) {
-                throw new \UnexpectedValueException(sprintf('Expected Drop. Got "%s"', print_r($item, true)));
-            }
+        foreach ($drop as $entry) {
+            $this->addDrop($entry);
         }
-
-        $this->items = $items;
     }
 
     public function isEmpty(): bool
     {
-        return $this->exp === 0 && $this->items === [];
+        return $this->exp === 0 && $this->drop === [];
+    }
+
+    /**
+     * @return Drop[]
+     */
+    public function listDrop(): array
+    {
+        return $this->drop;
+    }
+
+    private function addDrop(Drop $drop): void
+    {
+        $itemId = $drop->item->id->value;
+        if (isset($this->drop[$itemId])) {
+            $existingDrop = $this->drop[$itemId];
+            $this->drop[$itemId] = new Drop($existingDrop->item, $existingDrop->quantity + $drop->quantity);
+        } else {
+            $this->drop[$itemId] = $drop;
+        }
     }
 }
