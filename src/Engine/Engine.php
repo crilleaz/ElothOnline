@@ -6,8 +6,6 @@ namespace Game\Engine;
 use Game\Dungeon\DropRepository;
 use Game\Dungeon\RewardCalculator;
 use Game\Game;
-use Game\Item\Item;
-use Game\Item\ItemId;
 use Game\Player\PlayerLog;
 use Game\Wiki;
 
@@ -41,47 +39,16 @@ class Engine
     {
         $this->logs = [];
 
-        $this->db->transaction(fn () => $this->giveRewards());
-        $this->tickGameTime();
+        $this->db->transaction(function () {
+            $this->regenerateStamina();
+            $this->giveRewards();
+            $this->stopExhaustedHunters();
+        });
 
         $logs = $this->logs;
         $this->logs = [];
 
         return $logs;
-    }
-
-    private function tickGameTime(): void
-    {
-        $this->logs[] = '<Timestamp>';
-
-        $somebodyIsHunting = false;
-
-        foreach ($this->getHunters() as $row) {
-            // echo 'Some players hunting.';
-            $somebodyIsHunting = true;
-            $playerNames = $row['username'];
-            $timestamp = strtotime($row['tid']);
-
-
-            // Calculate the difference between the current time and the target timestamp
-            $minutes_past = (int)floor((time() - $timestamp) / 60);
-
-            // If the difference is greater than or equal to one minute, add 10 points to the user's score and update the timestamp
-            if ($minutes_past > 0) {
-                // Update the user's score and timestamp in the database
-                $this->db->execute("UPDATE hunting SET tid = NOW() WHERE username = '$playerNames'");
-                $this->db->execute("UPDATE players SET stamina = GREATEST(stamina - $minutes_past, 0)  WHERE name = '$playerNames'");
-                $this->logs[] = '[resetTimestamp] ' . 'User: ' . $playerNames . ' had their timestamp resetted.' . PHP_EOL;
-                $this->logs[] = '[reduceStamina] ' . 'User: ' . $playerNames . ' had their stamina reduced by ' . $minutes_past . PHP_EOL;
-            }
-        }
-
-        if (!$somebodyIsHunting) {
-            $this->logs[] = 'Nobody hunting.';
-        }
-
-        $this->stopExhaustedHunters();
-        $this->regenerateStamina();
     }
 
     // Regenerates resting hunters stamina
@@ -116,12 +83,9 @@ class Engine
         $huntingPlayers = $this->db->fetchRows("SELECT name, in_combat, stamina FROM players WHERE stamina <= 0 AND in_combat = 1");
         foreach ($huntingPlayers as $row) {
             $playerNameWithNoStamina = $row['name'];
-            // echo 'spelare med ingen stamina: ' . $playerNameWithNoStamina;
-            // echo 'ingen stamina: ' . $playerNameWithNoStamina;
 
-            // echo $row['stamina'];
-            $this->db->execute("DELETE from hunting WHERE username = '$playerNameWithNoStamina'");
-            $this->db->execute("UPDATE players SET in_combat = 0, stamina=GREATEST(stamina, 0) WHERE name = '$playerNameWithNoStamina'");
+            $this->db->execute('DELETE from hunting WHERE username = ?', [$playerNameWithNoStamina]);
+            $this->db->execute('UPDATE players SET in_combat = 0, stamina=0 WHERE name = ?', [$playerNameWithNoStamina]);
             $this->logs[] = '[noStamina] ' . 'User: ' . $playerNameWithNoStamina . ' had no stamina left.';
         }
     }
@@ -144,9 +108,30 @@ class Engine
 
             $huntingZone = $dungeons[$row['dungeon_id']];
             $timeSpentInDungeon = new TimeInterval(time() - strtotime($row['tid']));
-            $reward = $this->rewardCalculator->calculate($huntingZone, $hunter, $timeSpentInDungeon);
 
+            $minutesPassed = $timeSpentInDungeon->toMinutes();
+            if ($minutesPassed < 1.0) {
+                continue;
+            }
+
+            $remainingStamina = $hunter->getStamina();
+            $overhunt = false;
+            // If player spent in dungeon more time than stamina he has, decrease spent time according that amount
+            if ($remainingStamina < $minutesPassed) {
+                $overhunt = true;
+                $timeSpentInDungeon = TimeInterval::fromMinutes($remainingStamina);
+                $minutesPassed = $timeSpentInDungeon->toMinutes();
+            }
+            $minutesPassed = (int) $minutesPassed;
+
+            $reward = $this->rewardCalculator->calculate($huntingZone, $hunter, $timeSpentInDungeon);
             if ($reward->isEmpty()) {
+                // No rewards and has been to dungeon more that he could. Leave
+                if ($overhunt) {
+                    $hunter->leaveDungeon();
+                    $this->db->execute('UPDATE players SET stamina = 0  WHERE name = ?', [$playerName]);
+                }
+
                 continue;
             }
 
@@ -157,6 +142,11 @@ class Engine
                 $hunter->pickUp($drop);
                 $this->logs[] = sprintf('[Loot] User: %s were given, %s', $playerName, $drop->item->name) . PHP_EOL;
             }
+
+            $this->db->execute('UPDATE hunting SET tid = NOW() WHERE username = ?', [$playerName]);
+            $this->db->execute('UPDATE players SET stamina = GREATEST(stamina - ?, 0)  WHERE name = ?', [$minutesPassed, $playerName]);
+            $this->logs[] = '[resetTimestamp] ' . 'User: ' . $playerName . ' had their timestamp reset.';
+            $this->logs[] = '[reduceStamina] ' . 'User: ' . $playerName . ' had their stamina reduced by ' . $minutesPassed;
         }
     }
 
@@ -165,6 +155,6 @@ class Engine
      */
     private function getHunters(): iterable
     {
-        return $this->db->fetchRows("SELECT username, tid, dungeon_id FROM hunting");
+        return $this->db->fetchRows('SELECT username, tid, dungeon_id FROM hunting WHERE tid < NOW() + INTERVAL 1 MINUTE');
     }
 }

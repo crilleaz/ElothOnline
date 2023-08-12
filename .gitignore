@@ -3,4 +3,4 @@ Makefile
 vendor
 installed
 installed.tmp
-
+log.txt

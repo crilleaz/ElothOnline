@@ -18,14 +18,6 @@ readonly class RewardCalculator
     public function calculate(Dungeon $dungeon, Player $hunter, TimeInterval $timesSpentInDungeon): Reward
     {
         $approximateSpentMinutes = (int) round($timesSpentInDungeon->toMinutes());
-        $stamina = $hunter->getStamina();
-
-        // Prevents over-rewarding the player (1 stamina for 1 minute is how it should be).
-        // Thus, it decreases the passed time for a player as if he has left the dungeon after depleting the stamina
-        if ($stamina < $approximateSpentMinutes) {
-            $approximateSpentMinutes = $stamina;
-        }
-
         if ($approximateSpentMinutes === 0) {
             return Reward::none();
         }

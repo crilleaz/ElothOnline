@@ -1,0 +1,5 @@
+ALTER TABLE players
+    MODIFY stamina INT(10) NOT NULL DEFAULT 100,
+    MODIFY experience INT(10) NOT NULL DEFAULT 0,
+    MODIFY health_max INT(10) NOT NULL DEFAULT 100,
+    DROP gold;

@@ -2,11 +2,22 @@
 
 require_once __DIR__ . '/bootstrap.php';
 
-$resultLogs = \Game\Game::instance()->engine->performTasks();
+$intervalInSeconds = 10;
 
-foreach ($resultLogs as $log) {
-    echo $log . PHP_EOL;
+function writeSystemLog(string $msg) {
+    file_put_contents(__DIR__ . '/log.txt', $msg . PHP_EOL, FILE_APPEND);
 }
 
-echo PHP_EOL;
-echo 'Cron executed: ' . date("Y-m-d H:i:s") . PHP_EOL;
+$timer = \React\EventLoop\Loop::addPeriodicTimer($intervalInSeconds, function () {
+    echo date("H:i:s Y-m-d") . PHP_EOL;
+
+    $resultLogs = \Game\Game::instance()->engine->performTasks();
+
+    foreach ($resultLogs as $log) {
+        echo $log . PHP_EOL;
+    }
+
+    writeSystemLog(implode(PHP_EOL, $resultLogs));
+});
+
+echo 'Server is running';
