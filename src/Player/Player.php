@@ -133,17 +133,21 @@ class Player
 
     public function addExp(int $amount): void
     {
-        $this->connection->execute("UPDATE players SET experience = experience + $amount WHERE name = '{$this->name}'");
+        $this->connection->transaction(function (DBConnection $db) use ($amount) {
+            $db->execute("UPDATE players SET experience = experience + $amount WHERE name = '{$this->name}'");
 
-        $level = LvlCalculator::convertExpToLvl($this->getExp());
+            $level = LvlCalculator::convertExpToLvl($this->getExp());
 
-        // Update max level
-        $this->connection->execute("UPDATE players SET level = {$level} WHERE name = '{$this->name}'");
+            // Update max level
+            $db->execute("UPDATE players SET level = {$level} WHERE name = '{$this->name}'");
 
-        // Update max hp
-        $amountToAdd = 15;
-        $maxHealth = $level * $amountToAdd;
-        $this->connection->execute("UPDATE players SET health_max = {$maxHealth} WHERE name = '{$this->name}'");
+            // Update max hp
+            $amountToAdd = 15;
+            $maxHealth = $level * $amountToAdd;
+            $db->execute("UPDATE players SET health_max = {$maxHealth} WHERE name = '{$this->name}'");
+        });
+
+        $this->logger->add($this->name, "You gained $amount experience points.");
     }
 
     public function getLevel(): int

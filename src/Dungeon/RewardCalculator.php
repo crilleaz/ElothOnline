@@ -8,9 +8,11 @@ use Game\Player\Player;
 
 readonly class RewardCalculator
 {
+    private readonly TTKCalculator $ttkCalculator;
+
     public function __construct(private DropRepository $dropRepository)
     {
-
+        $this->ttkCalculator = new TTKCalculator();
     }
 
     public function calculate(Dungeon $dungeon, Player $hunter, TimeInterval $timesSpentInDungeon): Reward
@@ -24,9 +26,15 @@ readonly class RewardCalculator
             $approximateSpentMinutes = $stamina;
         }
 
-        $expEarned = $dungeon->inhabitant->exp * $approximateSpentMinutes;
+        if ($approximateSpentMinutes === 0) {
+            return Reward::none();
+        }
 
-        $drop = [$this->dropRepository->getMonsterDrop($dungeon->inhabitant)];
+        $ttk = $this->ttkCalculator->calculate($hunter, $dungeon->inhabitant);
+        $unitsKilled = (int) floor($approximateSpentMinutes/$ttk->toMinutes());
+
+        $expEarned = $unitsKilled * $dungeon->inhabitant->exp;
+        $drop = array_fill(0, $unitsKilled, $this->dropRepository->getMonsterDrop($dungeon->inhabitant));
 
         return new Reward($expEarned, $drop);
     }

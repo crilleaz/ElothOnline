@@ -146,9 +146,11 @@ class Engine
             $timeSpentInDungeon = new TimeInterval(time() - strtotime($row['tid']));
             $reward = $this->rewardCalculator->calculate($huntingZone, $hunter, $timeSpentInDungeon);
 
+            if ($reward->isEmpty()) {
+                continue;
+            }
+
             $hunter->addExp($reward->exp);
-            // TODO likely has to be performed within Player::addExp
-            $this->playerLog->add($playerName, "[Dungeon] You gained $reward->exp experience points.");
             $this->logs[] = '[giveExperience] ' . 'User: ' . $playerName . ' were given ' . $reward->exp . ' exp' . PHP_EOL;
 
             foreach ($reward->items as $drop) {

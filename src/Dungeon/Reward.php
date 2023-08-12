@@ -10,6 +10,11 @@ readonly class Reward
      */
     public array $items;
 
+    public static function none(): self
+    {
+        return new self(0, []);
+    }
+
     public function __construct(public int $exp, array $items)
     {
         foreach ($items as $item) {
@@ -19,5 +24,10 @@ readonly class Reward
         }
 
         $this->items = $items;
+    }
+
+    public function isEmpty(): bool
+    {
+        return $this->exp === 0 && $this->items === [];
     }
 }

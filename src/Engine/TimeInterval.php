@@ -5,6 +5,11 @@ namespace Game\Engine;
 
 class TimeInterval
 {
+    public static function fromMinutes(int $minutes): self
+    {
+        return new self($minutes * 60);
+    }
+
     public function __construct(private readonly int $seconds)
     {
         if ($seconds < 0) {
