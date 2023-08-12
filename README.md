@@ -39,5 +39,19 @@ It's sloppy and unfinished, but rather good start or if you would like to contin
 * Run ```php install.php```
 * Cronjob the server.php
 
+
+# Updates
+
+Eventually, there will be updates which means that database structure and some fixtures will change.  
+For those purposes there is `updates` folder which contains `sql` files.  
+
+To create new update run `php ./updates/create-new.php`. Modify created file according your needs.  
+
+To install updates just run `php install.php`.  
+
+**Beware!**  
+Do not modify existing updates once they are under VCS. Each update is executed only once.  
+If you need more changes, create a new one.
+
 # Discord
-Crilleaz
+Crilleaz, khan0454
