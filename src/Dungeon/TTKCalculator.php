@@ -11,17 +11,27 @@ use Game\Player\Player;
  */
 class TTKCalculator
 {
-    private const ATTACK_PER = 'second';
+    private const ATTACK_PER = 'minute';
 
     public function calculate(Player $hunter, Monster $prey): TimeInterval
     {
-        $mitigatedDamage = $hunter->getStrength() - $prey->defence;
+        return $this->calculateTtk($hunter->getStrength(), $prey->defence, $prey->health);
+    }
+
+    public function calculateForMonster(Monster $hunter, Player $prey): TimeInterval
+    {
+        return $this->calculateTtk($hunter->attack, $prey->getDefence(), $prey->getMaxHealth());
+    }
+
+    private function calculateTtk(int $attack, int $defence, int $health): TimeInterval
+    {
+        $mitigatedDamage = $attack - $defence;
         // If defences are higher than attack, then we assume it a scratch and deal 1 damage
-        if ($mitigatedDamage < 0) {
+        if ($mitigatedDamage < 1) {
             $mitigatedDamage = 1;
         }
 
-        $hitsRequired = (int)ceil($prey->health / $mitigatedDamage);
+        $hitsRequired = (int)ceil($health / $mitigatedDamage);
 
         switch (self::ATTACK_PER) {
             case 'second':

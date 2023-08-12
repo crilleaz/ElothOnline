@@ -10,7 +10,7 @@ class TimeInterval
         return new self($minutes * 60);
     }
 
-    public function __construct(private readonly int $seconds)
+    public function __construct(public readonly int $seconds)
     {
         if ($seconds < 0) {
             throw new \RuntimeException('Interval can not be negative');
@@ -20,5 +20,10 @@ class TimeInterval
     public function toMinutes(): float
     {
         return $this->seconds/60;
+    }
+
+    public function isGreaterThan(self $interval): bool
+    {
+        return $this->seconds > $interval->seconds;
     }
 }

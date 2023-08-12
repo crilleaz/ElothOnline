@@ -18,7 +18,7 @@
                             <th style="width:10%;">Health</th>
                             <th style="width:10%;">Experience</th>
                             <th style="width:10%;">Attack</th>
-                            <th style="width:10%;">Defense</th>
+                            <th style="width:10%;">Defence</th>
                         </tr>
                         <?php
                         

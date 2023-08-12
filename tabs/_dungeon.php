@@ -9,7 +9,7 @@
     <p class="card-text h-100"><?=$dungeon->description?></p>
     <x>Monster: <?=$dungeon->inhabitant->name?><br>
         Experience: <?=$dungeon->inhabitant->exp?> XP each<br>
-        Difficult: <?=$dungeon->difficulty?>
+        Difficulty: <?=$player->measureDifficulty($dungeon)?>
     </x><br>
     <?php if ($player->isInDungeon($dungeon)) {
         echo '<a class="btn btn-danger" href="?tab=dungeons&leave=' . $dungeon->id . '"' . 'role="button">Leave</a><br>';

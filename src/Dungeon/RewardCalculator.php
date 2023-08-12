@@ -30,8 +30,18 @@ readonly class RewardCalculator
             return Reward::none();
         }
 
-        $ttk = $this->ttkCalculator->calculate($hunter, $dungeon->inhabitant);
-        $unitsKilled = (int) floor($approximateSpentMinutes/$ttk->toMinutes());
+        $ttkMonster = $this->ttkCalculator->calculate($hunter, $dungeon->inhabitant);
+        $ttkPlayer = $this->ttkCalculator->calculateForMonster($dungeon->inhabitant, $hunter);
+
+        $unitsKilled = (int) floor($approximateSpentMinutes/$ttkMonster->toMinutes());
+        if ($unitsKilled === 0) {
+            return Reward::none();
+        }
+
+        // If player needs more time to kill monster than monsters needs to kill player, then issue no rewards
+        if ($ttkMonster->isGreaterThan($ttkPlayer)) {
+            return Reward::none();
+        }
 
         $expEarned = $unitsKilled * $dungeon->inhabitant->exp;
         $drop = array_fill(0, $unitsKilled, $this->dropRepository->getMonsterDrop($dungeon->inhabitant));

@@ -19,13 +19,13 @@ readonly class Wiki
         foreach ($this->connection->fetchRows('SELECT * FROM dungeons') as $dungeon) {
             $monster = $this->getMonster((int)$dungeon['monster_id']);
 
-            yield new Dungeon((int)$dungeon['id'], $dungeon['name'], $dungeon['description'], $monster, (int)$dungeon['difficult']);
+            yield new Dungeon((int)$dungeon['id'], $dungeon['name'], $dungeon['description'], $monster);
         }
     }
 
     public function getMonsters(): iterable
     {
-        $monsters = $this->connection->fetchRows('SELECT name, health, experience, attack, defense FROM monster');
+        $monsters = $this->connection->fetchRows('SELECT name, health, experience, attack, defence FROM monster');
 
         foreach ($monsters as $monsterData) {
             yield new Monster(
@@ -33,7 +33,7 @@ readonly class Wiki
                 $monsterData['health'],
                 $monsterData['experience'],
                 $monsterData['attack'],
-                $monsterData['defense']
+                $monsterData['defence']
             );
         }
     }
@@ -47,7 +47,7 @@ readonly class Wiki
             $monsterData['health'],
             $monsterData['experience'],
             $monsterData['attack'],
-            $monsterData['defense']
+            $monsterData['defence']
         );
     }
 }

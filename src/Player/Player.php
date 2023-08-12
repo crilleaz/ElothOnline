@@ -6,6 +6,7 @@ namespace Game\Player;
 use Game\Dungeon\Drop;
 use Game\Dungeon\Dungeon;
 use Game\Dungeon\Monster;
+use Game\Dungeon\TTKCalculator;
 use Game\Engine\DBConnection;
 use Game\Engine\Error;
 use Game\Item\Item;
@@ -59,7 +60,7 @@ class Player
     public function getHuntingDungeon(): ?Dungeon
     {
         $dungeon = $this->connection->fetchRow('
-                        SELECT h.dungeon_id as id, d.name, d.description, d.difficult, m.name as monsterName, m.health, m.attack, m.defense, m.experience
+                        SELECT h.dungeon_id as id, d.name, d.description, m.name as monsterName, m.health, m.attack, m.defence, m.experience
                                  FROM hunting h
                                     INNER JOIN dungeons d ON d.id=h.dungeon_id
                                     INNER JOIN monster m ON d.monster_id = m.id
@@ -74,8 +75,7 @@ class Player
             $dungeon['id'],
             $dungeon['name'],
             $dungeon['description'],
-            new Monster($dungeon['monsterName'], $dungeon['health'], $dungeon['experience'], $dungeon['attack'], $dungeon['defense']),
-            (int)$dungeon['difficult']
+            new Monster($dungeon['monsterName'], $dungeon['health'], $dungeon['experience'], $dungeon['attack'], $dungeon['defence'])
         );
     }
 
@@ -95,6 +95,25 @@ class Player
         $this->connection->execute('UPDATE players SET in_combat = 1 WHERE name = ?', [$this->name]);
 
         return null;
+    }
+
+    public function measureDifficulty(Dungeon $dungeon): string
+    {
+        $ttkCalculator = new TTKCalculator();
+        $ttkMonster = $ttkCalculator->calculate($this, $dungeon->inhabitant)->seconds;
+        $ttkPlayer = $ttkCalculator->calculateForMonster($dungeon->inhabitant, $this)->seconds;
+        $difficultyRatio = $ttkPlayer / $ttkMonster;
+
+        switch(true) {
+            case $difficultyRatio > 50:
+                return 'easy';
+            case $difficultyRatio > 20:
+                return 'moderate';
+            case $difficultyRatio > 1:
+                return 'hard';
+            default:
+                return 'impossible';
+        }
     }
 
     public function leaveDungeon(): void
@@ -191,9 +210,9 @@ class Player
         return (int) $this->getProperty('strength');
     }
 
-    public function getDefense(): int
+    public function getDefence(): int
     {
-        return (int) $this->getProperty('defense');
+        return (int) $this->getProperty('defence');
     }
 
     public function getWoodcutting(): int
