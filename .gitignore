@@ -4,3 +4,5 @@ vendor
 installed
 installed.tmp
 log.txt
+.phpunit.cache
+.phpunit.result.cache
