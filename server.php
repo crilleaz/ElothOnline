@@ -11,7 +11,7 @@ function writeSystemLog(string $msg) {
 $timer = \React\EventLoop\Loop::addPeriodicTimer($intervalInSeconds, function () {
     echo date("H:i:s Y-m-d") . PHP_EOL;
 
-    $resultLogs = \Game\Game::instance()->engine->performTasks();
+    $resultLogs = getService(\Game\Engine\Engine::class)->performTasks();
 
     foreach ($resultLogs as $log) {
         echo $log . PHP_EOL;

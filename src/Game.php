@@ -5,45 +5,21 @@ namespace Game;
 
 use Game\Chat\Chat;
 use Game\Engine\DBConnection;
-use Game\Engine\Engine;
 use Game\Engine\Error;
 use Game\Item\Item;
 use Game\Item\ItemId;
 use Game\Item\ItemPrototypeRepository;
 use Game\Player\Player;
+use Game\Player\PlayerLog;
 
-class Game
+readonly class Game
 {
-    public readonly Engine $engine;
-
-    public readonly Wiki $wiki;
-
-    public readonly Chat $chat;
-
-    private static ?self $instance = null;
-
-    private readonly DBConnection $db;
-    private readonly ItemPrototypeRepository $itemPrototypeRepository;
-
-    private function __construct()
-    {
-        $config = require __DIR__ .'/../config.php';
-
-        $this->db = new DBConnection($config['dbHost'], $config['dbName'], $config['dbUser'], $config['dbPass']);
-        $this->engine = new Engine($this->db);
-        $this->wiki = new Wiki($this->db);
-        $this->chat = new Chat($this->db);
-        $this->itemPrototypeRepository = new ItemPrototypeRepository($this->db);
-    }
-
-    public static function instance(): self
-    {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-
-        return self::$instance;
-    }
+    public function __construct(
+        private DBConnection $db,
+        private Chat $chat,
+        private PlayerLog $playerLog,
+        private ItemPrototypeRepository $itemPrototypeRepository
+    ){}
 
     public function findPlayer(string $name): ?Player
     {
@@ -90,7 +66,7 @@ class Game
         $player->obtain(new Item($gold, 10));
 
         $this->chat->addSystemMessage(sprintf('Registration: New member %s joined!', $playerName));
-        $this->engine->playerLog->add(
+        $this->playerLog->add(
             $playerName,
             "[System] Welcome $playerName! <br> This is your Combat log, right now its empty :( <br> Visit <a href='/?tab=dungeons'>Dungeons to start your adventure!</a>"
         );

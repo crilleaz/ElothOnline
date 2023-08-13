@@ -106,13 +106,13 @@ class Player
 
         switch(true) {
             case $difficultyRatio > 50:
-                return 'easy';
+                return 'easy(>50 mobs/h)';
             case $difficultyRatio > 20:
-                return 'moderate';
+                return 'moderate(<50 mobs/h)';
             case $difficultyRatio > 1:
-                return 'hard';
+                return 'hard(<20 mobs/h)';
             default:
-                return 'impossible';
+                return 'impossible(0 mobs/h)';
         }
     }
 

@@ -1,4 +1,10 @@
 <?php include '_header.php'; ?>
+<?php
+/**
+ * @var \Game\Player\Player $player
+ * @var \Game\Wiki $wiki
+ */
+?>
    <body style="background-color: #eceef4">
       <div class="container" style="position:relative; margin-top:10px">
          <div class="row">
@@ -22,7 +28,7 @@
                         </tr>
                         <?php
                         
-                            foreach (\Game\Game::instance()->wiki->getMonsters() as $monster)
+                            foreach ($wiki->getMonsters() as $monster)
                             {
                                     echo '<td>';
                                     echo $monster->name;

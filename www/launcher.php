@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+use Game\Wiki;
+
 require_once __DIR__ . '/../bootstrap.php';
 
 enum Tab: string
@@ -19,8 +21,15 @@ enum Tab: string
             exit();
         }
 
-        $player = \Game\Game::instance()->findPlayer($currentUserName);
+        $game = getService(\Game\Game::class);
+        $player = $game->findPlayer($currentUserName);
 
+        switch ($this) {
+            case self::LIBRARY:
+            case self::DUNGEON:
+                $wiki = getService(Wiki::class);
+                break;
+        }
         require PROJECT_ROOT . '/tabs/' . $this->value . '.php';
     }
 }

@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+use Game\Chat\Chat;
+use Game\Game;
+use Game\Player\Player;
+
 require_once __DIR__ . '/../bootstrap.php';
 
 function sendApiResponse(array $responseData, bool $success = true): void {
@@ -8,8 +12,8 @@ function sendApiResponse(array $responseData, bool $success = true): void {
     echo json_encode(['success' => $success, 'data' => $responseData]);
 }
 
-function getCurrentPlayer(): \Game\Player\Player {
-    return \Game\Game::instance()->findPlayer($_SESSION['username']);
+function getCurrentPlayer(): Player {
+    return getService(Game::class)->findPlayer($_SESSION['username']);
 }
 
 session_start();
@@ -32,14 +36,14 @@ switch ($action) {
             break;
         }
 
-        \Game\Game::instance()->chat->addMessage(getCurrentPlayer(), $message);
+        getService(Chat::class)->addMessage(getCurrentPlayer(), $message);
 
         sendApiResponse([]);
 
         break;
     case 'getChatMessages':
         $maxMessagesToShow = 10;
-        $messages = \Game\Game::instance()->chat->getLastMessages($maxMessagesToShow);
+        $messages = getService(Chat::class)->getLastMessages($maxMessagesToShow);
         $responseData = [];
         foreach ($messages as $message) {
             $responseData[] = [
@@ -64,11 +68,11 @@ switch ($action) {
             break;
         }
 
-        \Game\Game::instance()->banPlayer($userToBan);
+        getService(Game::class)->banPlayer($userToBan);
 
         sendApiResponse([]);
 
         break;
     default:
-        throw new RuntimeException('Unknown ');
+        throw new RuntimeException('Unknown action');
 }

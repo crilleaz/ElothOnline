@@ -3,32 +3,19 @@ declare(strict_types=1);
 
 namespace Game\Engine;
 
-use Game\Dungeon\DropRepository;
 use Game\Dungeon\RewardCalculator;
-use Game\Game;
-use Game\Player\PlayerLog;
+use Game\Player\Player;
 use Game\Wiki;
 
 class Engine
 {
-    /**
-     * @TODO law of Demeter violated. Access to player log has to be performed in a more suitable place.
-     */
-    public readonly PlayerLog $playerLog;
-
-    private readonly Wiki $wiki;
-
     private array $logs = [];
 
-    private readonly RewardCalculator $rewardCalculator;
-
-
-    public function __construct(private readonly DBConnection $db)
-    {
-        $this->playerLog = new PlayerLog($this->db);
-        $this->wiki = new Wiki($this->db);
-        $this->rewardCalculator = new RewardCalculator(new DropRepository($this->db));
-    }
+    public function __construct(
+        private readonly DBConnection $db,
+        private readonly RewardCalculator $rewardCalculator,
+        private readonly Wiki $wiki
+    ){}
 
     /**
      * @return string[] list of logs
@@ -99,12 +86,7 @@ class Engine
 
         foreach ($this->getHunters() as $row) {
             $playerName = $row['username'];
-            $hunter = Game::instance()->findPlayer($playerName);
-            if ($hunter === null) {
-                $this->logs[] = 'Player ' . $playerName . ' does not exist yet is present in hunting list!';
-
-                continue;
-            }
+            $hunter = Player::loadPlayer($playerName, $this->db);
 
             $huntingZone = $dungeons[$row['dungeon_id']];
             $timeSpentInDungeon = new TimeInterval(time() - strtotime($row['tid']));

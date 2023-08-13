@@ -11,7 +11,7 @@ if ($username == '') {
     exit();
 }
 
-$player = \Game\Game::instance()->findPlayer($username);
+$player = getService(\Game\Game::class)->findPlayer($username);
 foreach ($player->getLogs(5) as $log) {
     echo $log . '<br>';
 }

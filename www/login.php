@@ -10,7 +10,7 @@ if (isset($_POST['login'])) {
 
   session_start();
 
-  $result = \Game\Game::instance()->login($username, $password);
+  $result = getService(\Game\Game::class)->login($username, $password);
 
   if ($result instanceof \Game\Engine\Error) {
       $error = $result->message;
