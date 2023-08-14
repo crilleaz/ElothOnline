@@ -4,7 +4,7 @@ require_once __DIR__ . '/../bootstrap.php';
 
 session_start();
 
-$player = getService(\Game\Game::class)->getCurrentPlayer();
+$player = DI::getService(\Game\Game::class)->getCurrentPlayer();
 if ($player === null) {
     header('Location: /');
 

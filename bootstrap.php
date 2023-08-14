@@ -14,30 +14,38 @@ if (!file_exists(__DIR__ . '/installed')) {
 
 const PROJECT_ROOT = __DIR__;
 
-$di = (function (): ContainerInterface {
-    $container = new Container();
-    $container->defaultToShared(true);
-    $container->delegate(new ReflectionContainer(true));
-
-    $config = require PROJECT_ROOT . '/config.php';
-    $container->add(DBConnection::class)
-        ->addArgument($config['dbHost'])
-        ->addArgument($config['dbName'])
-        ->addArgument($config['dbUser'])
-        ->addArgument($config['dbPass']);
-
-    return $container;
-})();
-
-/**
- * @template T
- *
- * @param class-string<T> $id
- * @return T
- */
-function getService(string $id): object
+final class DI
 {
-    global $di;
+    private static ?ContainerInterface $container = null;
 
-    return $di->get($id);
+    public static function init(): void
+    {
+        if (self::$container !== null) {
+            return ;
+        }
+
+        self::$container = new Container();
+        self::$container->defaultToShared(true);
+        self::$container->delegate(new ReflectionContainer(true));
+
+        $config = require __DIR__ . '/config.php';
+        self::$container->add(DBConnection::class)
+            ->addArgument($config['dbHost'])
+            ->addArgument($config['dbName'])
+            ->addArgument($config['dbUser'])
+            ->addArgument($config['dbPass']);
+    }
+    /**
+     * @template T
+     *
+     * @param class-string<T> $id
+     * @return T
+     */
+    public static function getService(string $id): object
+    {
+        if (self::$container === null) {
+            self::init();
+        }
+        return self::$container->get($id);
+    }
 }

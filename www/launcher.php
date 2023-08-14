@@ -15,7 +15,7 @@ enum Tab: string
 
     public function load(): void
     {
-        $game = getService(\Game\Game::class);
+        $game = DI::getService(\Game\Game::class);
         $player = $game->getCurrentPlayer();
 
         if ($player === null) {
@@ -26,7 +26,7 @@ enum Tab: string
         switch ($this) {
             case self::LIBRARY:
             case self::DUNGEON:
-                $wiki = getService(Wiki::class);
+                $wiki = DI::getService(Wiki::class);
                 break;
         }
         require PROJECT_ROOT . '/tabs/' . $this->value . '.php';

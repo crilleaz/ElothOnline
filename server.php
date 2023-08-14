@@ -10,7 +10,7 @@ function writeSystemLog(string $msg) {
 }
 
 $timer = \React\EventLoop\Loop::addPeriodicTimer($intervalInSeconds, function () use (&$lastExecutedTime) {
-    $resultLogs = getService(\Game\Engine\Engine::class)->performTasks();
+    $resultLogs = DI::getService(\Game\Engine\Engine::class)->performTasks();
 
     foreach ($resultLogs as $log) {
         echo $log . PHP_EOL;

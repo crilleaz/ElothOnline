@@ -13,7 +13,7 @@ function sendApiResponse(array $responseData, bool $success = true): void {
 
 session_start();
 
-$player = getService(Game::class)->getCurrentPlayer();
+$player = DI::getService(Game::class)->getCurrentPlayer();
 if ($player === null) {
     header('Location: /login.php');
     exit();
@@ -32,14 +32,14 @@ switch ($action) {
             break;
         }
 
-        getService(Chat::class)->addMessage($player, $message);
+        DI::getService(Chat::class)->addMessage($player, $message);
 
         sendApiResponse([]);
 
         break;
     case 'getChatMessages':
         $maxMessagesToShow = 10;
-        $messages = getService(Chat::class)->getLastMessages($maxMessagesToShow);
+        $messages = DI::getService(Chat::class)->getLastMessages($maxMessagesToShow);
         $responseData = [];
         foreach ($messages as $message) {
             $responseData[] = [
@@ -63,7 +63,7 @@ switch ($action) {
             break;
         }
 
-        getService(Game::class)->banPlayer($userToBan);
+        DI::getService(Game::class)->banPlayer($userToBan);
 
         sendApiResponse([]);
 

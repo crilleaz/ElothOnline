@@ -15,7 +15,7 @@ if (isset($_POST['register'])) {
   } else if ($password !== $passwordConfirm) {
     $error = "Passwords do not match";
   } else {
-      $result = getService(\Game\Game::class)->register($username, $password);
+      $result = DI::getService(\Game\Game::class)->register($username, $password);
       if (!$result instanceof \Game\Engine\Error) {
         header("Location: login.php");
         exit;
