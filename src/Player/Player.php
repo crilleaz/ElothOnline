@@ -10,7 +10,6 @@ use Game\Dungeon\TTKCalculator;
 use Game\Engine\DBConnection;
 use Game\Engine\Error;
 use Game\Item\Item;
-use Game\Item\ItemId;
 use Game\Item\ItemPrototype as ItemPrototype;
 
 class Player
@@ -60,10 +59,10 @@ class Player
     public function getHuntingDungeon(): ?Dungeon
     {
         $dungeon = $this->connection->fetchRow('
-                        SELECT h.dungeon_id as id, d.name, d.description, m.name as monsterName, m.health, m.attack, m.defence, m.experience
+                        SELECT h.dungeon_id as id, d.name, d.description, m.name as monsterName, m.monster_id as monsterId, m.health, m.attack, m.defence, m.experience
                                  FROM hunting h
                                     INNER JOIN dungeons d ON d.id=h.dungeon_id
-                                    INNER JOIN monster m ON d.monster_id = m.id
+                                    INNER JOIN monster m ON d.monster_id = m.monster_id
                                  WHERE h.username = ?
         ',[$this->name]);
 
@@ -75,7 +74,7 @@ class Player
             $dungeon['id'],
             $dungeon['name'],
             $dungeon['description'],
-            new Monster($dungeon['monsterName'], $dungeon['health'], $dungeon['experience'], $dungeon['attack'], $dungeon['defence'])
+            new Monster($dungeon['monsterId'], $dungeon['monsterName'], $dungeon['health'], $dungeon['experience'], $dungeon['attack'], $dungeon['defence'])
         );
     }
 
@@ -176,7 +175,7 @@ class Player
 
     public function getGold(): int
     {
-        return $this->getItemQuantity(ItemId::GOLD);
+        return $this->getItemQuantity(1);
     }
 
     public function getCrystals(): int
@@ -279,10 +278,10 @@ class Player
      */
     public function getInventory(): iterable
     {
-        $entries = $this->connection->fetchRows('SELECT inv.*, ip.name FROM inventory inv INNER JOIN items ip ON ip.id = inv.item_id WHERE username = ?', [$this->name]);
+        $entries = $this->connection->fetchRows('SELECT inv.*, ip.name FROM inventory inv INNER JOIN items ip ON ip.item_id = inv.item_id WHERE username = ?', [$this->name]);
         foreach ($entries as $entry) {
             yield new Item(
-                new ItemPrototype(ItemId::from((int)$entry['item_id']), $entry['name'], (int) $entry['worth']),
+                new ItemPrototype($entry['item_id'], $entry['name'], (int) $entry['worth']),
                 $entry['amount']
             );
         }
@@ -298,9 +297,9 @@ class Player
         return $result[$property];
     }
 
-    private function getItemQuantity(ItemId $itemId): int
+    private function getItemQuantity(int $itemId): int
     {
-        $result = $this->connection->fetchRow("SELECT amount FROM inventory WHERE item_id = {$itemId->value} AND username = ?", [$this->name]);
+        $result = $this->connection->fetchRow("SELECT amount FROM inventory WHERE item_id = $itemId AND username = ?", [$this->name]);
         if ($result === []) {
             return 0;
         }

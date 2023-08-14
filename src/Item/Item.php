@@ -14,7 +14,7 @@ readonly class Item
 
     public function __construct(ItemPrototype $prototype, int $quantity)
     {
-        $this->id =  $prototype->id->value;
+        $this->id =  $prototype->id;
         $this->name = $prototype->name;
         $this->quantity = $quantity;
         $this->worth = $prototype->worth;

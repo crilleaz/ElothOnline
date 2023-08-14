@@ -7,7 +7,6 @@ use Game\Chat\Chat;
 use Game\Engine\DBConnection;
 use Game\Engine\Error;
 use Game\Item\Item;
-use Game\Item\ItemId;
 use Game\Item\ItemPrototypeRepository;
 use Game\Player\Player;
 use Game\Player\PlayerLog;
@@ -61,7 +60,7 @@ readonly class Game
                             VALUES (?, '0', 15, 15)",
             [$playerName]
         );
-        $gold = $this->itemPrototypeRepository->getById(ItemId::GOLD);
+        $gold = $this->itemPrototypeRepository->getById(1);
 
         $player = Player::loadPlayer($playerName, $this->db);
         $player->obtain(new Item($gold, 10));

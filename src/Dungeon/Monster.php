@@ -6,6 +6,7 @@ namespace Game\Dungeon;
 readonly class Monster
 {
     public function __construct(
+        public int $id,
         public string $name,
         public int    $health,
         public int    $exp,

@@ -7,9 +7,9 @@ use Game\Engine\DBConnection;
 
 readonly class Dungeon
 {
-    private const SQL_DUNGEON_BY_ID = 'SELECT d.id, d.name, d.description, m.name as monsterName, m.health, m.attack, m.defence, m.experience
+    private const SQL_DUNGEON_BY_ID = 'SELECT d.id, d.name, d.description, m.name as monsterName, m.monster_id as monsterId, m.health, m.attack, m.defence, m.experience
                                  FROM dungeons d
-                                    INNER JOIN monster m ON d.monster_id = m.id
+                                    INNER JOIN monster m ON d.monster_id = m.monster_id
                                  WHERE d.id=?
     ';
 
@@ -25,7 +25,7 @@ readonly class Dungeon
             $dungeon['id'],
             $dungeon['name'],
             $dungeon['description'],
-            new Monster($dungeon['monsterName'], $dungeon['health'], $dungeon['experience'], $dungeon['attack'], $dungeon['defence'])
+            new Monster($dungeon['monsterId'], $dungeon['monsterName'], $dungeon['health'], $dungeon['experience'], $dungeon['attack'], $dungeon['defence'])
         );
     }
 

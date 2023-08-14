@@ -11,17 +11,17 @@ final class ItemPrototypeRepository
 
     public function __construct(private readonly DBConnection $db) {}
 
-    public function getById(ItemId $id): ItemPrototype
+    public function getById(int $id): ItemPrototype
     {
-        if (!isset(self::$cache[$id->value])) {
-            $prototype = $this->db->fetchRow('SELECT * FROM items WHERE id=' . $id->value);
+        if (!isset(self::$cache[$id])) {
+            $prototype = $this->db->fetchRow('SELECT * FROM items WHERE item_id=' . $id);
             if ($prototype === []) {
                 throw new \RuntimeException('Unknown item');
             }
 
-            self::$cache[$id->value] = new ItemPrototype($id, $prototype['name'], (int) $prototype['worth']);
+            self::$cache[$id] = new ItemPrototype($id, $prototype['name'], (int) $prototype['worth']);
         }
 
-        return self::$cache[$id->value];
+        return self::$cache[$id];
     }
 }

@@ -25,10 +25,11 @@ readonly class Wiki
 
     public function getMonsters(): iterable
     {
-        $monsters = $this->connection->fetchRows('SELECT name, health, experience, attack, defence FROM monster');
+        $monsters = $this->connection->fetchRows('SELECT monster_id as id, name, health, experience, attack, defence FROM monster');
 
         foreach ($monsters as $monsterData) {
             yield new Monster(
+                $monsterData['id'],
                 $monsterData['name'],
                 $monsterData['health'],
                 $monsterData['experience'],
@@ -40,9 +41,10 @@ readonly class Wiki
 
     private function getMonster(int $monsterId): Monster
     {
-        $monsterData = $this->connection->fetchRow('SELECT * FROM monster WHERE id = ' . $monsterId);
+        $monsterData = $this->connection->fetchRow('SELECT * FROM monster WHERE monster_id = ' . $monsterId);
 
         return new Monster(
+            $monsterId,
             $monsterData['name'],
             $monsterData['health'],
             $monsterData['experience'],

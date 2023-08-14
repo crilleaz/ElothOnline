@@ -15,6 +15,10 @@ class Reward
         return new self(0, []);
     }
 
+    /**
+     * @param int $exp
+     * @param Drop[] $drop
+     */
     public function __construct(public readonly int $exp, array $drop)
     {
         foreach ($drop as $entry) {
@@ -37,7 +41,7 @@ class Reward
 
     private function addDrop(Drop $drop): void
     {
-        $itemId = $drop->item->id->value;
+        $itemId = $drop->item->id;
         if (isset($this->drop[$itemId])) {
             $existingDrop = $this->drop[$itemId];
             $this->drop[$itemId] = new Drop($existingDrop->item, $existingDrop->quantity + $drop->quantity);

@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/bootstrap.php';
 
-$intervalInSeconds = 30.0;
+$intervalInSeconds = 5.0;
 $lastExecutedTime = time();
 
 function writeSystemLog(string $msg) {
