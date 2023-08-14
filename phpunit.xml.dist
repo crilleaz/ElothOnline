@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.3/phpunit.xsd"
         backupGlobals="false"
-        bootstrap="bootstrap.php"
+        bootstrap="tests/bootstrap.php"
         colors="true"
         cacheDirectory=".phpunit.cache"
 >
@@ -11,7 +11,7 @@
     <ini name="display_errors" value="1"/>
     <ini name="error_reporting" value="-1"/>
     <env name="DB_HOST" value="127.0.0.1" force="true" />
-    <env name="DB_NAME" value="test_eloth" force="true" />
+    <env name="DB_NAME" value="eloth_test" force="true" />
     <env name="DB_USER" value="user" force="true" />
     <env name="DB_PASS" value="password" force="true" />
   </php>

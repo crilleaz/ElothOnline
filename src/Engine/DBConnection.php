@@ -18,7 +18,7 @@ readonly class DBConnection
     ) {
         $this->connection = DriverManager::getConnection([
             'dbname' => $db,
-            'driver' => 'mysqli',
+            'driver' => 'pdo_mysql',
             'host' => $host,
             'user' => $user,
             'password' => $pass,
