@@ -25,6 +25,7 @@ class Engine
     public function performTasks(): array
     {
         $this->logs = [];
+        $this->logs[] = sprintf('<StartedAt>%s</StartedAt>', date("H:i:s Y-m-d"));
 
         $this->db->transaction(function () {
             $this->regenerateStamina();
@@ -41,8 +42,6 @@ class Engine
     // Regenerates resting hunters stamina
     private function regenerateStamina(): void
     {
-        $this->logs[] = '<AddStamina>';
-
         // Basically means timestamp when last action was applied. Implied that action is taken only by Engine
         $row = $this->db->fetchRow("SELECT tid FROM timetable WHERE name = 'stamina'");
 
@@ -56,6 +55,7 @@ class Engine
 
         // echo $row['stamina'];
         if ($minutes_past > 0) {
+            $this->logs[] = sprintf('<RestoredStamina>%d</RestoredStamina>', $minutes_past);
             $this->db->execute("UPDATE players SET stamina = LEAST(stamina + $minutes_past, 100) WHERE in_combat = 0");
             $this->db->execute("UPDATE timetable SET tid = NOW()");
             // TODO return log about the player who restored the stamina
@@ -65,15 +65,13 @@ class Engine
 
     private function stopExhaustedHunters(): void
     {
-        $this->logs[] = '<Stamina>';
-
         $huntingPlayers = $this->db->fetchRows("SELECT name, in_combat, stamina FROM players WHERE stamina <= 0 AND in_combat = 1");
         foreach ($huntingPlayers as $row) {
             $playerNameWithNoStamina = $row['name'];
 
             $this->db->execute('DELETE from hunting WHERE username = ?', [$playerNameWithNoStamina]);
             $this->db->execute('UPDATE players SET in_combat = 0, stamina=0 WHERE name = ?', [$playerNameWithNoStamina]);
-            $this->logs[] = '[noStamina] ' . 'User: ' . $playerNameWithNoStamina . ' had no stamina left.';
+            $this->logs[] = sprintf('<Exhausted player="%s"/>', $playerNameWithNoStamina);
         }
     }
 
@@ -84,6 +82,15 @@ class Engine
             $dungeons[$dungeonWiki->id] = $dungeonWiki;
         }
 
+        $logTemplate = <<<XML
+                <Reward player="%s" dungeon="%s" huntDuration="%s">
+                    <Exp>%d</Exp>
+                    <Loot>%s</Loot>
+                    <Note>%s</Note>
+                </Reward>
+        XML;
+
+        $rewardLogs[] = '<Rewards>';
         foreach ($this->getHunters() as $row) {
             $playerName = $row['username'];
             $hunter = Player::loadPlayer($playerName, $this->db);
@@ -112,23 +119,40 @@ class Engine
                 if ($overhunt) {
                     $hunter->leaveDungeon();
                     $this->db->execute('UPDATE players SET stamina = 0  WHERE name = ?', [$playerName]);
+                    $rewardLogs[] = sprintf($logTemplate, $playerName, $huntingZone->name, $minutesPassed . ' minutes', 0, '', 'Exhausted');
                 }
 
                 continue;
             }
 
             $hunter->addExp($reward->exp);
-            $this->logs[] = '[giveExperience] ' . 'User: ' . $playerName . ' were given ' . $reward->exp . ' exp' . PHP_EOL;
 
+            $lootDetails = '';
             foreach ($reward->listDrop() as $drop) {
                 $hunter->pickUp($drop);
-                $this->logs[] = sprintf('[Loot] Player: %s picked up %d %s', $playerName, $drop->quantity, $drop->item->name) . PHP_EOL;
+                $lootDetails .= sprintf('<Item name="%s" quantity="%d"/>', $drop->item->name, $drop->quantity);
             }
 
             $this->db->execute('UPDATE hunting SET tid = NOW() WHERE username = ?', [$playerName]);
             $this->db->execute('UPDATE players SET stamina = GREATEST(stamina - ?, 0)  WHERE name = ?', [$minutesPassed, $playerName]);
-            $this->logs[] = '[resetTimestamp] ' . 'User: ' . $playerName . ' had their timestamp reset.';
-            $this->logs[] = '[reduceStamina] ' . 'User: ' . $playerName . ' had their stamina reduced by ' . $minutesPassed;
+
+            $rewardLogs[] = sprintf(
+                $logTemplate,
+                $playerName,
+                $huntingZone->name,
+                $minutesPassed . 'minutes',
+                $reward->exp,
+                $lootDetails,
+                'Stamina reduced by ' . $minutesPassed
+            );
+        }
+
+        $rewardLogs[] = '</Rewards>';
+
+        if (count($rewardLogs) !== 2) {
+            foreach ($rewardLogs as $rewardLog) {
+                $this->logs[] = $rewardLog;
+            }
         }
     }
 
