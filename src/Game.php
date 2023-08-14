@@ -21,9 +21,10 @@ readonly class Game
         private ItemPrototypeRepository $itemPrototypeRepository
     ){}
 
-    public function findPlayer(string $name): ?Player
+    public function getCurrentPlayer(): ?Player
     {
-        if (!Player::exists($name, $this->db)) {
+        $name = $_SESSION['username'] ?? '';
+        if ($name === '' || !Player::exists($name, $this->db)) {
             return null;
         }
 
@@ -62,7 +63,7 @@ readonly class Game
         );
         $gold = $this->itemPrototypeRepository->getById(ItemId::GOLD);
 
-        $player = $this->findPlayer($playerName);
+        $player = Player::loadPlayer($playerName, $this->db);
         $player->obtain(new Item($gold, 10));
 
         $this->chat->addSystemMessage(sprintf('Registration: New member %s joined!', $playerName));

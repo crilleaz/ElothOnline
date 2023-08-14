@@ -15,14 +15,13 @@ enum Tab: string
 
     public function load(): void
     {
-        $currentUserName = $_SESSION['username'] ?? '';
-        if ($currentUserName === '') {
+        $game = getService(\Game\Game::class);
+        $player = $game->getCurrentPlayer();
+
+        if ($player === null) {
             header('Location: /login.php');
             exit();
         }
-
-        $game = getService(\Game\Game::class);
-        $player = $game->findPlayer($currentUserName);
 
         switch ($this) {
             case self::LIBRARY:

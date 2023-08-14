@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 use Game\Chat\Chat;
 use Game\Game;
-use Game\Player\Player;
 
 require_once __DIR__ . '/../bootstrap.php';
 
@@ -12,13 +11,10 @@ function sendApiResponse(array $responseData, bool $success = true): void {
     echo json_encode(['success' => $success, 'data' => $responseData]);
 }
 
-function getCurrentPlayer(): Player {
-    return getService(Game::class)->findPlayer($_SESSION['username']);
-}
-
 session_start();
 
-if (!isset($_SESSION['username'])) {
+$player = getService(Game::class)->getCurrentPlayer();
+if ($player === null) {
     header('Location: /login.php');
     exit();
 }
@@ -36,7 +32,7 @@ switch ($action) {
             break;
         }
 
-        getService(Chat::class)->addMessage(getCurrentPlayer(), $message);
+        getService(Chat::class)->addMessage($player, $message);
 
         sendApiResponse([]);
 
@@ -62,8 +58,7 @@ switch ($action) {
             break;
         }
 
-        $currentUser = getCurrentPlayer();
-        if (!$currentUser->isAdmin()) {
+        if (!$player->isAdmin()) {
             sendApiResponse(['error' => 'Sorry, you\'re not admin.'], false);
             break;
         }
