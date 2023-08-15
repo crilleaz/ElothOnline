@@ -153,5 +153,6 @@ try {
     (new Installer())->run();
 } catch (RuntimeException $e) {
     echo $e->getMessage() . PHP_EOL;
+    echo $e->getTraceAsString() . PHP_EOL;
     exit(1);
 }
