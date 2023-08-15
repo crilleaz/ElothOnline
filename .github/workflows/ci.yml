@@ -25,6 +25,8 @@ jobs:
       - uses: nanasess/setup-php@master
         with:
           php-version: '8.2'
+      - name: install vendors
+        run: composer install --no-interaction
       - name: install project
         run: php install.php
 #      - name: codestyle
