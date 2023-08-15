@@ -23,24 +23,25 @@ class GameTest extends IntegrationTestCase
     public function testRegister(): void
     {
         $result = $this->game->register(self::PLAYER_NAME, self::PLAYER_PASSWORD);
-        $this->assertNoErrorHappened($result);
+        $this->assertNoErrorOccurred($result);
         $this->assertNewPlayerCreated(self::PLAYER_NAME);
     }
 
     public function testRegisterWithExistingNickname(): void
     {
-        $this->game->register(self::PLAYER_NAME, self::PLAYER_PASSWORD);
-        $result = $this->game->register(self::PLAYER_NAME, self::PLAYER_PASSWORD);
-        self::assertNotNull($result);
-        self::assertEquals('Username is already taken', $result->message);
+        $firstAttempt = $this->game->register(self::PLAYER_NAME, self::PLAYER_PASSWORD);
+        self::assertNoErrorOccurred($firstAttempt);
+        $secondAttempt = $this->game->register(self::PLAYER_NAME, self::PLAYER_PASSWORD);
+        self::assertErrorOccurred($secondAttempt, 'Username is already taken');
     }
 
     public function testLoginWhenAccountDoesNotExist(): void
     {
         $result = $this->game->login(self::PLAYER_NAME, self::PLAYER_PASSWORD);
 
-        self::assertInstanceOf(Error::class, $result);
-        self::assertEquals('Invalid username or password', $result->message);
+        self::assertErrorOccurred($result, 'Invalid username or password');
+        $player = $this->game->getCurrentPlayer();
+        self::assertNull($player);
     }
 
     public function testLoginWithIncorrectPassword(): void
@@ -48,19 +49,30 @@ class GameTest extends IntegrationTestCase
         $this->game->register(self::PLAYER_NAME, self::PLAYER_PASSWORD);
         $result = $this->game->login(self::PLAYER_NAME, 'wrongpassword');
 
-        self::assertInstanceOf(Error::class, $result);
-        self::assertEquals('Invalid username or password', $result->message);
+        self::assertErrorOccurred($result, 'Invalid username or password');
     }
 
     public function testLoginSuccess(): void
     {
         $this->game->register(self::PLAYER_NAME, self::PLAYER_PASSWORD);
         $result = $this->game->login(self::PLAYER_NAME, self::PLAYER_PASSWORD);
-        $this->assertNoErrorHappened($result);
+        $this->assertNoErrorOccurred($result);
 
         $player = $this->game->getCurrentPlayer();
         self::assertNotNull($player);
         self::assertSame(self::PLAYER_NAME, $player->getName());
+    }
+
+    public function testLoginNotPossibleForBanned(): void
+    {
+        $this->game->register(self::PLAYER_NAME, self::PLAYER_PASSWORD);
+        $this->game->banPlayer(self::PLAYER_NAME);
+
+        $result = $this->game->login(self::PLAYER_NAME, self::PLAYER_PASSWORD);
+
+        self::assertErrorOccurred($result, 'User is banned');
+        $player = $this->game->getCurrentPlayer();
+        self::assertNull($player);
     }
 
     private function assertNewPlayerCreated(string $playerName): void
@@ -80,7 +92,7 @@ class GameTest extends IntegrationTestCase
         self::assertEquals(10, $player->getGold());
     }
 
-    private function assertNoErrorHappened(?Error $result): void
+    private function assertNoErrorOccurred(?Error $result): void
     {
         $message = '';
         if ($result !== null) {
@@ -88,5 +100,11 @@ class GameTest extends IntegrationTestCase
         }
 
         self::assertNull($result, $message);
+    }
+
+    private static function assertErrorOccurred(?Error $result, string $expectedMessage): void
+    {
+        self::assertInstanceOf(Error::class, $result);
+        self::assertEquals($expectedMessage, $result->message);
     }
 }

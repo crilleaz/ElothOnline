@@ -24,6 +24,7 @@ abstract class IntegrationTestCase extends TestCase
 
         $this->db = $this->getService(DBConnection::class);
         $this->db->execute('ROLLBACK');
+        unset($_SESSION['username']);
     }
 
     /**
