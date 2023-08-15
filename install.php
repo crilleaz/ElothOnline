@@ -153,4 +153,5 @@ try {
     (new Installer())->run();
 } catch (RuntimeException $e) {
     echo $e->getMessage() . PHP_EOL;
+    exit(1);
 }
