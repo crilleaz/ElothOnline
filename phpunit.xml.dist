@@ -10,10 +10,10 @@
   <php>
     <ini name="display_errors" value="1"/>
     <ini name="error_reporting" value="-1"/>
-    <env name="DB_HOST" value="127.0.0.1" force="true" />
-    <env name="DB_NAME" value="eloth_test" force="true" />
-    <env name="DB_USER" value="user" force="true" />
-    <env name="DB_PASS" value="password" force="true" />
+    <env name="DB_HOST" value="127.0.0.1"/>
+    <env name="DB_NAME" value="eloth_test"/>
+    <env name="DB_USER" value="user"/>
+    <env name="DB_PASS" value="password"/>
   </php>
   <testsuites>
     <testsuite name="Primary">
