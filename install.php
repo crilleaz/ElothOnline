@@ -98,44 +98,30 @@ final class Installer
 
         ksort($dataSources, SORT_NATURAL);
 
-        $db->transaction(function(DBConnection $dbConnection) use ($dataSources) {
-            $isUpdate = [] !== $dbConnection->fetchRow("SHOW TABLES LIKE 'version'");
-            if ($isUpdate) {
-                $currentVersionDetails = $dbConnection->fetchRow('SELECT current from version LIMIT 1');
-                if ($currentVersionDetails === []) {
-                    throw new RuntimeException('Version system does not contain current version information!');
-                }
-                $this->currentVersion = $currentVersionDetails['current'];
+        $isUpdate = [] !== $db->fetchRow("SHOW TABLES LIKE 'version'");
+        if ($isUpdate) {
+            $currentVersionDetails = $db->fetchRow('SELECT current from version LIMIT 1');
+            if ($currentVersionDetails === []) {
+                throw new RuntimeException('Version system does not contain current version information!');
             }
+            $this->currentVersion = $currentVersionDetails['current'];
+        }
 
-            foreach ($dataSources as $sourceVersion => $dataSource) {
-                $sourceVersion = (string) $sourceVersion;
-                if ($this->isAlreadyInstalled($sourceVersion)) {
-                    continue;
-                }
-
-                $this->currentVersion = $sourceVersion;
-
-                try {
-                    foreach(explode(';'. PHP_EOL, file_get_contents($dataSource)) as $query) {
-                        $query = trim($query);
-                        if ($query !== '') {
-                            $dbConnection->execute($query);
-                        }
-                    }
-
-                    if ([] !== $dbConnection->fetchRow('SELECT * from version LIMIT 1')) {
-                        $dbConnection->execute('UPDATE version SET current=? LIMIT 1', [$sourceVersion]);
-                    } else {
-                        $dbConnection->execute('INSERT INTO version(current) VALUE (?)', [$sourceVersion]);
-                    }
-                } catch (Throwable $e) {
-                    echo $e->getMessage() . PHP_EOL;
-
-                    throw $e;
-                }
+        foreach ($dataSources as $sourceVersion => $dataSource) {
+            $sourceVersion = (string)$sourceVersion;
+            if ($this->isAlreadyInstalled($sourceVersion)) {
+                continue;
             }
-        });
+            $migration = file_get_contents($dataSource);
+
+            // Implicit migrations break transaction and thus there is no reason to attempt performing it within
+            $containsImplicitCommit = preg_match('/\b(?:ALTER TABLE|DROP TABLE|CREATE TABLE)\b/i', $migration) === 1;
+            if ($containsImplicitCommit) {
+                $this->runMigration($db, $sourceVersion, $migration);
+            } else {
+                $db->transaction(fn(DBConnection $dbConnection) => $this->runMigration($dbConnection, $sourceVersion, $migration));
+            }
+        }
     }
 
     private function dependenciesAreInstalled(): bool
@@ -146,6 +132,24 @@ final class Installer
     private function isAlreadyInstalled(string $version): bool
     {
         return strnatcmp($version, $this->currentVersion) <= 0;
+    }
+
+    private function runMigration(DBConnection $db, string $version, string $migration): void
+    {
+        foreach (explode(';' . PHP_EOL, $migration) as $query) {
+            $query = trim($query);
+            if ($query !== '') {
+                $db->execute($query);
+            }
+        }
+
+        if ([] !== $db->fetchRow('SELECT * from version LIMIT 1')) {
+            $db->execute('UPDATE version SET current=? LIMIT 1', [$version]);
+        } else {
+            $db->execute('INSERT INTO version(current) VALUE (?)', [$version]);
+        }
+
+        $this->currentVersion = $version;
     }
 }
 
