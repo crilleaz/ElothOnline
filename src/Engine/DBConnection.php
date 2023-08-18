@@ -50,6 +50,22 @@ readonly class DBConnection
         $this->connection->transactional(fn() => $procedure($this));
     }
 
+    /**
+     * @internal only for internal usages
+     */
+    public function startTransaction(): void
+    {
+        $this->connection->beginTransaction();
+    }
+
+    /**
+     * @internal only for internal usages
+     */
+    public function rollbackTransaction(): void
+    {
+        $this->connection->rollBack();
+    }
+
     private function detectTypes(array $params): array
     {
         $types = [];

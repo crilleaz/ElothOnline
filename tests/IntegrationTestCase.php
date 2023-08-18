@@ -15,7 +15,7 @@ abstract class IntegrationTestCase extends TestCase
         parent::setUp();
 
         $this->db = $this->getService(DBConnection::class);
-        $this->db->execute('START TRANSACTION');
+        $this->db->startTransaction();
     }
 
     protected function tearDown(): void
@@ -23,7 +23,7 @@ abstract class IntegrationTestCase extends TestCase
         parent::tearDown();
 
         $this->db = $this->getService(DBConnection::class);
-        $this->db->execute('ROLLBACK');
+        $this->db->rollbackTransaction();
         unset($_SESSION['username']);
     }
 

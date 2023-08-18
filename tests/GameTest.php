@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Game;
 
 use Game\Engine\Error;
+use Game\Player\LvlCalculator;
 use Game\Player\Player;
 
 class GameTest extends IntegrationTestCase
@@ -75,6 +76,47 @@ class GameTest extends IntegrationTestCase
         self::assertNull($player);
     }
 
+    public function testListTopPlayers(): void
+    {
+        $lvls = [
+            'MisterTester1' => LvlCalculator::minExpRequired(10),
+            'MisterTester2' => LvlCalculator::minExpRequired(5),
+            'MisterTester3' => LvlCalculator::minExpRequired(3),
+            'MisterTester4' => LvlCalculator::minExpRequired(4),
+            'MisterTester5' => LvlCalculator::minExpRequired(7),
+            'MisterTester6' => LvlCalculator::minExpRequired(2),
+            'MisterTester7' => LvlCalculator::minExpRequired(12),
+            'MisterTester8' => LvlCalculator::minExpRequired(9),
+            'MisterTester9' => LvlCalculator::minExpRequired(1),
+            'MisterTester10' => LvlCalculator::minExpRequired(6),
+        ];
+
+        foreach($lvls as $newPlayerName => $exp) {
+            $this->game->register($newPlayerName, self::PLAYER_PASSWORD);
+            $player = $this->findPlayer($newPlayerName);
+            self::assertNotNull($player);
+            $player->addExp($exp);
+        }
+
+        $topPlayerNames = [];
+        foreach ($this->game->listTopPlayers(7) as $topPlayer) {
+            $topPlayerNames[] = $topPlayer->getName();
+        }
+
+        self::assertSame(
+            [
+                'MisterTester7',
+                'MisterTester1',
+                'MisterTester8',
+                'MisterTester5',
+                'MisterTester10',
+                'MisterTester2',
+                'MisterTester4',
+            ],
+            $topPlayerNames
+        );
+    }
+
     private function assertNewPlayerCreated(string $playerName): void
     {
         self::assertTrue(Player::exists($playerName, $this->db), 'Player does not exist');
@@ -106,5 +148,14 @@ class GameTest extends IntegrationTestCase
     {
         self::assertInstanceOf(Error::class, $result);
         self::assertEquals($expectedMessage, $result->message);
+    }
+
+    private function findPlayer(string $name): ?Player
+    {
+        if (Player::exists($name, $this->db)) {
+            return Player::loadPlayer($name, $this->db);
+        }
+
+        return null;
     }
 }
