@@ -20,7 +20,6 @@ readonly class TimeInterval
     public function __construct(public int $seconds)
     {
         if ($seconds < 0) {
-            var_dump($seconds);
             throw new \RuntimeException('Interval can not be negative');
         }
     }
