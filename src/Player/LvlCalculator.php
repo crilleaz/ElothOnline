@@ -7,13 +7,17 @@ class LvlCalculator
 {
     public static function convertExpToLvl(int $exp): int
     {
-        $lvl = 1;
+        $lvl = 0;
         do {
-            $lvlExpRequirement = self::minExpRequired($lvl);
             $lvl++;
+            $lvlExpRequirement = self::minExpRequired($lvl);
         } while ($exp > $lvlExpRequirement);
 
-        return $lvl;
+        if ($exp === $lvlExpRequirement) {
+            return $lvl;
+        }
+
+        return $lvl - 1;
     }
 
     public static function minExpRequired(int $forLevel): int
