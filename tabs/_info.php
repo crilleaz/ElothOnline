@@ -18,7 +18,7 @@
             <font size="2">Experience: <?php print_r($player->getExp()) ?> <?php echo " / " ?> <?php print_r($player->getNextLevelExp())?><br>
                 Magic: <?php print_r($player->getMagic()) ?> <br>
                 Strength: <?php print_r($player->getStrength()) ?> <br>
-                Defense: <?php print_r($player->getDefense()) ?> <br>
+                Defense: <?php print_r($player->getDefence()) ?> <br>
 
             </font>
         </li>

@@ -1,0 +1,37 @@
+name: CI
+
+on: [ push ]
+
+jobs:
+  tests:
+    runs-on: ubuntu-20.04
+    env:
+      DB_HOST: 127.0.0.1
+      DB_NAME: eloth_test
+      DB_USER: root
+      DB_PASS: some_pass
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: eloth_test
+          MYSQL_ROOT_PASSWORD: some_pass
+        ports:
+          - 3306:3306
+          # Before continuing, verify the mysql container is reachable from the ubuntu host
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v2
+      - uses: nanasess/setup-php@master
+        with:
+          php-version: '8.2'
+      - name: install vendors
+        run: composer install --no-interaction
+      - name: install project
+        run: php install.php
+#      - name: codestyle
+#        run: ./vendor/bin/phpcs
+#      - name: static analyze
+#        run: ./vendor/bin/phpstan
+      - name: tests
+        run: ./vendor/bin/phpunit

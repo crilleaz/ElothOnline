@@ -1,13 +1,16 @@
 <?php include '_header.php'; ?>
 <?php
 
-/** @var \Game\Player $player */
+/**
+ * @var \Game\Player\Player $player
+ * @var \Game\Wiki $wiki
+ */
 
 if (isset($_GET['hunt'])) {
     $selectedDungeon = (int)$_GET['hunt'];
 
     $result = $player->enterDungeon($selectedDungeon);
-    if ($result instanceof Game\Error) {
+    if ($result instanceof \Game\Engine\Error) {
         echo '<meta http-equiv="Refresh" content="0; url=?tab=dungeons&error='.$result->message.'">';
     } else {
         echo '<meta http-equiv="Refresh" content="0; url=?tab=dungeons&success=hunting">';
@@ -52,7 +55,7 @@ if (isset($_GET['error']) && is_string($_GET['error'])) {
                                                 echo '<center><font color="green">' . $infoMsg . '</font></center><br>';
                                             }
                                             $column = 0;
-                                            foreach (\Game\Game::instance()->wiki->getDungeons() as $dungeon) {
+                                            foreach ($wiki->getDungeons() as $dungeon) {
                                                 $column++;
                                                 if ($column === 1) {
                                                     echo '<div class="row">';

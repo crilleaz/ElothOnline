@@ -1,4 +1,10 @@
 <?php include '_header.php'; ?>
+<?php
+/**
+ * @var \Game\Player\Player $player
+ * @var \Game\Game $game
+ */
+?>
    <body style="background-color: #eceef4">
       <div class="container" style="position:relative; margin-top:10px">
          <div class="row">
@@ -24,7 +30,7 @@
                         </tr>
                         <?php
                         
-                            foreach (\Game\Game::instance()->listTopPlayers(100) as $topPlayer) {
+                            foreach ($game->listTopPlayers(100) as $topPlayer) {
                                 if($topPlayer->isAdmin()){
                                     echo '<tr title="This player is a gamemaster.">';
                                     echo '<td><font color="red">' . $topPlayer->getName() . '</font></td>';

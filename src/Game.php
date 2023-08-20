@@ -3,38 +3,27 @@ declare(strict_types=1);
 
 namespace Game;
 
-class Game
+use Game\Chat\Chat;
+use Game\Engine\DBConnection;
+use Game\Engine\Error;
+use Game\Item\Item;
+use Game\Item\ItemPrototypeRepository;
+use Game\Player\Player;
+use Game\Player\PlayerLog;
+
+readonly class Game
 {
-    public readonly Engine $engine;
+    public function __construct(
+        private DBConnection $db,
+        private Chat $chat,
+        private PlayerLog $playerLog,
+        private ItemPrototypeRepository $itemPrototypeRepository
+    ){}
 
-    public readonly Wiki $wiki;
-
-    public readonly Chat $chat;
-
-    private static ?self $instance = null;
-
-    private readonly DBConnection $db;
-
-    private function __construct()
+    public function getCurrentPlayer(): ?Player
     {
-        $this->db = new DBConnection("127.0.0.1", 'db', 'user', 'password');
-        $this->engine = new Engine($this->db);
-        $this->wiki = new Wiki($this->db);
-        $this->chat = new Chat($this->db);
-    }
-
-    public static function instance(): self
-    {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-
-        return self::$instance;
-    }
-
-    public function findPlayer(string $name): ?Player
-    {
-        if (!Player::exists($name, $this->db)) {
+        $name = $_SESSION['username'] ?? '';
+        if ($name === '' || !Player::exists($name, $this->db)) {
             return null;
         }
 
@@ -71,10 +60,13 @@ class Game
                             VALUES (?, '0', 15, 15)",
             [$playerName]
         );
+        $gold = $this->itemPrototypeRepository->getById(1);
 
-        $this->chat->addSystemMessage('Registration: New member joined!');
-        $this->engine->addToInventory(ItemId::GOLD, 10, 0, $playerName);
-        $this->engine->playerLog->add(
+        $player = Player::loadPlayer($playerName, $this->db);
+        $player->obtain(new Item($gold, 10));
+
+        $this->chat->addSystemMessage(sprintf('Registration: New member %s joined!', $playerName));
+        $this->playerLog->add(
             $playerName,
             "[System] Welcome $playerName! <br> This is your Combat log, right now its empty :( <br> Visit <a href='/?tab=dungeons'>Dungeons to start your adventure!</a>"
         );

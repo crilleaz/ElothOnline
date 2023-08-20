@@ -33,13 +33,25 @@ It's sloppy and unfinished, but rather good start or if you would like to contin
 ![server](https://user-images.githubusercontent.com/20803604/215297008-bcb9b38d-bcce-4f67-ab9b-7f913d657b32.PNG)
 
 
-
 # Installation
-* Upload the files to your webserver
-* Import the sql-file
-* Edit: engine.php, register.php, chat.php, login.php, server.php and log.php with your details
-* Run or cronjob the server.php
-* Register your account/character at register.php
+* Upload the files to your webserver so that `./www/` should be exposed as the root folder. 
+* Set db properties in `config.php`
+* Run ```php install.php```
+* Run ```php server.php``` (it's react-driven loop process)
+
+
+# Updates
+
+Eventually, there will be updates which means that database structure and some fixtures will change.  
+For those purposes there is `updates` folder which contains `sql` files.  
+
+To create new update run `php ./updates/create-new.php`. Modify created file according your needs.  
+
+To install updates just run `php install.php`.  
+
+**Beware!**  
+Do not modify existing updates once they are under VCS. Each update is executed only once.  
+If you need more changes, create a new one.
 
 # Discord
-Crilleaz
+Crilleaz, khan0454
