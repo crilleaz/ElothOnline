@@ -85,6 +85,10 @@ class Player
     {
         $currentDungeon = $this->getHuntingDungeon();
         if ($currentDungeon !== null) {
+            if ($currentDungeon->id === $id) {
+                return null;
+            }
+
             return new Error('You are already hunting at ' . $currentDungeon->name);
         }
 
@@ -257,22 +261,21 @@ class Player
 
     public function pickUp(Drop $drop): void
     {
-        $item = new Item($drop->item, $drop->quantity);
-        $this->obtain($item);
-        $this->logger->add($this->name, sprintf("You picked up %d %s", $item->quantity, $item->name));
+        $this->obtain($drop->item, $drop->quantity);
+        $this->logger->add($this->name, sprintf("You picked up %d %s", $drop->quantity, $drop->item->name));
     }
 
-    public function obtain(Item $item): void
+    public function obtain(ItemPrototype $item, int $quantity): void
     {
         $entry = $this->connection
             ->fetchRow('SELECT amount FROM inventory WHERE item_id = ? AND username = ?', [$item->id, $this->name]);
 
         if ($entry === []) {
             $this->connection
-                ->execute('INSERT INTO inventory (username, item_id, amount) VALUES (?, ?, ?)', [$this->name, $item->id, $item->quantity]);
+                ->execute('INSERT INTO inventory (username, item_id, amount, worth) VALUES (?, ?, ?, ?)', [$this->name, $item->id, $quantity, $item->worth]);
         } else {
             $this->connection
-                ->execute('UPDATE inventory SET amount = amount + ? WHERE item_id = ? AND username = ?', [$item->quantity, $item->id, $this->name]);
+                ->execute('UPDATE inventory SET amount = amount + ? WHERE item_id = ? AND username = ?', [$quantity, $item->id, $this->name]);
         }
     }
 

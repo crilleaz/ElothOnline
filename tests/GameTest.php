@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Game;
 
-use Game\Engine\Error;
 use Game\Player\LvlCalculator;
 use Game\Player\Player;
 
@@ -132,22 +131,6 @@ class GameTest extends IntegrationTestCase
         self::assertEquals(0, $player->getBlacksmith());
         self::assertEquals(0, $player->getMining());
         self::assertEquals(0, $player->getGathering());
-    }
-
-    private function assertNoErrorOccurred(?Error $result): void
-    {
-        $message = '';
-        if ($result !== null) {
-            $message = $result->message;
-        }
-
-        self::assertNull($result, $message);
-    }
-
-    private static function assertErrorOccurred(?Error $result, string $expectedMessage): void
-    {
-        self::assertInstanceOf(Error::class, $result);
-        self::assertEquals($expectedMessage, $result->message);
     }
 
     private function findPlayer(string $name): ?Player
