@@ -8,12 +8,15 @@ use Game\Dungeon\Dungeon;
 use Game\Dungeon\Monster;
 use Game\Dungeon\TTKCalculator;
 use Game\Engine\DBConnection;
+use Game\Engine\DbTimeFactory;
 use Game\Engine\Error;
 use Game\Item\Item;
 use Game\Item\ItemPrototype as ItemPrototype;
 
 class Player
 {
+    public const MAX_POSSIBLE_STAMINA = 100;
+
     private readonly PlayerLog $logger;
 
     public static function loadPlayer(string $name, DBConnection $connection): self
@@ -90,7 +93,7 @@ class Player
             return new Error(sprintf('Dungeon with id "%d" does not exist', $id));
         }
 
-        $this->connection->execute('INSERT INTO hunting (username, dungeon_id) VALUES (?, ?)', [$this->name, $id]);
+        $this->connection->execute('INSERT INTO hunting (username, dungeon_id, tid) VALUES (?, ?, ?)', [$this->name, $id, DbTimeFactory::createCurrentTimestamp()]);
         $this->connection->execute('UPDATE players SET in_combat = 1 WHERE name = ?', [$this->name]);
 
         return null;

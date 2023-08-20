@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Game\Dungeon;
 
-use Game\Engine\TimeInterval;
 use Game\Player\Player;
+use Game\Utils\TimeInterval;
 
 readonly class RewardCalculator
 {

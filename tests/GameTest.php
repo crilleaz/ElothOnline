@@ -12,15 +12,6 @@ class GameTest extends IntegrationTestCase
     private const PLAYER_NAME = 'MisterTester';
     private const PLAYER_PASSWORD = '123123123';
 
-    private Game $game;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->game = $this->getService(Game::class);
-    }
-
     public function testRegister(): void
     {
         $result = $this->game->register(self::PLAYER_NAME, self::PLAYER_PASSWORD);

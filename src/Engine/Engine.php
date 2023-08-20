@@ -3,12 +3,16 @@ declare(strict_types=1);
 
 namespace Game\Engine;
 
+use Carbon\CarbonImmutable;
 use Game\Dungeon\RewardCalculator;
 use Game\Player\Player;
+use Game\Utils\TimeInterval;
 use Game\Wiki;
 
 class Engine
 {
+    private CarbonImmutable $currentTime;
+
     private array $logs = [];
 
     public function __construct(
@@ -24,8 +28,10 @@ class Engine
      */
     public function performTasks(): array
     {
+        $this->currentTime = CarbonImmutable::now();
+
         $this->logs = [];
-        $this->logs[] = sprintf('<StartedAt>%s</StartedAt>', date("H:i:s Y-m-d"));
+        $this->logs[] = sprintf('<StartedAt>%s</StartedAt>', $this->currentTime->format("H:i:s d-m-Y"));
 
         $this->db->transaction(function () {
             $this->regenerateStamina();
@@ -45,22 +51,18 @@ class Engine
         // Basically means timestamp when last action was applied. Implied that action is taken only by Engine
         $row = $this->db->fetchRow("SELECT tid FROM timetable WHERE name = 'stamina'");
 
-        // $timestamp = $row['tid'];
-        //Gör om timestamp i DB till unix
-        $reference_timestamp = strtotime($row['tid']);
-        //Hämta lokal tid
-        $current_timestamp = time();
-        //Runda ner till senaste minut
-        $minutes_past = (int)floor(($current_timestamp - $reference_timestamp) / 60);
-
-        // echo $row['stamina'];
-        if ($minutes_past > 0) {
-            $this->logs[] = sprintf('<RestoredStamina>%d</RestoredStamina>', $minutes_past);
-            $this->db->execute("UPDATE players SET stamina = LEAST(stamina + $minutes_past, 100) WHERE in_combat = 0");
-            $this->db->execute("UPDATE timetable SET tid = NOW()");
-            // TODO return log about the player who restored the stamina
-            // echo '[addStamina] ' . 'User: ' . $usersNotInCombat . ' were given ' . '1' . ' stamina.' . PHP_EOL;
+        $lastUpdateAt = CarbonImmutable::create($row['tid']);
+        $minutesPassed = $this->currentTime->diffInMinutes($lastUpdateAt);
+        if ($minutesPassed === 0) {
+            return;
         }
+
+        $this->logs[] = sprintf('<RestoredStamina>%d</RestoredStamina>', $minutesPassed);
+        $this->db->execute(
+            'UPDATE players SET stamina = LEAST(stamina + ?, ?) WHERE in_combat = 0 AND stamina < ?',
+            [$minutesPassed, Player::MAX_POSSIBLE_STAMINA, Player::MAX_POSSIBLE_STAMINA]
+        );
+        $this->db->execute("UPDATE timetable SET tid = NOW() WHERE name='stamina'");
     }
 
     private function stopExhaustedHunters(): void
@@ -94,10 +96,9 @@ class Engine
         foreach ($this->getHunters() as $row) {
             $playerName = $row['username'];
             $hunter = Player::loadPlayer($playerName, $this->db);
-
             $huntingZone = $dungeons[$row['dungeon_id']];
-            $timeSpentInDungeon = new TimeInterval(time() - strtotime($row['tid']));
 
+            $timeSpentInDungeon = TimeInterval::between(CarbonImmutable::create($row['tid']), $this->currentTime);
             $minutesPassed = $timeSpentInDungeon->toMinutes();
             if ($minutesPassed < 1.0) {
                 continue;
@@ -108,8 +109,8 @@ class Engine
             // If player spent in dungeon more time than stamina he has, decrease spent time according that amount
             if ($remainingStamina < $minutesPassed) {
                 $overhunt = true;
-                $timeSpentInDungeon = TimeInterval::fromMinutes($remainingStamina);
-                $minutesPassed = $timeSpentInDungeon->toMinutes();
+                $minutesPassed = $remainingStamina;
+                $timeSpentInDungeon = TimeInterval::fromMinutes($minutesPassed);
             }
             $minutesPassed = (int) $minutesPassed;
 
@@ -119,7 +120,7 @@ class Engine
                 if ($overhunt) {
                     $hunter->leaveDungeon();
                     $this->db->execute('UPDATE players SET stamina = 0  WHERE name = ?', [$playerName]);
-                    $rewardLogs[] = sprintf($logTemplate, $playerName, $huntingZone->name, $minutesPassed . ' minutes', 0, '', 'Exhausted');
+                    $rewardLogs[] = sprintf(trim($logTemplate), $playerName, $huntingZone->name, $minutesPassed . ' minutes', 0, '', 'Exhausted');
                 }
 
                 continue;
@@ -161,6 +162,11 @@ class Engine
      */
     private function getHunters(): iterable
     {
-        return $this->db->fetchRows('SELECT username, tid, dungeon_id FROM hunting WHERE tid < NOW() + INTERVAL 1 MINUTE');
+        $startedHuntingBefore = $this->currentTime->subMinute();
+
+        return $this->db->fetchRows(
+            'SELECT username, tid, dungeon_id FROM hunting WHERE tid < ?',
+            [DbTimeFactory::createTimestamp($startedHuntingBefore)]
+        );
     }
 }
