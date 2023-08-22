@@ -6,6 +6,8 @@ namespace Game;
 use Game\Dungeon\Dungeon;
 use Game\Dungeon\Monster;
 use Game\Engine\DBConnection;
+use Game\Item\ItemPrototypeRepository;
+use Game\Trade\Shop;
 
 readonly class Wiki
 {
@@ -21,6 +23,26 @@ readonly class Wiki
 
             yield new Dungeon((int)$dungeon['id'], $dungeon['name'], $dungeon['description'], $monster);
         }
+    }
+
+    /**
+     * @return iterable<Shop>
+     */
+    public function getShops(): iterable
+    {
+        $shops = $this->connection->fetchRows('SELECT * FROM shop');
+
+        foreach ($shops as $shop) {
+            yield new Shop($shop['id'], $shop['name'], $shop['description'], $this->connection, \DI::getService(ItemPrototypeRepository::class));
+        }
+    }
+
+    // TODO likely not the best place to keep this method
+    public function getShop(string $name): Shop
+    {
+        $shop = $this->connection->fetchRow('SELECT * FROM shop WHERE name=?', [$name]);
+
+        return new Shop($shop['id'], $shop['name'], $shop['description'], $this->connection, \DI::getService(ItemPrototypeRepository::class));
     }
 
     public function getMonsters(): iterable

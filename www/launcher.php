@@ -12,6 +12,9 @@ enum Tab: string
     case MAIN = 'main';
     case INVENTORY = 'inventory';
     case LIBRARY = 'library';
+    case SHOPS = 'shops';
+
+    case SHOP = 'shop';
 
     public function load(): void
     {
@@ -23,12 +26,6 @@ enum Tab: string
             exit();
         }
 
-        switch ($this) {
-            case self::LIBRARY:
-            case self::DUNGEON:
-                $wiki = DI::getService(Wiki::class);
-                break;
-        }
         require PROJECT_ROOT . '/tabs/' . $this->value . '.php';
     }
 }

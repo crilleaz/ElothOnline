@@ -4,7 +4,7 @@
  * @var \Game\Player\Player $player
  */
 ?>
-<div class="col card ">
+<div class="col card">
     <center><?=$dungeon->name?></center>
     <p class="card-text h-100"><?=$dungeon->description?></p>
     <x>Monster: <?=$dungeon->inhabitant->name?><br>

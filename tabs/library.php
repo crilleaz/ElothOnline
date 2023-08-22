@@ -2,8 +2,9 @@
 <?php
 /**
  * @var \Game\Player\Player $player
- * @var \Game\Wiki $wiki
  */
+
+$wiki = DI::getService(\Game\Wiki::class);
 ?>
    <body style="background-color: #eceef4">
       <div class="container" style="position:relative; margin-top:10px">

@@ -18,7 +18,13 @@
             Time left: 20:02
             </font>
         </li>
-        <a href="?tab=inventory" class="list-group-item list-group-item-action">Inventory</a>
+        <li class="list-group-item rounded">
+            <a href="?tab=inventory" class="list-group-item list-group-item-action">Inventory</a>
+        </li>
+
+        <li class="list-group-item rounded">
+        <a href="?tab=shops" class="list-group-item list-group-item-action">Shops</a>
+        </li>
         <li class="list-group-item rounded">Mining</li>
         <li class="list-group-item rounded">Gathering</li>
         <li class="list-group-item rounded">Harvesting</li>

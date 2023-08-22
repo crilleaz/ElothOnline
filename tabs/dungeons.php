@@ -3,8 +3,9 @@
 
 /**
  * @var \Game\Player\Player $player
- * @var \Game\Wiki $wiki
  */
+
+$wiki = DI::getService(\Game\Wiki::class);
 
 if (isset($_GET['hunt'])) {
     $selectedDungeon = (int)$_GET['hunt'];
