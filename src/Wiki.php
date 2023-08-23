@@ -38,9 +38,13 @@ readonly class Wiki
     }
 
     // TODO likely not the best place to keep this method
-    public function getShop(string $name): Shop
+    public function findShop(string $name): ?Shop
     {
         $shop = $this->connection->fetchRow('SELECT * FROM shop WHERE name=?', [$name]);
+
+        if ($shop === []) {
+            return null;
+        }
 
         return new Shop($shop['id'], $shop['name'], $shop['description'], $this->connection, \DI::getService(ItemPrototypeRepository::class));
     }

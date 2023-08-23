@@ -1,0 +1,38 @@
+{% extends "minimalistic.template.twig" %}
+
+{% block content %}
+    <div class="card-body flex-column">
+        <h5 class="card-titles">{{ shop.name }}</h5>
+        <div class="row">
+            <table id="myTable">
+                <tr class="header">
+                    <th style="width:20%;">Offer</th>
+                    <th style="width:20%;">Price</th>
+                    <th style="width:20%;">Action</th>
+                </tr>
+                {% for offer in shop.listStock %}
+                    <tr>
+                        <td>{{ offer.item.name }}</td>
+                        <td>{{ offer.inExchange.quantity }} {{ offer.inExchange.name }}</td>
+
+                        {% if offer.inExchange.id == 1 %}
+                            {% if playerGold >= offer.inExchange.quantity %}
+                                <td>
+                                    <button type="button" class="btn btn-primary">Buy</button>
+                                </td>
+                            {% else %}
+                                <td>
+                                    <button type="button" class="btn btn-danger" disabled>Buy</button>
+                                </td>
+                            {% endif %}
+                        {% else %}
+                            <td>
+                                <button type="button" class="btn btn-primary">Exchange</button>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+{% endblock %}

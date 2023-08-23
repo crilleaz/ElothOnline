@@ -67,7 +67,7 @@ readonly class Game
         $this->chat->addSystemMessage(sprintf('Registration: New member %s joined!', $playerName));
         $this->playerLog->add(
             $playerName,
-            "[System] Welcome $playerName! <br> This is your Combat log, right now its empty :( <br> Visit <a href='/?tab=dungeons'>Dungeons to start your adventure!</a>"
+            "[System] Welcome $playerName! <br> This is your Combat log, right now its empty :( <br> Visit <a href='/?scene=dungeons'>Dungeons to start your adventure!</a>"
         );
 
         return null;

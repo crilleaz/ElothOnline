@@ -1,0 +1,49 @@
+{% extends "minimalistic.template.twig" %}
+
+{% block content %}
+    <div class="card border border-success" style="width: 100%;">
+        <div class="card-body">
+            <h5 class="card-title">Combatlog</h5>
+            <p class="card-text">
+            <div class="mdb-lightbox">
+                <div id="combatlog">
+                    Loading combatlog..
+                </div>
+            </div>
+            </p>
+        </div>
+    </div>
+    <div class="card border" style="width: 100%;">
+        <div class="card-body">
+            <h5 class="card-title">Chat</h5>
+            <p class="card-text">
+            <div class="mdb-lightbox">
+                {% include 'component/chat.twig' %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block footer %}
+    <script>
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+
+        function refreshDiv() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById('combatlog').innerHTML = this.responseText;
+                }
+            };
+            xhttp.open('GET', 'log.php', true);
+            xhttp.send();
+        }
+
+        setInterval(refreshDiv, 3000);
+
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+    </script>
+{% endblock %}

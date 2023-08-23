@@ -1,0 +1,56 @@
+{% extends "minimalistic.template.twig" %}
+
+{% block content %}
+    <div class="card-body flex-column">
+        <h5 class="card-titles">Bestiary</h5>
+        <div class="container">
+            <div class="row">
+                <input type="text" id="myInput" onkeyup="searchMonster()" placeholder="Search monster..">
+                <table id="myTable">
+                    <tr class="header">
+                        <th style="width:10%;">Name</th>
+                        <th style="width:10%;">Health</th>
+                        <th style="width:10%;">Experience</th>
+                        <th style="width:10%;">Attack</th>
+                        <th style="width:10%;">Defence</th>
+                    </tr>
+                    {% for monster in monsters %}
+                        <tr>
+                            <td>{{ monster.name }}</td>
+                            <td>{{ monster.health }}</td>
+                            <td>{{ monster.exp }}</td>
+                            <td>{{ monster.attack }}</td>
+                            <td>{{ monster.defence }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <script>
+        function searchMonster() {
+            // Declare variables
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("myInput");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("myTable");
+            tr = table.getElementsByTagName("tr");
+
+            // Loop through all table rows, and hide those who don't match the search query
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[0];
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+    </script>
+{% endblock %}

@@ -6,3 +6,5 @@ installed.tmp
 log.txt
 .phpunit.cache
 .phpunit.result.cache
+var/**
+!var/.gitkeep
