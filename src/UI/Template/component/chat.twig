@@ -19,7 +19,7 @@
 
             const response = JSON.parse(this.responseText);
             if (!response.success) {
-                alert(response.data['error']);
+                alert(response.message);
                 return;
             }
 
@@ -48,7 +48,7 @@
 
             const response = JSON.parse(this.responseText);
             if (!response.success) {
-                alert(response.data['error']);
+                alert(response.message);
                 return;
             }
 
@@ -68,7 +68,7 @@
 
             const response = JSON.parse(this.responseText);
             if (!response.success) {
-                alert(response.data['error']);
+                alert(response.message);
                 return;
             }
 

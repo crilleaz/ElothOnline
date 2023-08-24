@@ -1,15 +1,11 @@
 <?php
 declare(strict_types=1);
 
-use Game\Chat\Chat;
+use Game\API\HttpApi;
+use Game\API\Response;
 use Game\Game;
 
 require_once __DIR__ . '/../bootstrap.php';
-
-function sendApiResponse(array $responseData, bool $success = true): void {
-    header('Content-Type: application/json');
-    echo json_encode(['success' => $success, 'data' => $responseData]);
-}
 
 session_start();
 
@@ -24,49 +20,20 @@ if (!is_string($action)) {
     throw new RuntimeException('Tried to perform invalid action');
 }
 
+$api = new HttpApi($player);
+
 switch ($action) {
     case 'addChatMessage':
-        $message = (string)$_POST['message'] ?? '';
-        if ($message === '') {
-            sendApiResponse(['error' => 'Message can not be empty'], false);
-            break;
-        }
-
-        DI::getService(Chat::class)->addMessage($player, $message);
-
-        sendApiResponse([]);
-
+        $response = $api->addChatMessage((string)$_POST['message'] ?? '');
+        Response::terminateWith($response);
         break;
     case 'getChatMessages':
-        $maxMessagesToShow = 10;
-        $messages = DI::getService(Chat::class)->getLastMessages($maxMessagesToShow);
-        $responseData = [];
-        foreach ($messages as $message) {
-            $responseData[] = [
-                'isFromAdmin' => $message->isFromAdmin,
-                'sender' => $message->sender,
-                'message' => $message->content,
-                'sentAt' => $message->sentAt->format(DATE_ATOM),
-            ];
-        }
-        sendApiResponse($responseData);
+        $response = $api->getLastChatMessages(10);
+        Response::terminateWith($response);
         break;
     case 'ban':
-        $userToBan = $_POST['username'] ?? '';
-        if ($userToBan === '') {
-            sendApiResponse(['error' => 'You need to pass the username to ban him'], false);
-            break;
-        }
-
-        if (!$player->isAdmin()) {
-            sendApiResponse(['error' => 'Sorry, you\'re not admin.'], false);
-            break;
-        }
-
-        DI::getService(Game::class)->banPlayer($userToBan);
-
-        sendApiResponse([]);
-
+        $response = $api->banPlayer((string) ($_POST['username'] ?? ''));
+        Response::terminateWith($response);
         break;
     default:
         throw new RuntimeException('Unknown action');
