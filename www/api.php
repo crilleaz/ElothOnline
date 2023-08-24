@@ -25,16 +25,20 @@ $api = new HttpApi($player);
 switch ($action) {
     case 'addChatMessage':
         $response = $api->addChatMessage((string)$_POST['message'] ?? '');
-        Response::terminateWith($response);
         break;
     case 'getChatMessages':
         $response = $api->getLastChatMessages(10);
-        Response::terminateWith($response);
         break;
     case 'ban':
         $response = $api->banPlayer((string) ($_POST['username'] ?? ''));
-        Response::terminateWith($response);
+        break;
+    case 'buyItem':
+        $fromShop = (string) ($_POST['shop'] ?? '');
+        $itemId = (int) ($_POST['itemId'] ?? 0);
+        $response = $api->buyItem($itemId, $fromShop);
         break;
     default:
         throw new RuntimeException('Unknown action');
 }
+
+Response::terminateWith($response);

@@ -33,4 +33,17 @@ readonly class Shop
             );
         }
     }
+
+    public function findOffer(int $itemId): ?Offer
+    {
+        $offer = $this->db->fetchRow('SELECT * FROM shop_stock WHERE shop_id=? AND item_id=?', [$this->id, $itemId]);
+        if ($offer === []) {
+            return null;
+        }
+
+        return new Offer(
+            new Item($this->itemPrototypeRepository->getById($offer['item_id']), 1),
+            new Item($this->itemPrototypeRepository->getById($offer['price_id']), $offer['price_quantity']),
+        );
+    }
 }

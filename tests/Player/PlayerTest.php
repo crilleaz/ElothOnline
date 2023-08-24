@@ -114,9 +114,9 @@ class PlayerTest extends IntegrationTestCase
         $gold = $this->getService(ItemPrototypeRepository::class)->getById(1);
         $cheese = $this->getService(ItemPrototypeRepository::class)->getById(2);
 
-        $this->player->obtain($gold, 123);
-        $this->player->obtain($cheese, 3);
-        $this->player->obtain($gold, 15);
+        $this->player->obtainItem($gold, 123);
+        $this->player->obtainItem($cheese, 3);
+        $this->player->obtainItem($gold, 15);
 
         self::assertEquals(123 + 15, $this->player->getGold());
 

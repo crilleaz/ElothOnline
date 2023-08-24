@@ -4,8 +4,10 @@ declare(strict_types=1);
 namespace Game\API;
 
 use Game\Chat\Chat;
+use Game\Engine\Error;
 use Game\Game;
 use Game\Player\Player;
+use Game\Wiki;
 use Psr\Http\Message\ResponseInterface;
 
 class HttpApi
@@ -59,6 +61,30 @@ class HttpApi
         }
 
         \DI::getService(Game::class)->banPlayer($username);
+
+        return $this->success();
+    }
+
+    public function buyItem(int $itemId, string $fromShop): ResponseInterface
+    {
+        if ($itemId <= 0) {
+            return $this->failure('Invalid item id');
+        }
+
+        $shop = \DI::getService(Wiki::class)->findShop($fromShop);
+        if ($shop === null) {
+            return $this->failure('Shop not found');
+        }
+
+        $offer = $shop->findOffer($itemId);
+        if ($offer === null) {
+            return $this->failure('Shop does not have such item');
+        }
+
+        $result = $this->player->acceptOffer($offer);
+        if ($result instanceof Error) {
+            return $this->failure($result->message);
+        }
 
         return $this->success();
     }

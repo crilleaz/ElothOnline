@@ -12,7 +12,7 @@ readonly class Item
     public int $worth;
     public bool $isSellable;
 
-    public function __construct(ItemPrototype $prototype, int $quantity)
+    public function __construct(public ItemPrototype $prototype, int $quantity)
     {
         $this->id =  $prototype->id;
         $this->name = $prototype->name;

@@ -18,7 +18,7 @@
                         {% if offer.inExchange.id == 1 %}
                             {% if playerGold >= offer.inExchange.quantity %}
                                 <td>
-                                    <button type="button" class="btn btn-primary">Buy</button>
+                                    <button type="button" class="btn btn-primary" onclick="buyItem({{ offer.item.id }}, '{{ shop.name }}')">Buy</button>
                                 </td>
                             {% else %}
                                 <td>
@@ -27,7 +27,7 @@
                             {% endif %}
                         {% else %}
                             <td>
-                                <button type="button" class="btn btn-primary">Exchange</button>
+                                <button type="button" class="btn btn-primary" onclick="buyItem({{ offer.item.id }}, '{{ shop.name }}')">Exchange</button>
                             </td>
                         {% endif %}
                     </tr>
@@ -35,4 +35,28 @@
             </table>
         </div>
     </div>
+{% endblock %}
+
+{% block footer %}
+    <script>
+        function buyItem(itemId, shopName) {
+            const xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.status !== 200 || this.readyState !== 4) {
+                    return;
+                }
+
+                const response = JSON.parse(this.responseText);
+                if (!response.success) {
+                    new PopupMessage(response.message, 'error', 'top right', 3);
+                    return;
+                }
+
+                new PopupMessage('You have successfully purchased an item', 'success', 'top right', 2);
+            };
+            xhttp.open('POST', '/api.php?action=buyItem', true);
+            xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            xhttp.send('itemId=' + itemId + '&shop=' + shopName);
+        }
+    </script>
 {% endblock %}

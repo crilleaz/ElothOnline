@@ -12,6 +12,7 @@ use Game\Engine\DbTimeFactory;
 use Game\Engine\Error;
 use Game\Item\Item;
 use Game\Item\ItemPrototype as ItemPrototype;
+use Game\Trade\Offer;
 
 class Player
 {
@@ -261,22 +262,38 @@ class Player
 
     public function pickUp(Drop $drop): void
     {
-        $this->obtain($drop->item, $drop->quantity);
+        $this->obtainItem($drop->item, $drop->quantity);
         $this->logger->add($this->name, sprintf("You picked up %d %s", $drop->quantity, $drop->item->name));
     }
 
-    public function obtain(ItemPrototype $item, int $quantity): void
+    public function obtainItem(ItemPrototype $item, int $quantity): void
     {
-        $entry = $this->connection
-            ->fetchRow('SELECT amount FROM inventory WHERE item_id = ? AND username = ?', [$item->id, $this->name]);
-
-        if ($entry === []) {
+        if ($this->getItemQuantity($item->id) === 0) {
             $this->connection
                 ->execute('INSERT INTO inventory (username, item_id, amount, worth) VALUES (?, ?, ?, ?)', [$this->name, $item->id, $quantity, $item->worth]);
         } else {
             $this->connection
                 ->execute('UPDATE inventory SET amount = amount + ? WHERE item_id = ? AND username = ?', [$quantity, $item->id, $this->name]);
         }
+    }
+
+    public function dropItem(ItemPrototype $item, int $quantity): Drop
+    {
+        $this->connection->transaction(function () use ($item, $quantity) {
+            $this->connection->execute('UPDATE inventory SET amount = amount - ? WHERE item_id = ? AND username = ?', [$quantity, $item->id, $this->name]);
+
+            $remainingItemsQuantity = $this->getItemQuantity($item->id);
+
+            if ($remainingItemsQuantity < 0) {
+                throw new \RuntimeException('Player does not have that many items');
+            }
+
+            if ($remainingItemsQuantity === 0) {
+                $this->connection->execute('DELETE FROM inventory WHERE item_id = ? AND username = ?', [$quantity, $this->name]);
+            }
+        });
+
+        return new Drop($item, $quantity);
     }
 
     /**
@@ -291,6 +308,29 @@ class Player
                 $entry['amount']
             );
         }
+    }
+
+    public function canAfford(Offer $offer): bool
+    {
+        $requiredQuantity = $offer->inExchange->quantity;
+        $existingQuantity = $this->getItemQuantity($offer->inExchange->id);
+
+        return $existingQuantity >= $requiredQuantity;
+    }
+
+    public function acceptOffer(Offer $offer): ?Error
+    {
+        if (!$this->canAfford($offer)) {
+            return new Error('Player does not have enough items to fulfil the offer');
+        }
+
+        $this->connection->transaction(function () use ($offer) {
+            // TODO drop returns actually dropped item which means that it can be used for actual trade player<=>seller
+            $this->dropItem($offer->inExchange->prototype, $offer->inExchange->quantity);
+            $this->obtainItem($offer->item->prototype, $offer->item->quantity);
+        });
+
+        return null;
     }
 
     private function getProperty(string $property): string|int|float|null

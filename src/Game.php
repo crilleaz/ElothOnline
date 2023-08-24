@@ -62,7 +62,7 @@ readonly class Game
         $gold = $this->itemPrototypeRepository->getById(1);
 
         $player = Player::loadPlayer($playerName, $this->db);
-        $player->obtain($gold, 10);
+        $player->obtainItem($gold, 10);
 
         $this->chat->addSystemMessage(sprintf('Registration: New member %s joined!', $playerName));
         $this->playerLog->add(
