@@ -3,9 +3,8 @@ declare(strict_types=1);
 
 namespace Game\Item;
 
-use Game\Engine\DBConnection;
 use Game\Skill\Effect;
-use Game\Skill\Effect\EffectType;
+use Game\Skill\EffectRepository;
 
 readonly class Item
 {
@@ -30,24 +29,11 @@ readonly class Item
     }
 
     /**
-     * @return Effect[]
+     * @return iterable<Effect>
      */
-    public function listEffects(): array
+    public function listEffects(): iterable
     {
-        $entries = \DI::getService(DBConnection::class)->fetchRows('SELECT * FROM item_effect WHERE item_id=' . $this->id);
-
-        if ($entries === []) {
-            return [];
-        }
-
-        $effects = [];
-        foreach ($entries as $entry) {
-            // todo item effects should be immutable data source
-            // todo move every immutable data source into files/memory. Don't use db for that
-            $effects[] = new Effect($entry['name'], EffectType::from($entry['type']), $entry['power']);
-        }
-
-        return $effects;
+        return \DI::getService(EffectRepository::class)->findByItem($this->id);
     }
 
     public function isConsumable(): bool
