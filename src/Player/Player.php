@@ -5,7 +5,6 @@ namespace Game\Player;
 
 use Game\Dungeon\Drop;
 use Game\Dungeon\Dungeon;
-use Game\Dungeon\Monster;
 use Game\Dungeon\TTKCalculator;
 use Game\Engine\DBConnection;
 use Game\Engine\DbTimeFactory;
@@ -53,53 +52,31 @@ class Player
 
     public function isInDungeon(Dungeon $dungeon): bool
     {
-        $huntingDungeon = $this->getHuntingDungeon();
-        if ($huntingDungeon === null) {
-            return false;
-        }
-
-        return $huntingDungeon->id === $dungeon->id;
+        return $this->getHuntingDungeonId() === $dungeon->id;
     }
 
-    public function getHuntingDungeon(): ?Dungeon
+    public function getHuntingDungeonId(): ?int
     {
-        $dungeon = $this->connection->fetchRow('
-                        SELECT h.dungeon_id as id, d.name, d.description, m.name as monsterName, m.monster_id as monsterId, m.health, m.attack, m.defence, m.experience
-                                 FROM hunting h
-                                    INNER JOIN dungeons d ON d.id=h.dungeon_id
-                                    INNER JOIN monster m ON d.monster_id = m.monster_id
-                                 WHERE h.username = ?
-        ',[$this->name]);
-
-        if ($dungeon === []) {
+        $hunt = $this->connection->fetchRow('SELECT dungeon_id FROM hunting WHERE username = ?',[$this->name]);
+        if ($hunt === []) {
             return null;
         }
 
-        return new Dungeon(
-            $dungeon['id'],
-            $dungeon['name'],
-            $dungeon['description'],
-            new Monster($dungeon['monsterId'], $dungeon['monsterName'], $dungeon['health'], $dungeon['experience'], $dungeon['attack'], $dungeon['defence'])
-        );
+        return $hunt['dungeon_id'];
     }
 
-    public function enterDungeon(int $id): null|Error
+    public function enterDungeon(Dungeon $dungeon): null|Error
     {
-        $currentDungeon = $this->getHuntingDungeon();
-        if ($currentDungeon !== null) {
-            if ($currentDungeon->id === $id) {
+        $currentDungeonId = $this->getHuntingDungeonId();
+        if ($currentDungeonId !== null) {
+            if ($currentDungeonId === $dungeon->id) {
                 return null;
             }
 
-            return new Error('You are already hunting at ' . $currentDungeon->name);
+            return new Error('You are already hunting in a dungeon');
         }
 
-        $dungeon = Dungeon::loadById($id, $this->connection);
-        if ($dungeon === null) {
-            return new Error(sprintf('Dungeon with id "%d" does not exist', $id));
-        }
-
-        $this->connection->execute('INSERT INTO hunting (username, dungeon_id, tid) VALUES (?, ?, ?)', [$this->name, $id, DbTimeFactory::createCurrentTimestamp()]);
+        $this->connection->execute('INSERT INTO hunting (username, dungeon_id, tid) VALUES (?, ?, ?)', [$this->name, $dungeon->id, DbTimeFactory::createCurrentTimestamp()]);
         $this->connection->execute('UPDATE players SET in_combat = 1 WHERE name = ?', [$this->name]);
 
         return null;
@@ -346,34 +323,21 @@ class Player
      */
     public function getInventory(): iterable
     {
-        $entries = $this->connection->fetchRows('SELECT inv.*, ip.name FROM inventory inv INNER JOIN items ip ON ip.item_id = inv.item_id WHERE username = ?', [$this->name]);
+        $entries = $this->connection->fetchRows('SELECT item_id, amount FROM inventory WHERE username = ?', [$this->name]);
         foreach ($entries as $entry) {
-            yield new Item(
-                new ItemPrototype($entry['item_id'], $entry['name'], (int) $entry['worth']),
-                $entry['amount']
-            );
+            yield new Item($entry['item_id'], $entry['amount']);
         }
     }
 
     public function findInInventory(int $itemId): ?Item
     {
-        $item = $this->connection->fetchRow(
-            'SELECT inv.*, ip.name
-                    FROM inventory inv
-                    INNER JOIN items ip ON ip.item_id = inv.item_id
-                    WHERE username = ? AND inv.item_id=?
-            ',
-            [$this->name, $itemId]
-        );
+        $item = $this->connection->fetchRow('SELECT item_id, amount FROM inventory WHERE username = ? AND item_id=?', [$this->name, $itemId]);
 
         if ($item === []) {
             return null;
         }
 
-        return new Item(
-            new ItemPrototype($item['item_id'], $item['name'], (int) $item['worth']),
-            $item['amount']
-        );
+        return new Item($item['item_id'], $item['amount']);
     }
 
     public function canAfford(Offer $offer): bool

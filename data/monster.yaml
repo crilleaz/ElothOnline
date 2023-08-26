@@ -1,0 +1,28 @@
+-
+    id: 1
+    name: Rat
+    health: 20
+    experience: 5
+    attack: 5
+    defence: 1
+-
+    id: 2
+    name: Rotworm
+    health: 40
+    experience: 25
+    attack: 8
+    defence: 2
+-
+    id: 3
+    name: Dragon
+    health: 1000
+    experience: 700
+    attack: 30
+    defence: 20
+-
+    id: 4
+    name: 'Dragon Hatchling'
+    health: 450
+    experience: 200
+    attack: 15
+    defence: 10

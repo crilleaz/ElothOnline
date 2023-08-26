@@ -7,7 +7,7 @@ use Game\Chat\Chat;
 use Game\Engine\Error;
 use Game\Game;
 use Game\Player\Player;
-use Game\Wiki;
+use Game\Trade\ShopRepository;
 use Psr\Http\Message\ResponseInterface;
 
 class HttpApi
@@ -71,7 +71,7 @@ class HttpApi
             return $this->failure('Invalid item id');
         }
 
-        $shop = \DI::getService(Wiki::class)->findShop($fromShop);
+        $shop = \DI::getService(ShopRepository::class)->findShopByName($fromShop);
         if ($shop === null) {
             return $this->failure('Shop not found');
         }

@@ -3,25 +3,35 @@ declare(strict_types=1);
 
 namespace Game\Item;
 
-use Game\Engine\DBConnection;
+use Game\Utils\AbstractDataAccessor;
 
-final class ItemPrototypeRepository
+final class ItemPrototypeRepository extends AbstractDataAccessor
 {
-    private static array $cache = [];
-
-    public function __construct(private readonly DBConnection $db) {}
+    private array $cache = [];
 
     public function getById(int $id): ItemPrototype
     {
-        if (!isset(self::$cache[$id])) {
-            $prototype = $this->db->fetchRow('SELECT * FROM items WHERE item_id=' . $id);
+        if (!isset($this->cache[$id])) {
+            $prototype = [];
+            foreach ($this->getData() as $itemData) {
+                if ($itemData['id'] === $id) {
+                    $prototype = $itemData;
+                    break;
+                }
+            }
+
             if ($prototype === []) {
                 throw new \RuntimeException('Unknown item');
             }
 
-            self::$cache[$id] = new ItemPrototype($id, $prototype['name'], (int) $prototype['worth']);
+            $this->cache[$id] = new ItemPrototype($id, $prototype['name'], (int) $prototype['worth']);
         }
 
-        return self::$cache[$id];
+        return $this->cache[$id];
+    }
+
+    protected function getDataName(): string
+    {
+        return 'item';
     }
 }

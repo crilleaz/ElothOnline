@@ -7,10 +7,6 @@ class MainMenu extends AbstractScene
 {
     public function run(): string
     {
-        $player = $this->game->getCurrentPlayer();
-
-        return $this->renderTemplate('main-menu', [
-            'player' => $player,
-        ]);
+        return $this->renderTemplate('main-menu');
     }
 }

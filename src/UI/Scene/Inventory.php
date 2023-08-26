@@ -7,10 +7,6 @@ class Inventory extends AbstractScene
 {
     public function run(): string
     {
-        $player = $this->game->getCurrentPlayer();
-
-        return $this->renderTemplate('inventory', [
-            'player' => $player,
-        ]);
+        return $this->renderTemplate('inventory');
     }
 }

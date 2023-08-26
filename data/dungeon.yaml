@@ -1,0 +1,20 @@
+-
+    id: 1
+    name: 'Rat Cave'
+    monster_id: 1
+    description: 'A rather small rat cave with healthy amount of rats.'
+-
+    id: 2
+    name: 'Rotworm Cave'
+    monster_id: 2
+    description: asd
+-
+    id: 3
+    name: 'Dragon Lair'
+    monster_id: 3
+    description: asd
+-
+    id: 4
+    name: 'Hatchling Cave'
+    monster_id: 4
+    description: asd

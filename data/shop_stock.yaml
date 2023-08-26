@@ -1,0 +1,15 @@
+-
+    shop_id: 1
+    item_id: 2
+    price_id: 1
+    price_quantity: 3
+-
+    shop_id: 1
+    item_id: 5
+    price_id: 1
+    price_quantity: 7
+-
+    shop_id: 2
+    item_id: 3
+    price_id: 1
+    price_quantity: 54

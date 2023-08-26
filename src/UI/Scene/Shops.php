@@ -3,15 +3,16 @@ declare(strict_types=1);
 
 namespace Game\UI\Scene;
 
+use Game\Dungeon\DungeonRepository;
 use Game\Game;
-use Game\Wiki;
+use Game\Trade\ShopRepository;
 use Twig\Environment;
 
 class Shops extends AbstractScene
 {
-    public function __construct(Game $game, Environment $renderer, private readonly Wiki $wiki)
+    public function __construct(Game $game, Environment $renderer, DungeonRepository $dungeonRepository, private readonly ShopRepository $shopRepository)
     {
-        parent::__construct($game, $renderer);
+        parent::__construct($game, $renderer, $dungeonRepository);
     }
 
     public function run(): string
@@ -20,7 +21,7 @@ class Shops extends AbstractScene
 
         return $this->renderTemplate('shops', [
             'player' => $player,
-            'shops' => $this->wiki->getShops(),
+            'shops' => $this->shopRepository->listShops(),
         ]);
     }
 }

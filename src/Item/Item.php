@@ -16,8 +16,12 @@ readonly class Item
     public int $worth;
     public bool $isSellable;
 
-    public function __construct(public ItemPrototype $prototype, int $quantity)
+    public ItemPrototype $prototype;
+
+    public function __construct(int $itemId, int $quantity)
     {
+        $prototype = \DI::getService(ItemPrototypeRepository::class)->getById($itemId);
+        $this->prototype = $prototype;
         $this->id =  $prototype->id;
         $this->name = $prototype->name;
         $this->quantity = $quantity;

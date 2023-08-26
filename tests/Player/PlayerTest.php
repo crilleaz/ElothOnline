@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Game\Player;
 
 use Game\Dungeon\Drop;
-use Game\Dungeon\Dungeon;
+use Game\Dungeon\DungeonRepository;
 use Game\IntegrationTestCase;
 use Game\Item\Item;
 use Game\Item\ItemPrototypeRepository;
@@ -14,6 +14,8 @@ class PlayerTest extends IntegrationTestCase
 {
     private Player $player;
 
+    private DungeonRepository $dungeonRepository;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -21,6 +23,8 @@ class PlayerTest extends IntegrationTestCase
         $this->db->execute("INSERT INTO players(name, experience, health, health_max, defence, strength)
                             VALUES ('Mick', '0', 120, 120, 5, 100)");
         $this->player = Player::loadPlayer('Mick', $this->db);
+
+        $this->dungeonRepository = $this->getService(DungeonRepository::class);
     }
 
     public function testExpGain(): void
@@ -36,15 +40,15 @@ class PlayerTest extends IntegrationTestCase
 
     public function testStates(): void
     {
-        $dungeon = Dungeon::loadById(1, $this->db);
-        $dungeon2 = Dungeon::loadById(2, $this->db);
+        $dungeon = $this->dungeonRepository->findById(1);
+        $dungeon2 = $this->dungeonRepository->findById(2);
 
         self::assertFalse($this->player->isFighting());
         self::assertTrue($this->player->isInProtectiveZone());
         self::assertFalse($this->player->isInDungeon($dungeon));
         self::assertFalse($this->player->isInDungeon($dungeon2));
 
-        $result = $this->player->enterDungeon($dungeon->id);
+        $result = $this->player->enterDungeon($dungeon);
         self::assertNoErrorOccurred($result);
 
         self::assertTrue($this->player->isFighting());
@@ -60,26 +64,24 @@ class PlayerTest extends IntegrationTestCase
 
     public function testEnterDungeonWhileAlreadyInOne(): void
     {
-        $dungeon = Dungeon::loadById(1, $this->db);
-        $dungeon2 = Dungeon::loadById(2, $this->db);
+        $dungeon = $this->dungeonRepository->findById(1);
+        $dungeon2 = $this->dungeonRepository->findById(2);
 
-        $firstEnter = $this->player->enterDungeon($dungeon->id);
+        $firstEnter = $this->player->enterDungeon($dungeon);
         self::assertNoErrorOccurred($firstEnter);
 
         $this->setCurrentTime($this->currentTime->addMinutes(2));
 
-        $enterSameDungeon = $this->player->enterDungeon($dungeon->id);
-        self::assertNoErrorOccurred($enterSameDungeon);
         // TODO check that attempt to enter the same dungeon twice doesn't modify anything
 
-        $secondEnter = $this->player->enterDungeon($dungeon2->id);
-        self::assertErrorOccurred($secondEnter, 'You are already hunting at ' . $dungeon->name);
+        $secondEnter = $this->player->enterDungeon($dungeon2);
+        self::assertErrorOccurred($secondEnter, 'You are already hunting in a dungeon');
     }
 
     #[DataProvider('dungeonDifficultyProvider')]
     public function testMeasureDifficulty(int $dungeonId, string $expectedDifficulty): void
     {
-        $dungeon = Dungeon::loadById($dungeonId, $this->db);
+        $dungeon = $this->dungeonRepository->findById($dungeonId);
 
         $difficulty = $this->player->measureDifficulty($dungeon);
 

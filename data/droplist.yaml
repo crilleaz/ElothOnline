@@ -1,0 +1,36 @@
+-
+    monster_id: 1
+    item_id: 2
+    quantity_min: 1
+    quantity_max: 1
+    chance: 15
+-
+    monster_id: 1
+    item_id: 1
+    quantity_min: 1
+    quantity_max: 7
+    chance: 100
+-
+    monster_id: 2
+    item_id: 1
+    quantity_min: 5
+    quantity_max: 5
+    chance: 100
+-
+    monster_id: 3
+    item_id: 1
+    quantity_min: 40
+    quantity_max: 50
+    chance: 100
+-
+    monster_id: 4
+    item_id: 3
+    quantity_min: 1
+    quantity_max: 1
+    chance: 100
+-
+    monster_id: 4
+    item_id: 1
+    quantity_min: 50
+    quantity_max: 100
+    chance: 100

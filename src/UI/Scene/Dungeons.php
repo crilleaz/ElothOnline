@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace Game\UI\Scene;
 
+use Game\Dungeon\DungeonRepository;
 use Game\Engine\Error;
 use Game\Game;
-use Game\Wiki;
 use Twig\Environment;
 
 class Dungeons extends AbstractScene
@@ -13,20 +13,20 @@ class Dungeons extends AbstractScene
     private string $infoMsg = '';
     private string $errorMsg = '';
 
-    public function __construct(Game $game, Environment $renderer, private readonly Wiki $wiki)
-    {
-        parent::__construct($game, $renderer);
+    public function __construct(
+        Game $game,
+        Environment $renderer,
+        private readonly DungeonRepository $dungeonRepository
+    ) {
+        parent::__construct($game, $renderer, $dungeonRepository);
     }
 
     public function run(): string
     {
         $this->handleInteraction();
 
-        $player = $this->game->getCurrentPlayer();
-
         return $this->renderTemplate('dungeons', [
-            'player' => $player,
-            'dungeons' => $this->wiki->getDungeons(),
+            'dungeons' => $this->dungeonRepository->listDungeons(),
             'errorMsg' => $this->errorMsg,
             'infoMsg' => $this->infoMsg,
         ]);
@@ -36,8 +36,9 @@ class Dungeons extends AbstractScene
     {
         if (isset($_GET['hunt'])) {
             $selectedDungeon = (int)$_GET['hunt'];
+            $dungeon = $this->dungeonRepository->findById($selectedDungeon);
 
-            $result = $this->game->getCurrentPlayer()->enterDungeon($selectedDungeon);
+            $result = $this->getCurrentPlayer()->enterDungeon($dungeon);
             if ($result instanceof Error) {
                 $this->errorMsg = $result->message;
             } else {
@@ -48,7 +49,7 @@ class Dungeons extends AbstractScene
         }
 
         if (isset($_GET['leave'])) {
-            $this->game->getCurrentPlayer()->leaveDungeon();
+            $this->getCurrentPlayer()->leaveDungeon();
             $this->infoMsg = 'You left the dungeon';
         }
     }

@@ -7,7 +7,7 @@ class Highscore extends AbstractScene
 {
     public function run(): string
     {
-        $player = $this->game->getCurrentPlayer();
+        $player = $this->getCurrentPlayer();
         $topPlayers = $this->game->listTopPlayers(100);
 
         return $this->renderTemplate('highscores', [
