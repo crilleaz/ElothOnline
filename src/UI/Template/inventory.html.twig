@@ -24,7 +24,7 @@
                     {% if item.isSellable %}
                         <td>
                             <button type="button" class="btn btn-success">Sell</button>
-                            <button type="button" class="btn btn-success">Use</button>
+                            <button type="button" class="btn btn-success" onclick="useItem({{ item.id }})">Use</button>
                         </td>
                     {% endif %}
                     </tr>
@@ -57,6 +57,26 @@
                     }
                 }
             }
+        }
+
+        function useItem(itemId) {
+            const xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.status !== 200 || this.readyState !== 4) {
+                    return;
+                }
+
+                const response = JSON.parse(this.responseText);
+                if (!response.success) {
+                    new PopupMessage(response.message, 'error', 'top right', 3);
+                    return;
+                }
+
+                location.reload();
+            };
+            xhttp.open('POST', '/api.php?action=useItem', true);
+            xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            xhttp.send('itemId=' + itemId);
         }
     </script>
 {% endblock %}

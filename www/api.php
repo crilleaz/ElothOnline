@@ -37,8 +37,12 @@ switch ($action) {
         $itemId = (int) ($_POST['itemId'] ?? 0);
         $response = $api->buyItem($itemId, $fromShop);
         break;
+    case 'useItem':
+        $itemId = (int) ($_POST['itemId'] ?? 0);
+        $response = $api->useItem($itemId);
+        break;
     default:
-        throw new RuntimeException('Unknown action');
+        $response = Response::json(['message' => 'Unknown API action', 'success' => false]);
 }
 
 Response::terminateWith($response);

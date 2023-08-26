@@ -12,6 +12,7 @@ use Game\Engine\DbTimeFactory;
 use Game\Engine\Error;
 use Game\Item\Item;
 use Game\Item\ItemPrototype as ItemPrototype;
+use Game\Skill\Effect\EffectApplier;
 use Game\Trade\Offer;
 
 class Player
@@ -197,6 +198,11 @@ class Player
         return (int) $this->getProperty('stamina');
     }
 
+    public function restoreStamina(int $amount): void
+    {
+        $this->connection->execute('UPDATE players SET stamina = LEAST(stamina + ?, ?)', [$amount, self::MAX_POSSIBLE_STAMINA]);
+    }
+
     public function getMaxHealth(): int
     {
         return (int) $this->getProperty('health_max');
@@ -283,17 +289,56 @@ class Player
             $this->connection->execute('UPDATE inventory SET amount = amount - ? WHERE item_id = ? AND username = ?', [$quantity, $item->id, $this->name]);
 
             $remainingItemsQuantity = $this->getItemQuantity($item->id);
-
             if ($remainingItemsQuantity < 0) {
                 throw new \RuntimeException('Player does not have that many items');
             }
 
             if ($remainingItemsQuantity === 0) {
-                $this->connection->execute('DELETE FROM inventory WHERE item_id = ? AND username = ?', [$quantity, $this->name]);
+                $this->destroyItem($item);
             }
         });
 
         return new Drop($item, $quantity);
+    }
+
+    public function destroyItem(ItemPrototype $item, int $quantity = null): void
+    {
+        if ($quantity === null) {
+            $this->connection->execute('DELETE FROM inventory WHERE item_id = ? AND username = ?', [$item->id, $this->name]);
+
+            return;
+        }
+
+        if ($quantity < 1) {
+            throw new \DomainException('Can not destroy 0 or less items');
+        }
+
+        $this->connection->execute('UPDATE inventory SET amount=GREATEST(amount-?, 0) WHERE item_id = ? AND username = ?', [$quantity, $item->id, $this->name]);
+
+        $this->removeNonExistentItems();
+    }
+
+    public function useItem(int $itemId): ?Error
+    {
+        $item = $this->findInInventory($itemId);
+        if ($item === null) {
+            return new Error('Player does not have such item');
+        }
+
+        $this->connection->transaction(function () use ($item) {
+            foreach ($item->listEffects() as $effect) {
+                $error = EffectApplier::apply($effect, $this);
+                if ($error !== null) {
+                    throw new \RuntimeException($error->message);
+                }
+            }
+
+            if ($item->isConsumable()) {
+                $this->destroyItem($item->prototype, 1);
+            }
+        });
+
+        return null;
     }
 
     /**
@@ -308,6 +353,27 @@ class Player
                 $entry['amount']
             );
         }
+    }
+
+    public function findInInventory(int $itemId): ?Item
+    {
+        $item = $this->connection->fetchRow(
+            'SELECT inv.*, ip.name
+                    FROM inventory inv
+                    INNER JOIN items ip ON ip.item_id = inv.item_id
+                    WHERE username = ? AND inv.item_id=?
+            ',
+            [$this->name, $itemId]
+        );
+
+        if ($item === []) {
+            return null;
+        }
+
+        return new Item(
+            new ItemPrototype($item['item_id'], $item['name'], (int) $item['worth']),
+            $item['amount']
+        );
     }
 
     public function canAfford(Offer $offer): bool
@@ -351,5 +417,10 @@ class Player
         }
 
         return (int) $result['amount'];
+    }
+
+    private function removeNonExistentItems(): void
+    {
+        $this->connection->execute('DELETE FROM inventory WHERE username=? AND amount=0', [$this->name]);
     }
 }

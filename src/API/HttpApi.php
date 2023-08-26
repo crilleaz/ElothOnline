@@ -89,6 +89,16 @@ class HttpApi
         return $this->success();
     }
 
+    public function useItem(int $itemId): ResponseInterface
+    {
+        $error = $this->player->useItem($itemId);
+        if ($error !== null) {
+            return $this->failure($error->message);
+        }
+
+        return $this->success();
+    }
+
     private function success(array $data = []): ResponseInterface
     {
         return Response::json([
