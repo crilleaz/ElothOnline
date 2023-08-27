@@ -23,7 +23,7 @@
                     <td>{{ item.quantity }}</td>
                     <td>
                     {% if item.isSellable %}
-                        <button type="button" class="btn btn-success">Sell</button>
+                        <button type="button" class="btn btn-success" onclick="sellItem({{ item.id }})">Sell</button>
                     {% endif %}
                     {% if item.isConsumable %}
                         <button type="button" class="btn btn-success" onclick="useItem({{ item.id }})">Use</button>
@@ -63,6 +63,16 @@
 
         async function useItem(itemId) {
             const result = await performAction('useItem', {itemId: itemId});
+            if (!result.success) {
+                new PopupMessage(result.message, 'error');
+                return;
+            }
+
+            location.reload();
+        }
+
+        async function sellItem(itemId) {
+            const result = await performAction('sellItem', {itemId: itemId});
             if (!result.success) {
                 new PopupMessage(result.message, 'error');
                 return;

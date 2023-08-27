@@ -6,7 +6,10 @@ namespace Game\API;
 use Game\Chat\Chat;
 use Game\Engine\Error;
 use Game\Game;
+use Game\Item\Item;
+use Game\Item\ItemPrototypeRepository;
 use Game\Player\Player;
+use Game\Trade\Offer;
 use Game\Trade\ShopRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -41,6 +44,8 @@ class HttpApi
                 return $this->buyItem($request);
             case 'useItem':
                 return $this->useItem($request);
+            case 'sellItem':
+                return $this->sellItem($request);
             default:
                 return $this->failure('Unknown API action');
         }
@@ -108,6 +113,28 @@ class HttpApi
         $result = $this->player->acceptOffer($offer);
         if ($result instanceof Error) {
             return $this->failure($result->message);
+        }
+
+        return $this->success();
+    }
+
+    private function sellItem(Request $request): Response
+    {
+        $itemId = $request->request->getInt('itemId');
+        $quantity = 1;
+
+        $sellingItem = new Item($itemId, $quantity);
+
+        $goldId = 1;
+
+        $trade = new Offer(
+            new Item($goldId, $sellingItem->worth * $quantity),
+            $sellingItem
+        );
+
+        $error = $this->player->acceptOffer($trade);
+        if ($error !== null) {
+            return $this->failure($error->message);
         }
 
         return $this->success();
