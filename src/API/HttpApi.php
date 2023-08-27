@@ -8,16 +8,48 @@ use Game\Engine\Error;
 use Game\Game;
 use Game\Player\Player;
 use Game\Trade\ShopRepository;
-use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class HttpApi
 {
-    public function __construct(private readonly Player $player)
+    private Player $player;
+
+    public function __construct(private readonly Game $game)
     {
 
     }
 
-    public function addChatMessage(string $message): ResponseInterface
+    public function handle(Request $request): Response
+    {
+        $currentPlayer = $this->game->getCurrentPlayer();
+        if ($currentPlayer === null) {
+            return $this->failure('Player is not authenticated. Please, sign in first.');
+        }
+        $this->player = $currentPlayer;
+
+        $action = $request->query->getString('action');
+        switch ($action) {
+            case 'addChatMessage':
+                return $this->addChatMessage((string)$_POST['message'] ?? '');
+            case 'getChatMessages':
+                return $this->getLastChatMessages(10);
+            case 'ban':
+                return $this->banPlayer((string) ($_POST['username'] ?? ''));
+            case 'buyItem':
+                $fromShop = (string) ($_POST['shop'] ?? '');
+                $itemId = (int) ($_POST['itemId'] ?? 0);
+                return $this->buyItem($itemId, $fromShop);
+            case 'useItem':
+                $itemId = (int) ($_POST['itemId'] ?? 0);
+                return $this->useItem($itemId);
+            default:
+                return new JsonResponse(['message' => 'Unknown API action', 'success' => false]);
+        }
+    }
+
+    private function addChatMessage(string $message): Response
     {
         $message = trim($message);
         if ($message === '') {
@@ -29,7 +61,7 @@ class HttpApi
         return $this->success();
     }
 
-    public function getLastChatMessages(int $amountOfMessages): ResponseInterface
+    private function getLastChatMessages(int $amountOfMessages): Response
     {
         if ($amountOfMessages <= 0) {
             return $this->failure('Can not fetch zero or negative amount of messages');
@@ -49,7 +81,7 @@ class HttpApi
         return $this->success($messagesData);
     }
 
-    public function banPlayer(string $username): ResponseInterface
+    private function banPlayer(string $username): Response
     {
         $username = trim($username);
         if ($username === '') {
@@ -65,7 +97,7 @@ class HttpApi
         return $this->success();
     }
 
-    public function buyItem(int $itemId, string $fromShop): ResponseInterface
+    private function buyItem(int $itemId, string $fromShop): Response
     {
         if ($itemId <= 0) {
             return $this->failure('Invalid item id');
@@ -89,7 +121,7 @@ class HttpApi
         return $this->success();
     }
 
-    public function useItem(int $itemId): ResponseInterface
+    private function useItem(int $itemId): Response
     {
         $error = $this->player->useItem($itemId);
         if ($error !== null) {
@@ -99,9 +131,9 @@ class HttpApi
         return $this->success();
     }
 
-    private function success(array $data = []): ResponseInterface
+    private function success(array $data = []): Response
     {
-        return Response::json([
+        return new JsonResponse([
             'success' => true,
             'message' => '',
             'data' => $data,
@@ -110,7 +142,7 @@ class HttpApi
 
     private function failure(string $message): Response
     {
-        return Response::json([
+        return new JsonResponse([
             'success' => false,
             'message' => $message,
             'data' => [],
