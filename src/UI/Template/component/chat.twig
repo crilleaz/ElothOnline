@@ -4,91 +4,58 @@
 </div>
 
 <script>
-    const isAdmin = {{ player.isAdmin ? 'true': 'false' }};
+    async function banUser(username) {
+        const result = await performAction('ban', {username:username});
 
-    function banUser(username) {
-        if (!isAdmin) {
+        if (!result.success) {
+            new PopupMessage(result.message, 'error')
+
             return;
         }
 
-        const xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (this.status !== 200 || this.readyState !== 4) {
-                return;
-            }
+        new PopupMessage('User has been banned', 'info');
 
-            const response = JSON.parse(this.responseText);
-            if (!response.success) {
-                alert(response.message);
-                return;
-            }
-
-            alert('User has been banned')
-
-            refreshChat();
-        };
-
-        xhttp.open('POST', '/api.php?action=ban', true);
-        xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-        xhttp.send('username=' + username);
+        await refreshChat();
     }
 
-    function sendMessageToChat(message) {
+    async function sendMessageToChat(message) {
         if (message === '') {
-            alert('Message is empty');
+            new PopupMessage('Message is empty', 'error');
 
             return;
         }
 
-        const xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (this.status !== 200 || this.readyState !== 4) {
-                return;
-            }
+        const result = await performAction('addChatMessage', {message: message})
+        if (!result.success) {
+            new PopupMessage(result.message, 'error');
+            return;
+        }
 
-            const response = JSON.parse(this.responseText);
-            if (!response.success) {
-                alert(response.message);
-                return;
-            }
-
-            refreshChat();
-        };
-        xhttp.open('POST', '/api.php?action=addChatMessage', true);
-        xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-        xhttp.send('message=' + message);
+        await refreshChat();
     }
 
-    function refreshChat() {
-        const xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (this.status !== 200 || this.readyState !== 4) {
-                return;
+    async function refreshChat() {
+        const result = await performAction('getChatMessages');
+
+        if (!result.success) {
+            new PopupMessage(result.message, 'error');
+            return;
+        }
+
+        let messagesContent = '';
+        for(const message of result.data) {
+            const sentAt = new Date(message.sentAt);
+            let sender;
+            if (message.isFromAdmin) {
+                sender = '<font color="red">[' + message.sender + ']:</font>';
+            } else {
+                sender = '<font title="Ban this user" color="blue" onclick="banUser(\'' + message.sender + '\')">[' + message.sender + ']:</font>';
             }
 
-            const response = JSON.parse(this.responseText);
-            if (!response.success) {
-                alert(response.message);
-                return;
-            }
+            messagesContent += '[' + sentAt.toLocaleString() + ']' + sender + ' ' + message.message + '<br>';
+        }
 
-            let messagesContent = '';
-            for(const message of response.data) {
-                const sentAt = new Date(message.sentAt);
-                let sender;
-                if (message.isFromAdmin) {
-                    sender = '<font color="red">[' + message.sender + ']:</font>';
-                } else {
-                    sender = '<font title="Ban this user" color="blue" onclick="banUser(\'' + message.sender + '\')">[' + message.sender + ']:</font>';
-                }
-
-                messagesContent += '[' + sentAt.toLocaleString() + ']' + sender + ' ' + message.message + '<br>';
-            }
-
-            document.getElementById('chat-messages').innerHTML = messagesContent;
-        };
-        xhttp.open('GET', '/api.php?action=getChatMessages', true);
-        xhttp.send();
+        document.getElementById('chat-messages').innerHTML = messagesContent;
     }
 
     window.addEventListener("load", () => {

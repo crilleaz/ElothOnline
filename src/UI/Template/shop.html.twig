@@ -39,24 +39,15 @@
 
 {% block footer %}
     <script>
-        function buyItem(itemId, shopName) {
-            const xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function() {
-                if (this.status !== 200 || this.readyState !== 4) {
-                    return;
-                }
+        async function buyItem(itemId, shopName) {
+            const result = await performAction('buyItem', {itemId: itemId, shop: shopName});
+            if (!result.success) {
+                new PopupMessage(result.message, 'error', 'top right', 3);
 
-                const response = JSON.parse(this.responseText);
-                if (!response.success) {
-                    new PopupMessage(response.message, 'error', 'top right', 3);
-                    return;
-                }
+                return;
+            }
 
-                new PopupMessage('You have successfully purchased an item', 'success', 'top right', 2);
-            };
-            xhttp.open('POST', '/api.php?action=buyItem', true);
-            xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-            xhttp.send('itemId=' + itemId + '&shop=' + shopName);
+            new PopupMessage('You have successfully purchased an item', 'success', 'top right', 2);
         }
     </script>
 {% endblock %}

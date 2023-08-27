@@ -32,26 +32,23 @@ class HttpApi
         $action = $request->query->getString('action');
         switch ($action) {
             case 'addChatMessage':
-                return $this->addChatMessage((string)$_POST['message'] ?? '');
+                return $this->addChatMessage($request);
             case 'getChatMessages':
-                return $this->getLastChatMessages(10);
+                return $this->getLastChatMessages();
             case 'ban':
-                return $this->banPlayer((string) ($_POST['username'] ?? ''));
+                return $this->banPlayer($request);
             case 'buyItem':
-                $fromShop = (string) ($_POST['shop'] ?? '');
-                $itemId = (int) ($_POST['itemId'] ?? 0);
-                return $this->buyItem($itemId, $fromShop);
+                return $this->buyItem($request);
             case 'useItem':
-                $itemId = (int) ($_POST['itemId'] ?? 0);
-                return $this->useItem($itemId);
+                return $this->useItem($request);
             default:
-                return new JsonResponse(['message' => 'Unknown API action', 'success' => false]);
+                return $this->failure('Unknown API action');
         }
     }
 
-    private function addChatMessage(string $message): Response
+    private function addChatMessage(Request $request): Response
     {
-        $message = trim($message);
+        $message = trim($request->request->getString('message'));
         if ($message === '') {
             return $this->failure('Message can not be empty');
         }
@@ -61,13 +58,9 @@ class HttpApi
         return $this->success();
     }
 
-    private function getLastChatMessages(int $amountOfMessages): Response
+    private function getLastChatMessages(): Response
     {
-        if ($amountOfMessages <= 0) {
-            return $this->failure('Can not fetch zero or negative amount of messages');
-        }
-
-        $messages = \DI::getService(Chat::class)->getLastMessages($amountOfMessages);
+        $messages = \DI::getService(Chat::class)->getLastMessages(10);
         $messagesData = [];
         foreach ($messages as $message) {
             $messagesData[] = [
@@ -81,15 +74,15 @@ class HttpApi
         return $this->success($messagesData);
     }
 
-    private function banPlayer(string $username): Response
+    private function banPlayer(Request $request): Response
     {
-        $username = trim($username);
+        $username = trim($request->request->getString('username'));
         if ($username === '') {
-            return $this->failure('You need to pass the username to ban him');
+            return $this->failure('Username is empty');
         }
 
         if (!$this->player->isAdmin()) {
-            return $this->failure('Sorry, you\'re not admin.');
+            return $this->failure('Only admin can perform this action');
         }
 
         \DI::getService(Game::class)->banPlayer($username);
@@ -97,11 +90,10 @@ class HttpApi
         return $this->success();
     }
 
-    private function buyItem(int $itemId, string $fromShop): Response
+    private function buyItem(Request $request): Response
     {
-        if ($itemId <= 0) {
-            return $this->failure('Invalid item id');
-        }
+        $itemId = $request->request->getInt('itemId');
+        $fromShop = $request->request->getString('shop');
 
         $shop = \DI::getService(ShopRepository::class)->findShopByName($fromShop);
         if ($shop === null) {
@@ -121,8 +113,13 @@ class HttpApi
         return $this->success();
     }
 
-    private function useItem(int $itemId): Response
+    private function useItem(Request $request): Response
     {
+        $itemId = $request->request->getInt('itemId');
+        if ($itemId === 0) {
+            return $this->failure('Invalid item id');
+        }
+
         $error = $this->player->useItem($itemId);
         if ($error !== null) {
             return $this->failure($error->message);

@@ -61,24 +61,14 @@
             }
         }
 
-        function useItem(itemId) {
-            const xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function() {
-                if (this.status !== 200 || this.readyState !== 4) {
-                    return;
-                }
+        async function useItem(itemId) {
+            const result = await performAction('useItem', {itemId: itemId});
+            if (!result.success) {
+                new PopupMessage(result.message, 'error');
+                return;
+            }
 
-                const response = JSON.parse(this.responseText);
-                if (!response.success) {
-                    new PopupMessage(response.message, 'error', 'top right', 3);
-                    return;
-                }
-
-                location.reload();
-            };
-            xhttp.open('POST', '/api.php?action=useItem', true);
-            xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-            xhttp.send('itemId=' + itemId);
+            location.reload();
         }
     </script>
 {% endblock %}
