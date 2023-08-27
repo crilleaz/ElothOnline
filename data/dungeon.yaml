@@ -5,9 +5,9 @@
     description: 'A rather small rat cave with healthy amount of rats.'
 -
     id: 2
-    name: 'Rotworm Cave'
+    name: 'Foul Cave'
     monster_id: 2
-    description: asd
+    description: 'Small and stinky hideout. Beware of wild inhabitants.'
 -
     id: 3
     name: 'Dragon Lair'

@@ -13,3 +13,8 @@
     item_id: 3
     price_id: 1
     price_quantity: 54
+-
+    shop_id: 2
+    item_id: 5
+    price_id: 4
+    price_quantity: 2

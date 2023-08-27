@@ -7,14 +7,20 @@
 -
     monster_id: 1
     item_id: 1
-    quantity_min: 1
+    quantity_min: 0
     quantity_max: 7
-    chance: 100
+    chance: 30
 -
     monster_id: 2
     item_id: 1
-    quantity_min: 5
+    quantity_min: 0
     quantity_max: 5
+    chance: 70
+-
+    monster_id: 2
+    item_id: 4
+    quantity_min: 1
+    quantity_max: 1
     chance: 100
 -
     monster_id: 3
