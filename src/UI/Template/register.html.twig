@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Eloth Online</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div style="text-align: center;">
+    {% if error != '' %}
+        <p style='color:red'>{{ error }}</p>
+    {% endif %}
+
+    <!-- The registration form -->
+    <form method="post">
+        <label for="username">Username:</label><br>
+        <input type="text" name="username" value="{{ username }}" required><br>
+        <label for="password">Password:</label><br>
+        <input type="password" name="password" required><br>
+        <label for="password_confirm">Confirm password:</label><br>
+        <input type="password" name="password_confirm" required><br><br>
+        <input type="submit" name="register" value="Sign Up">
+    </form>
+    <a href="/?scene=auth">Login</a>
+
+</div>
+</body>

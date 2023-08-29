@@ -10,7 +10,7 @@ use Game\Item\ItemPrototypeRepository;
 use Game\Player\Player;
 use Game\Player\PlayerLog;
 
-readonly class Game
+readonly class Client
 {
     public function __construct(
         private DBConnection $db,
@@ -18,6 +18,11 @@ readonly class Game
         private PlayerLog $playerLog,
         private ItemPrototypeRepository $itemPrototypeRepository
     ){}
+
+    public function run(): void
+    {
+
+    }
 
     public function getCurrentPlayer(): ?Player
     {

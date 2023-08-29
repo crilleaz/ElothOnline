@@ -5,21 +5,19 @@ namespace Game\UI\Scene;
 
 use Game\Dungeon\Dungeon;
 use Game\Dungeon\DungeonRepository;
-use Game\Game;
+use Game\Client;
 use Game\Player\Player;
 use Twig\Environment;
 
 abstract class AbstractScene implements SceneInterface
 {
     public function __construct(
-        protected readonly Game $game,
+        protected readonly Client          $client,
         private readonly Environment       $renderer,
         private readonly DungeonRepository $dungeonRepository
     ) {
 
     }
-
-    abstract public function run(): string;
 
     protected function renderTemplate(string $templateName, array $parameters = []): string
     {
@@ -44,7 +42,7 @@ abstract class AbstractScene implements SceneInterface
 
     protected function getCurrentPlayer(): Player
     {
-        return $this->game->getCurrentPlayer();
+        return $this->client->getCurrentPlayer();
     }
 
     protected function getHuntingDungeon(): ?Dungeon

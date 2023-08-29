@@ -5,7 +5,7 @@ namespace Game\API;
 
 use Game\Chat\Chat;
 use Game\Engine\Error;
-use Game\Game;
+use Game\Client;
 use Game\Item\Item;
 use Game\Item\ItemPrototypeRepository;
 use Game\Player\Player;
@@ -19,7 +19,7 @@ class HttpApi
 {
     private Player $player;
 
-    public function __construct(private readonly Game $game)
+    public function __construct(private readonly Client $game)
     {
 
     }
@@ -92,7 +92,7 @@ class HttpApi
             return $this->failure('Only admin can perform this action');
         }
 
-        \DI::getService(Game::class)->banPlayer($username);
+        \DI::getService(Client::class)->banPlayer($username);
 
         return $this->success();
     }

@@ -6,7 +6,7 @@ namespace Game;
 use Game\Player\LvlCalculator;
 use Game\Player\Player;
 
-class GameTest extends IntegrationTestCase
+class ClientTest extends IntegrationTestCase
 {
     private const PLAYER_NAME = 'MisterTester';
     private const PLAYER_PASSWORD = '123123123';

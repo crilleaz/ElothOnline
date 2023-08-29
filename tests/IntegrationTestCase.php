@@ -17,14 +17,14 @@ abstract class IntegrationTestCase extends TestCase
 
     protected ?CarbonImmutable $currentTime = null;
 
-    protected Game $game;
+    protected Client $game;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->setCurrentTime(CarbonImmutable::now());
-        $this->game = $this->getService(Game::class);
+        $this->game = $this->getService(Client::class);
         $this->db = $this->getService(DBConnection::class);
         $this->db->startTransaction();
         $this->db->execute("UPDATE timetable SET tid = ?", [DbTimeFactory::createTimestamp($this->currentTime)]);

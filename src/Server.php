@@ -1,15 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace Game\Engine;
+namespace Game;
 
 use Carbon\CarbonImmutable;
 use Game\Dungeon\DungeonRepository;
 use Game\Dungeon\RewardCalculator;
+use Game\Engine\DBConnection;
+use Game\Engine\DbTimeFactory;
 use Game\Player\Player;
-use Game\Utils\TimeInterval;
 
-class Engine
+class Server
 {
     private CarbonImmutable $currentTime;
 

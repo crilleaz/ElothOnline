@@ -1,13 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Game\Engine;
+namespace Game;
 
 use Game\Dungeon\DungeonRepository;
-use Game\IntegrationTestCase;
 use Game\Player\Player;
 
-class EngineTest extends IntegrationTestCase
+class ServerTest extends IntegrationTestCase
 {
     private const MINUTES_SINCE_THE_LAST_EXECUTION = 47;
 
@@ -16,12 +15,12 @@ class EngineTest extends IntegrationTestCase
     private const PLAYER3 = 'Gamid';
     private const PLAYER4 = 'Mila';
 
-    private Engine $engine;
+    private Server $server;
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->engine = $this->getService(Engine::class);
+        $this->server = $this->getService(Server::class);
 
         $dungeonRepository = $this->getService(DungeonRepository::class);
         $dungeon1 = $dungeonRepository->getById(1);
@@ -35,7 +34,7 @@ class EngineTest extends IntegrationTestCase
 
     public function testPerformTasksWhenThereIsNothingToDo(): void
     {
-        $result = $this->engine->performTasks();
+        $result = $this->server->performTasks();
 
         $this->assertStaminaRestoredForRestingPlayers(0);
         $this->assertStaminaSpentForHuntingPlayers(0);
@@ -47,7 +46,7 @@ class EngineTest extends IntegrationTestCase
     {
         $this->setCurrentTime($this->currentTime->addMinutes(self::MINUTES_SINCE_THE_LAST_EXECUTION));
 
-        $logs = $this->engine->performTasks();
+        $logs = $this->server->performTasks();
 
         $this->assertStaminaRestoredForRestingPlayers(self::MINUTES_SINCE_THE_LAST_EXECUTION);
         $this->assertStaminaSpentForHuntingPlayers(self::MINUTES_SINCE_THE_LAST_EXECUTION);

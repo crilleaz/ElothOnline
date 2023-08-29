@@ -4,22 +4,22 @@ declare(strict_types=1);
 namespace Game\UI\Scene;
 
 use Game\Dungeon\DungeonRepository;
-use Game\Game;
+use Game\Client;
 use Game\Trade\ShopRepository;
+use Game\UI\Scene\Input\InputInterface;
 use Twig\Environment;
 
 class Shop extends AbstractScene
 {
-    public function __construct(Game $game, Environment $renderer, DungeonRepository $dungeonRepository, private readonly ShopRepository $shopRepository)
+    public function __construct(Client $game, Environment $renderer, DungeonRepository $dungeonRepository, private readonly ShopRepository $shopRepository)
     {
         parent::__construct($game, $renderer, $dungeonRepository);
     }
 
-    public function run(): string
+    public function run(InputInterface $input): string
     {
-        $shopName = $_GET['shop'] ?? '';
-
-        if (!is_string($shopName) || $shopName === '') {
+        $shopName = $input->getString('shop');
+        if ($shopName === '') {
             return $this->switchToScene(Shops::class);
         }
 
@@ -28,7 +28,7 @@ class Shop extends AbstractScene
             return $this->switchToScene(Shops::class);
         }
 
-        $player = $this->game->getCurrentPlayer();
+        $player = $this->client->getCurrentPlayer();
 
         return $this->renderTemplate('shop', [
             'playerGold' => $player->getGold(),
