@@ -6,7 +6,6 @@ namespace Game;
 use Game\Chat\Chat;
 use Game\Engine\DBConnection;
 use Game\Engine\Error;
-use Game\Item\Item;
 use Game\Item\ItemPrototypeRepository;
 use Game\Player\Player;
 use Game\Player\PlayerLog;
@@ -63,12 +62,12 @@ readonly class Game
         $gold = $this->itemPrototypeRepository->getById(1);
 
         $player = Player::loadPlayer($playerName, $this->db);
-        $player->obtain(new Item($gold, 10));
+        $player->obtainItem($gold, 10);
 
         $this->chat->addSystemMessage(sprintf('Registration: New member %s joined!', $playerName));
         $this->playerLog->add(
             $playerName,
-            "[System] Welcome $playerName! <br> This is your Combat log, right now its empty :( <br> Visit <a href='/?tab=dungeons'>Dungeons to start your adventure!</a>"
+            "[System] Welcome $playerName! <br> This is your Combat log, right now its empty :( <br> Visit <a href='/?scene=dungeons'>Dungeons to start your adventure!</a>"
         );
 
         return null;

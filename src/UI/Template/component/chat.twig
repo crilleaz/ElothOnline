@@ -1,0 +1,75 @@
+<div id="chat">
+    <div id="chat-messages">Loading</div>
+    <input type="text" id="new-chat-msg" name="message" placeholder="Write something.." autofocus><br>
+</div>
+
+<script>
+    async function banUser(username) {
+        const result = await performAction('ban', {username:username});
+
+        if (!result.success) {
+            new PopupMessage(result.message, 'error')
+
+            return;
+        }
+
+        new PopupMessage('User has been banned', 'info');
+
+        await refreshChat();
+    }
+
+    async function sendMessageToChat(message) {
+        if (message === '') {
+            new PopupMessage('Message is empty', 'error');
+
+            return;
+        }
+
+        const result = await performAction('addChatMessage', {message: message})
+        if (!result.success) {
+            new PopupMessage(result.message, 'error');
+            return;
+        }
+
+        await refreshChat();
+    }
+
+    async function refreshChat() {
+        const result = await performAction('getChatMessages');
+
+        if (!result.success) {
+            new PopupMessage(result.message, 'error');
+            return;
+        }
+
+        let messagesContent = '';
+        for(const message of result.data) {
+            const sentAt = new Date(message.sentAt);
+            let sender;
+            if (message.isFromAdmin) {
+                sender = '<font color="red">[' + message.sender + ']:</font>';
+            } else {
+                sender = '<font title="Ban this user" color="blue" onclick="banUser(\'' + message.sender + '\')">[' + message.sender + ']:</font>';
+            }
+
+            messagesContent += '[' + sentAt.toLocaleString() + ']' + sender + ' ' + message.message + '<br>';
+        }
+
+        document.getElementById('chat-messages').innerHTML = messagesContent;
+    }
+
+    window.addEventListener("load", () => {
+        refreshChat();
+        setInterval(refreshChat, 10000);
+
+        const newMsgInputField = document.getElementById('new-chat-msg');
+        newMsgInputField.addEventListener('keypress', function(event) {
+            if (event.code !== 'Enter') {
+                return;
+            }
+
+            sendMessageToChat(this.value)
+            this.value = '';
+        });
+    });
+</script>

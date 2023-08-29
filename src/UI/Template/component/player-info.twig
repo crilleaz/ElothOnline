@@ -1,0 +1,58 @@
+<div class="col-lg-3 d-none d-lg-block">
+    <ul class="list-group myStickyListGroup shadow bg-white rounded">
+        <li class="list-group-item rounded">
+            <font size="5"><b>{{ player.name }}</b></font> Lv. {{ player.level }}<br>
+            <font size="2">HP: {{ player.currentHealth }}/{{ player.maxHealth }}</font>
+            |
+            {% if player.stamina < 50 %}
+                <font size="2">Stamina: <font color="yellow"> {{ player.stamina }}</font>/100</font>
+            {% elseif player.stamina < 10 %}
+                <font size="2">Stamina: <font color="red"> {{ player.stamina }}</font>/100</font>
+            {% else %}
+                <font size="2">Stamina: {{ player.stamina }}/100</font>
+            {% endif %}
+            <hr>
+            <center>
+                <pre>Skills</pre>
+            </center>
+            <font size="2">Experience: {{ player.exp }} /{{ player.nextLevelExp }}<br>
+                Magic: {{ player.magic }}<br>
+                Strength: {{ player.strength }}<br>
+                Defense: {{ player.defence }}<br>
+            </font>
+        </li>
+        <li class="list-group-item rounded">
+            <center>
+                <pre>Abilities</pre>
+            </center>
+            <font size="2">
+                Woodcutting: {{ player.woodcutting }}<br>
+                Mining: {{ player.mining }} <br>
+                Gathering: {{ player.gathering }} <br>
+                Harvesting: {{ player.harvesting }} <br>
+                Blacksmith: {{ player.blacksmith }} <br>
+                Herbalism: {{ player.herbalism }} <br>
+            </font>
+        </li>
+        <li class="list-group-item rounded">
+            <center>
+                <pre>Bank</pre>
+            </center>
+            <font size="2">
+                Gold: {{ player.gold }}<br>
+                Crystals: {{ player.crystals }} <br>
+            </font>
+        </li>
+        <li class="list-group-item rounded">
+            <center>
+                <pre>Log</pre>
+            </center>
+            <font size="1">
+                {% for log in player.logs(3) %}
+                    {{ log }}<br>
+                {% endfor %}
+            </font>
+        </li>
+    </ul>
+    <hr class="d-sm-none">
+</div>

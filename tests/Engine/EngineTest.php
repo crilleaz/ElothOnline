@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Game\Engine;
 
+use Game\Dungeon\DungeonRepository;
 use Game\IntegrationTestCase;
 use Game\Player\Player;
 
@@ -22,8 +23,12 @@ class EngineTest extends IntegrationTestCase
 
         $this->engine = $this->getService(Engine::class);
 
-        $this->createPlayer(self::PLAYER1, 100)->enterDungeon(1);
-        $this->createPlayer(self::PLAYER2, 40)->enterDungeon(2);
+        $dungeonRepository = $this->getService(DungeonRepository::class);
+        $dungeon1 = $dungeonRepository->getById(1);
+        $dungeon2 = $dungeonRepository->getById(2);
+
+        $this->createPlayer(self::PLAYER1, 100)->enterDungeon($dungeon1);
+        $this->createPlayer(self::PLAYER2, 40)->enterDungeon($dungeon2);
         $this->createPlayer(self::PLAYER3, 23);
         $this->createPlayer(self::PLAYER4, 61);
     }
@@ -130,7 +135,7 @@ class EngineTest extends IntegrationTestCase
     {
         $player = Player::loadPlayer(self::PLAYER1, $this->db);
         self::assertTrue($player->isFighting());
-        self::assertEquals(1, $player->getHuntingDungeon()->id, 'Player had to stay in the same dungeon');
+        self::assertEquals(1, $player->getHuntingDungeonId(), 'Player had to stay in the same dungeon');
 
         $player = Player::loadPlayer(self::PLAYER2, $this->db);
         self::assertTrue($player->isInProtectiveZone());

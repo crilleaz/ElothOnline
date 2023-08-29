@@ -1,0 +1,14 @@
+<div class="col card">
+    <center>{{ dungeon.name }}</center>
+    <p class="card-text h-100">{{ dungeon.description }}</p>
+    <x>Monster: {{ dungeon.inhabitant.name }}<br>
+        Experience: {{ dungeon.inhabitant.exp }} XP each<br>
+        Difficulty: {{ player.measureDifficulty(dungeon) }}
+    </x>
+    <br>
+    {% if player.isInDungeon(dungeon) %}
+        <a class="btn btn-danger" href="?scene=dungeons&leave={{ dungeon.id }}" role="button">Leave</a><br>
+    {% else %}
+        <a class="btn btn-primary" href="?scene=dungeons&hunt={{ dungeon.id }}" role="button">Start</a><br>
+    {% endif %}
+</div>

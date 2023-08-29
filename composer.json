@@ -13,11 +13,13 @@
   },
   "require": {
     "php": "^8.2",
-    "ext-mysqli": "*",
     "doctrine/dbal": "^3.6",
     "react/event-loop": "^1.4",
     "league/container": "^4.2",
-    "nesbot/carbon": "^2.69"
+    "nesbot/carbon": "^2.69",
+    "twig/twig": "^3.7",
+    "symfony/yaml": "^6.3",
+    "symfony/http-foundation": "^6.3"
   },
   "require-dev": {
     "phpunit/phpunit": "^10.3"

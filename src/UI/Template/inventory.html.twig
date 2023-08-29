@@ -1,0 +1,84 @@
+{% extends "minimalistic.template.twig" %}
+
+{% block content %}
+<div class="card-body flex-column">
+    <h5 class="card-titles">Inventory</h5>
+    <div class="container">
+        <div class="row">
+            <input type="text" id="myInput" onkeyup="searchItem()" placeholder="Search for item..">
+            <table id="myTable">
+                <tr class="header">
+                    <th style="width:20%;">Name</th>
+                    <th style="width:20%;">Amount</th>
+                    <th style="width:20%;">Action</th>
+                </tr>
+                {% for item in player.inventory %}
+                    {% if item.isSellable %}
+                    <tr title="Worth {{ item.worth }} GP each">
+                    {% else %}
+                    <tr title="Cannot be sold">
+                    {% endif %}
+
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>
+                    {% if item.isSellable %}
+                        <button type="button" class="btn btn-success" onclick="sellItem({{ item.id }})">Sell</button>
+                    {% endif %}
+                    {% if item.isConsumable %}
+                        <button type="button" class="btn btn-success" onclick="useItem({{ item.id }})">Use</button>
+                    {% endif %}
+                    </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+    <script>
+        function searchItem() {
+            // Declare variables
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("myInput");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("myTable");
+            tr = table.getElementsByTagName("tr");
+
+            // Loop through all table rows, and hide those who don't match the search query
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[0];
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        async function useItem(itemId) {
+            const result = await performAction('useItem', {itemId: itemId});
+            if (!result.success) {
+                new PopupMessage(result.message, 'error');
+                return;
+            }
+
+            location.reload();
+        }
+
+        async function sellItem(itemId) {
+            const result = await performAction('sellItem', {itemId: itemId});
+            if (!result.success) {
+                new PopupMessage(result.message, 'error');
+                return;
+            }
+
+            location.reload();
+        }
+    </script>
+{% endblock %}

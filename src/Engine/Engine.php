@@ -4,10 +4,10 @@ declare(strict_types=1);
 namespace Game\Engine;
 
 use Carbon\CarbonImmutable;
+use Game\Dungeon\DungeonRepository;
 use Game\Dungeon\RewardCalculator;
 use Game\Player\Player;
 use Game\Utils\TimeInterval;
-use Game\Wiki;
 
 class Engine
 {
@@ -18,7 +18,7 @@ class Engine
     public function __construct(
         private readonly DBConnection $db,
         private readonly RewardCalculator $rewardCalculator,
-        private readonly Wiki $wiki
+        private readonly DungeonRepository $dungeonRepository
     ){}
 
     /**
@@ -79,11 +79,6 @@ class Engine
 
     private function giveRewards(): void
     {
-        $dungeons = [];
-        foreach ($this->wiki->getDungeons() as $dungeonWiki) {
-            $dungeons[$dungeonWiki->id] = $dungeonWiki;
-        }
-
         $logTemplate = <<<XML
                 <Reward player="%s" dungeon="%s" huntDuration="%s">
                     <Exp>%d</Exp>
@@ -96,7 +91,7 @@ class Engine
         foreach ($this->getHunters() as $row) {
             $playerName = $row['username'];
             $hunter = Player::loadPlayer($playerName, $this->db);
-            $huntingZone = $dungeons[$row['dungeon_id']];
+            $huntingZone = $this->dungeonRepository->getById($row['dungeon_id']);
 
             $timeSpentInDungeon = TimeInterval::between(CarbonImmutable::create($row['tid']), $this->currentTime);
             $minutesPassed = $timeSpentInDungeon->toMinutes();

@@ -1,0 +1,49 @@
+{% extends "minimalistic.template.twig" %}
+
+{% block content %}
+    <div class="card border border-success" style="width: 100%;">
+        <div class="card-body">
+            <h5 class="card-title">Combatlog</h5>
+            <p class="card-text">
+            <div class="mdb-lightbox">
+                <div id="combatlog">
+                    Loading combatlog..
+                </div>
+            </div>
+            </p>
+        </div>
+    </div>
+    <div class="card border" style="width: 100%;">
+        <div class="card-body">
+            <h5 class="card-title">Chat</h5>
+            <p class="card-text">
+            <div class="mdb-lightbox">
+                {% include 'component/chat.twig' %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block footer %}
+    <script>
+        function showLogs() {
+            const logContainer = document.getElementById('combatlog');
+
+            performAction('viewLogs')
+                .then(function (result) {
+                    if (!result.success) {
+                        logContainer.innerHTML = result.message;
+                    }
+
+                    let logsContent = '';
+                    for (let i = 0; i < result.data.logs.length; i++) {
+                        logsContent += result.data.logs[i] + '<br>';
+                    }
+
+                    logContainer.innerHTML = logsContent;
+                });
+        }
+
+        showLogs();
+        setInterval(showLogs, 10000);
+    </script>
+{% endblock %}

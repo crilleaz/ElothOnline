@@ -5,13 +5,14 @@ namespace Game\Player;
 
 use Game\Dungeon\Drop;
 use Game\Dungeon\Dungeon;
-use Game\Dungeon\Monster;
 use Game\Dungeon\TTKCalculator;
 use Game\Engine\DBConnection;
 use Game\Engine\DbTimeFactory;
 use Game\Engine\Error;
 use Game\Item\Item;
 use Game\Item\ItemPrototype as ItemPrototype;
+use Game\Skill\Effect\EffectApplier;
+use Game\Trade\Offer;
 
 class Player
 {
@@ -51,49 +52,31 @@ class Player
 
     public function isInDungeon(Dungeon $dungeon): bool
     {
-        $huntingDungeon = $this->getHuntingDungeon();
-        if ($huntingDungeon === null) {
-            return false;
-        }
-
-        return $huntingDungeon->id === $dungeon->id;
+        return $this->getHuntingDungeonId() === $dungeon->id;
     }
 
-    public function getHuntingDungeon(): ?Dungeon
+    public function getHuntingDungeonId(): ?int
     {
-        $dungeon = $this->connection->fetchRow('
-                        SELECT h.dungeon_id as id, d.name, d.description, m.name as monsterName, m.monster_id as monsterId, m.health, m.attack, m.defence, m.experience
-                                 FROM hunting h
-                                    INNER JOIN dungeons d ON d.id=h.dungeon_id
-                                    INNER JOIN monster m ON d.monster_id = m.monster_id
-                                 WHERE h.username = ?
-        ',[$this->name]);
-
-        if ($dungeon === []) {
+        $hunt = $this->connection->fetchRow('SELECT dungeon_id FROM hunting WHERE username = ?',[$this->name]);
+        if ($hunt === []) {
             return null;
         }
 
-        return new Dungeon(
-            $dungeon['id'],
-            $dungeon['name'],
-            $dungeon['description'],
-            new Monster($dungeon['monsterId'], $dungeon['monsterName'], $dungeon['health'], $dungeon['experience'], $dungeon['attack'], $dungeon['defence'])
-        );
+        return $hunt['dungeon_id'];
     }
 
-    public function enterDungeon(int $id): null|Error
+    public function enterDungeon(Dungeon $dungeon): null|Error
     {
-        $currentDungeon = $this->getHuntingDungeon();
-        if ($currentDungeon !== null) {
-            return new Error('You are already hunting at ' . $currentDungeon->name);
+        $currentDungeonId = $this->getHuntingDungeonId();
+        if ($currentDungeonId !== null) {
+            if ($currentDungeonId === $dungeon->id) {
+                return null;
+            }
+
+            return new Error('You are already hunting in a dungeon');
         }
 
-        $dungeon = Dungeon::loadById($id, $this->connection);
-        if ($dungeon === null) {
-            return new Error(sprintf('Dungeon with id "%d" does not exist', $id));
-        }
-
-        $this->connection->execute('INSERT INTO hunting (username, dungeon_id, tid) VALUES (?, ?, ?)', [$this->name, $id, DbTimeFactory::createCurrentTimestamp()]);
+        $this->connection->execute('INSERT INTO hunting (username, dungeon_id, tid) VALUES (?, ?, ?)', [$this->name, $dungeon->id, DbTimeFactory::createCurrentTimestamp()]);
         $this->connection->execute('UPDATE players SET in_combat = 1 WHERE name = ?', [$this->name]);
 
         return null;
@@ -192,6 +175,11 @@ class Player
         return (int) $this->getProperty('stamina');
     }
 
+    public function restoreStamina(int $amount): void
+    {
+        $this->connection->execute('UPDATE players SET stamina = LEAST(stamina + ?, ?)', [$amount, self::MAX_POSSIBLE_STAMINA]);
+    }
+
     public function getMaxHealth(): int
     {
         return (int) $this->getProperty('health_max');
@@ -257,23 +245,77 @@ class Player
 
     public function pickUp(Drop $drop): void
     {
-        $item = new Item($drop->item, $drop->quantity);
-        $this->obtain($item);
-        $this->logger->add($this->name, sprintf("You picked up %d %s", $item->quantity, $item->name));
+        $this->obtainItem($drop->item, $drop->quantity);
+        $this->logger->add($this->name, sprintf("You picked up %d %s", $drop->quantity, $drop->item->name));
     }
 
-    public function obtain(Item $item): void
+    public function obtainItem(ItemPrototype $item, int $quantity): void
     {
-        $entry = $this->connection
-            ->fetchRow('SELECT amount FROM inventory WHERE item_id = ? AND username = ?', [$item->id, $this->name]);
-
-        if ($entry === []) {
+        if ($this->getItemQuantity($item->id) === 0) {
             $this->connection
-                ->execute('INSERT INTO inventory (username, item_id, amount) VALUES (?, ?, ?)', [$this->name, $item->id, $item->quantity]);
+                ->execute('INSERT INTO inventory (username, item_id, amount, worth) VALUES (?, ?, ?, ?)', [$this->name, $item->id, $quantity, $item->worth]);
         } else {
             $this->connection
-                ->execute('UPDATE inventory SET amount = amount + ? WHERE item_id = ? AND username = ?', [$item->quantity, $item->id, $this->name]);
+                ->execute('UPDATE inventory SET amount = amount + ? WHERE item_id = ? AND username = ?', [$quantity, $item->id, $this->name]);
         }
+    }
+
+    public function dropItem(ItemPrototype $item, int $quantity): Drop
+    {
+        $this->connection->transaction(function () use ($item, $quantity) {
+            $this->connection->execute('UPDATE inventory SET amount = amount - ? WHERE item_id = ? AND username = ?', [$quantity, $item->id, $this->name]);
+
+            $remainingItemsQuantity = $this->getItemQuantity($item->id);
+            if ($remainingItemsQuantity < 0) {
+                throw new \RuntimeException('Player does not have that many items');
+            }
+
+            if ($remainingItemsQuantity === 0) {
+                $this->destroyItem($item);
+            }
+        });
+
+        return new Drop($item, $quantity);
+    }
+
+    public function destroyItem(ItemPrototype $item, int $quantity = null): void
+    {
+        if ($quantity === null) {
+            $this->connection->execute('DELETE FROM inventory WHERE item_id = ? AND username = ?', [$item->id, $this->name]);
+
+            return;
+        }
+
+        if ($quantity < 1) {
+            throw new \DomainException('Can not destroy 0 or less items');
+        }
+
+        $this->connection->execute('UPDATE inventory SET amount=GREATEST(amount-?, 0) WHERE item_id = ? AND username = ?', [$quantity, $item->id, $this->name]);
+
+        $this->removeNonExistentItems();
+    }
+
+    public function useItem(int $itemId): ?Error
+    {
+        $item = $this->findInInventory($itemId);
+        if ($item === null) {
+            return new Error('Player does not have such item');
+        }
+
+        $this->connection->transaction(function () use ($item) {
+            foreach ($item->listEffects() as $effect) {
+                $error = EffectApplier::apply($effect, $this);
+                if ($error !== null) {
+                    throw new \RuntimeException($error->message);
+                }
+            }
+
+            if ($item->isConsumable()) {
+                $this->destroyItem($item->prototype, 1);
+            }
+        });
+
+        return null;
     }
 
     /**
@@ -281,13 +323,44 @@ class Player
      */
     public function getInventory(): iterable
     {
-        $entries = $this->connection->fetchRows('SELECT inv.*, ip.name FROM inventory inv INNER JOIN items ip ON ip.item_id = inv.item_id WHERE username = ?', [$this->name]);
+        $entries = $this->connection->fetchRows('SELECT item_id, amount FROM inventory WHERE username = ?', [$this->name]);
         foreach ($entries as $entry) {
-            yield new Item(
-                new ItemPrototype($entry['item_id'], $entry['name'], (int) $entry['worth']),
-                $entry['amount']
-            );
+            yield new Item($entry['item_id'], $entry['amount']);
         }
+    }
+
+    public function findInInventory(int $itemId): ?Item
+    {
+        $item = $this->connection->fetchRow('SELECT item_id, amount FROM inventory WHERE username = ? AND item_id=?', [$this->name, $itemId]);
+
+        if ($item === []) {
+            return null;
+        }
+
+        return new Item($item['item_id'], $item['amount']);
+    }
+
+    public function canAfford(Offer $offer): bool
+    {
+        $requiredQuantity = $offer->inExchange->quantity;
+        $existingQuantity = $this->getItemQuantity($offer->inExchange->id);
+
+        return $existingQuantity >= $requiredQuantity;
+    }
+
+    public function acceptOffer(Offer $offer): ?Error
+    {
+        if (!$this->canAfford($offer)) {
+            return new Error('Player does not have enough items to fulfil the offer');
+        }
+
+        $this->connection->transaction(function () use ($offer) {
+            // TODO drop returns actually dropped item which means that it can be used for actual trade player<=>seller
+            $this->dropItem($offer->inExchange->prototype, $offer->inExchange->quantity);
+            $this->obtainItem($offer->item->prototype, $offer->item->quantity);
+        });
+
+        return null;
     }
 
     private function getProperty(string $property): string|int|float|null
@@ -308,5 +381,10 @@ class Player
         }
 
         return (int) $result['amount'];
+    }
+
+    private function removeNonExistentItems(): void
+    {
+        $this->connection->execute('DELETE FROM inventory WHERE username=? AND amount=0', [$this->name]);
     }
 }

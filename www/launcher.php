@@ -1,17 +1,20 @@
 <?php
 declare(strict_types=1);
 
-use Game\Wiki;
+use Game\UI\Scene;
 
 require_once __DIR__ . '/../bootstrap.php';
 
-enum Tab: string
+enum Navigation: string
 {
-    case DUNGEON = 'dungeons';
+    case DUNGEONS = 'dungeons';
     case HIGH_SCORE = 'highscores';
     case MAIN = 'main';
     case INVENTORY = 'inventory';
     case LIBRARY = 'library';
+    case SHOPS = 'shops';
+
+    case SHOP = 'shop';
 
     public function load(): void
     {
@@ -23,24 +26,38 @@ enum Tab: string
             exit();
         }
 
+        echo $this->getScene()->run();
+    }
+
+    private function getScene(): Scene\SceneInterface
+    {
         switch ($this) {
-            case self::LIBRARY:
-            case self::DUNGEON:
-                $wiki = DI::getService(Wiki::class);
-                break;
+            case Navigation::DUNGEONS:
+                return DI::getService(Scene\Dungeons::class);
+            case Navigation::LIBRARY:
+                return DI::getService(Scene\Library::class);
+            case Navigation::HIGH_SCORE:
+                return DI::getService(Scene\Highscore::class);
+            case Navigation::INVENTORY:
+                return DI::getService(Scene\Inventory::class);
+            case Navigation::SHOPS:
+                return DI::getService(Scene\Shops::class);
+            case Navigation::SHOP:
+                return DI::getService(Scene\Shop::class);
+            default:
+                return DI::getService(Scene\MainMenu::class);
         }
-        require PROJECT_ROOT . '/tabs/' . $this->value . '.php';
     }
 }
 
 session_start();
 
-$currentTab = Tab::MAIN;
-if (isset($_GET['tab']) && is_string($_GET['tab'])) {
-    $currentTab = Tab::tryFrom($_GET['tab']);
-    if ($currentTab === null) {
-        exit('Unknown tab');
+$navigation = Navigation::MAIN;
+if (isset($_GET['scene']) && is_string($_GET['scene'])) {
+    $navigation = Navigation::tryFrom($_GET['scene']);
+    if ($navigation === null) {
+        exit('Unknown scene');
     }
 }
 
-$currentTab->load();
+$navigation->load();

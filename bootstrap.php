@@ -28,13 +28,27 @@ final class DI
         self::$container->defaultToShared(true);
         self::$container->delegate(new ReflectionContainer(true));
 
+        // configure db
         $config = require __DIR__ . '/config.php';
         self::$container->add(DBConnection::class)
             ->addArgument($config['dbHost'])
             ->addArgument($config['dbName'])
             ->addArgument($config['dbUser'])
             ->addArgument($config['dbPass']);
+
+        // configure template engine
+        self::$container->add(\Twig\Loader\FilesystemLoader::class)
+            ->addArgument(PROJECT_ROOT . '/src/UI/Template');
+
+        self::$container->add(\Twig\Environment::class)
+            ->addArgument(\Twig\Loader\FilesystemLoader::class)
+            ->addArgument([
+                'cache' => PROJECT_ROOT . '/var/twig-cache',
+                'strict_variables' => true,
+                'auto_reload' => true,
+            ]);
     }
+
     /**
      * @template T
      *

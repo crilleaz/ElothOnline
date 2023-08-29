@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace Game\Dungeon;
 
-use Game\Engine\DBConnection;
-use Game\Item\ItemPrototype;
+use Game\Item\ItemPrototypeRepository;
 use Game\Utils\Chance;
+use Game\Utils\AbstractDataAccessor;
 
-readonly class DropChanceRepository
+class DropChanceRepository extends AbstractDataAccessor
 {
-    public function __construct(private DBConnection $db)
+    public function __construct(private readonly ItemPrototypeRepository $itemPrototypeRepository)
     {
     }
 
@@ -20,15 +20,22 @@ readonly class DropChanceRepository
      */
     public function getMonsterDrop(Monster $monster): iterable
     {
-        $dropList = $this->db->fetchRows('SELECT * FROM droplist JOIN items i ON droplist.item_id = i.item_id WHERE monster_id=?', [$monster->id]);
+        $data = $this->getData();
 
-        foreach ($dropList as $dropDetails) {
-            yield new DropChance(
-                Chance::percentage((float)$dropDetails['chance']),
-                new ItemPrototype($dropDetails['item_id'], $dropDetails['name'], $dropDetails['worth']),
-                $dropDetails['quantity_min'],
-                $dropDetails['quantity_max']
-            );
+        foreach ($data as $dropDetails) {
+            if ($dropDetails['monster_id'] == $monster->id) {
+                yield new DropChance(
+                    Chance::percentage((float)$dropDetails['chance']),
+                    $this->itemPrototypeRepository->getById($dropDetails['item_id']),
+                    $dropDetails['quantity_min'],
+                    $dropDetails['quantity_max']
+                );
+            }
         }
+    }
+
+    protected function getDataName(): string
+    {
+        return 'droplist';
     }
 }

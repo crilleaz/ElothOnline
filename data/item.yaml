@@ -1,0 +1,20 @@
+-
+    id: 1
+    name: 'Gold Coins'
+    worth: 1
+-
+    id: 2
+    name: Cheese
+    worth: 2
+-
+    id: 3
+    name: 'Short Sword'
+    worth: 18
+-
+    id: 4
+    name: 'Animal hide'
+    worth: 2
+-
+    id: 5
+    name: Leather
+    worth: 5

@@ -1,0 +1,39 @@
+{% extends "minimalistic.template.twig" %}
+
+{% block content %}
+
+    <div class="card-body flex-column">
+        <h5 class="card-titles">Dungeons</h5>
+        <div class="mdb-lightbox card-text">
+            <div class="container-fluid">
+                <div class="container">
+                    {% if errorMsg %}
+                        <center><font color="red"> {{ errorMsg }}</font></center><br>
+                    {% elseif infoMsg %}
+                        <center><font color="green">{{ infoMsg }}</font></center><br>
+                    {% endif %}
+                    {% set column = 0 %}
+                    {% for dungeon in dungeons %}
+                        {% set column = column + 1 %}
+                        {% if column == 1 %}
+                            <div class="row">
+                        {% endif %}
+
+                        {% include 'component/dungeon.twig' %}
+
+                        {% if column == 2 %}
+                            {% set column = 0 %}
+                            </div>
+                            <hr>
+                        {% endif %}
+                    {% endfor %}
+                    {# helps to close an unclosed div-row #}
+                    {% if column == 1 %}
+                </div>
+                <hr>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    </div>
+{% endblock %}

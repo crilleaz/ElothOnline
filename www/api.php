@@ -1,73 +1,24 @@
 <?php
 declare(strict_types=1);
 
-use Game\Chat\Chat;
-use Game\Game;
+use Game\API\HttpApi;
+use Symfony\Component\HttpFoundation\InputBag;
+use Symfony\Component\HttpFoundation\Request;
 
 require_once __DIR__ . '/../bootstrap.php';
 
-function sendApiResponse(array $responseData, bool $success = true): void {
-    header('Content-Type: application/json');
-    echo json_encode(['success' => $success, 'data' => $responseData]);
-}
-
 session_start();
 
-$player = DI::getService(Game::class)->getCurrentPlayer();
-if ($player === null) {
-    header('Location: /login.php');
-    exit();
+$api = DI::getService(HttpApi::class);
+
+$request = Request::createFromGlobals();
+// decode json data and replace request params with it
+try {
+    $data = $request->toArray();
+} catch (\Symfony\Component\HttpFoundation\Exception\JsonException $e) {
+    $data = [];
 }
-
-$action = $_GET['action'] ?? '';
-if (!is_string($action)) {
-    throw new RuntimeException('Tried to perform invalid action');
-}
-
-switch ($action) {
-    case 'addChatMessage':
-        $message = (string)$_POST['message'] ?? '';
-        if ($message === '') {
-            sendApiResponse(['error' => 'Message can not be empty'], false);
-            break;
-        }
-
-        DI::getService(Chat::class)->addMessage($player, $message);
-
-        sendApiResponse([]);
-
-        break;
-    case 'getChatMessages':
-        $maxMessagesToShow = 10;
-        $messages = DI::getService(Chat::class)->getLastMessages($maxMessagesToShow);
-        $responseData = [];
-        foreach ($messages as $message) {
-            $responseData[] = [
-                'isFromAdmin' => $message->isFromAdmin,
-                'sender' => $message->sender,
-                'message' => $message->content,
-                'sentAt' => $message->sentAt->format(DATE_ATOM),
-            ];
-        }
-        sendApiResponse($responseData);
-        break;
-    case 'ban':
-        $userToBan = $_POST['username'] ?? '';
-        if ($userToBan === '') {
-            sendApiResponse(['error' => 'You need to pass the username to ban him'], false);
-            break;
-        }
-
-        if (!$player->isAdmin()) {
-            sendApiResponse(['error' => 'Sorry, you\'re not admin.'], false);
-            break;
-        }
-
-        DI::getService(Game::class)->banPlayer($userToBan);
-
-        sendApiResponse([]);
-
-        break;
-    default:
-        throw new RuntimeException('Unknown action');
-}
+$request->request = new InputBag($data);
+$response = $api->handle($request);
+$response->prepare($request);
+$response->send();

@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Game;
 
-use Game\Engine\Error;
 use Game\Player\LvlCalculator;
 use Game\Player\Player;
 
@@ -116,29 +115,22 @@ class GameTest extends IntegrationTestCase
 
         self::assertEquals($playerName, $player->getName());
         self::assertEquals(1, $player->getLevel());
+        self::assertEquals(0, $player->getExp());
         self::assertEquals(100, $player->getStamina());
         self::assertEquals(15, $player->getCurrentHealth());
         self::assertEquals(15, $player->getMaxHealth());
-        self::assertEquals(1, $player->getLevel());
-        self::assertEquals(1, $player->getLevel());
-        self::assertEquals(1, $player->getLevel());
+        self::assertEquals(10, $player->getStrength());
+        self::assertEquals(10, $player->getDefence());
         self::assertEquals(10, $player->getGold());
-    }
-
-    private function assertNoErrorOccurred(?Error $result): void
-    {
-        $message = '';
-        if ($result !== null) {
-            $message = $result->message;
-        }
-
-        self::assertNull($result, $message);
-    }
-
-    private static function assertErrorOccurred(?Error $result, string $expectedMessage): void
-    {
-        self::assertInstanceOf(Error::class, $result);
-        self::assertEquals($expectedMessage, $result->message);
+        self::assertFalse($player->isFighting());
+        self::assertTrue($player->isInProtectiveZone());
+        self::assertFalse($player->isAdmin());
+        self::assertEquals(0, $player->getWoodcutting());
+        self::assertEquals(0, $player->getHerbalism());
+        self::assertEquals(0, $player->getHarvesting());
+        self::assertEquals(0, $player->getBlacksmith());
+        self::assertEquals(0, $player->getMining());
+        self::assertEquals(0, $player->getGathering());
     }
 
     private function findPlayer(string $name): ?Player

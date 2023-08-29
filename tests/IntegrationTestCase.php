@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use DateTimeInterface;
 use Game\Engine\DBConnection;
 use Game\Engine\DbTimeFactory;
+use Game\Engine\Error;
 use PHPUnit\Framework\TestCase;
 
 abstract class IntegrationTestCase extends TestCase
@@ -58,5 +59,21 @@ abstract class IntegrationTestCase extends TestCase
 
         Carbon::setTestNow($this->currentTime);
         CarbonImmutable::setTestNow($this->currentTime);
+    }
+
+    protected function assertNoErrorOccurred(?Error $result): void
+    {
+        $message = '';
+        if ($result !== null) {
+            $message = $result->message;
+        }
+
+        self::assertNull($result, $message);
+    }
+
+    protected static function assertErrorOccurred(?Error $result, string $expectedMessage): void
+    {
+        self::assertInstanceOf(Error::class, $result);
+        self::assertEquals($expectedMessage, $result->message);
     }
 }

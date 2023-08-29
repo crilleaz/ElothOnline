@@ -1,0 +1,17 @@
+{% extends "minimalistic.template.twig" %}
+
+{% block content %}
+    <div class="card-body flex-column">
+        <h5 class="card-titles">Shops</h5>
+        <div class="row">
+            {% for shop in shops %}
+                <div class="col card">
+                    <a href="?scene=shop&shop={{ shop.name|url_encode }}">
+                        <p>{{ shop.name }}</p>
+                        <p style="color:gray; font-size: 0.7em">{{ shop.description }}</p>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
