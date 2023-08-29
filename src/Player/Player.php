@@ -76,7 +76,7 @@ class Player
             return new Error('You are already hunting in a dungeon');
         }
 
-        $this->connection->execute('INSERT INTO hunting (username, dungeon_id, tid) VALUES (?, ?, ?)', [$this->name, $dungeon->id, DbTimeFactory::createCurrentTimestamp()]);
+        $this->connection->execute('INSERT INTO hunting (username, dungeon_id) VALUES (?, ?)', [$this->name, $dungeon->id]);
         $this->connection->execute('UPDATE players SET in_combat = 1 WHERE name = ?', [$this->name]);
 
         return null;

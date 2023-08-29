@@ -15,9 +15,10 @@ readonly class RewardCalculator
         $this->ttkCalculator = new TTKCalculator();
     }
 
-    public function calculate(Dungeon $dungeon, Player $hunter, TimeInterval $timesSpentInDungeon): Reward
+    // TODO SRP is violated here. At the same time encapsulation is not fulfiled. Calculate ttk separately and issue them too.
+    public function calculate(Dungeon $dungeon, Player $hunter, int $minutesInDungeon): Reward
     {
-        $approximateSpentMinutes = (int)round($timesSpentInDungeon->toMinutes());
+        $approximateSpentMinutes = $minutesInDungeon;
         if ($approximateSpentMinutes === 0) {
             return Reward::none();
         }
