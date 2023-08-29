@@ -46,6 +46,8 @@ class HttpApi
                 return $this->useItem($request);
             case 'sellItem':
                 return $this->sellItem($request);
+            case 'viewLogs':
+                return $this->viewLogs($request);
             default:
                 return $this->failure('Unknown API action');
         }
@@ -153,6 +155,13 @@ class HttpApi
         }
 
         return $this->success();
+    }
+
+    private function viewLogs(Request $request): Response
+    {
+        $logs = iterator_to_array($this->player->getLogs(5));
+
+        return $this->success(['logs' => $logs]);
     }
 
     private function success(array $data = []): Response

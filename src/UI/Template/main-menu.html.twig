@@ -25,26 +25,25 @@
 {% endblock %}
 {% block footer %}
     <script>
-        if (window.history.replaceState) {
-            window.history.replaceState(null, null, window.location.href);
+        function showLogs() {
+            const logContainer = document.getElementById('combatlog');
+
+            performAction('viewLogs')
+                .then(function (result) {
+                    if (!result.success) {
+                        logContainer.innerHTML = result.message;
+                    }
+
+                    let logsContent = '';
+                    for (let i = 0; i < result.data.logs.length; i++) {
+                        logsContent += result.data.logs[i] + '<br>';
+                    }
+
+                    logContainer.innerHTML = logsContent;
+                });
         }
 
-        // todo replace with api call
-        function refreshDiv() {
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function () {
-                if (this.readyState == 4 && this.status == 200) {
-                    document.getElementById('combatlog').innerHTML = this.responseText;
-                }
-            };
-            xhttp.open('GET', 'log.php', true);
-            xhttp.send();
-        }
-
-        setInterval(refreshDiv, 3000);
-
-        if (window.history.replaceState) {
-            window.history.replaceState(null, null, window.location.href);
-        }
+        showLogs();
+        setInterval(showLogs, 10000);
     </script>
 {% endblock %}

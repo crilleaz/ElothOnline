@@ -13,7 +13,12 @@ $api = DI::getService(HttpApi::class);
 
 $request = Request::createFromGlobals();
 // decode json data and replace request params with it
-$request->request = new InputBag($request->toArray());
+try {
+    $data = $request->toArray();
+} catch (\Symfony\Component\HttpFoundation\Exception\JsonException $e) {
+    $data = [];
+}
+$request->request = new InputBag($data);
 $response = $api->handle($request);
 $response->prepare($request);
 $response->send();
