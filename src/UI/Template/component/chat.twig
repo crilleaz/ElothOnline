@@ -59,7 +59,8 @@
     }
 
     window.addEventListener("load", () => {
-        setInterval(refreshChat, 3000);
+        refreshChat();
+        setInterval(refreshChat, 10000);
 
         const newMsgInputField = document.getElementById('new-chat-msg');
         newMsgInputField.addEventListener('keypress', function(event) {
