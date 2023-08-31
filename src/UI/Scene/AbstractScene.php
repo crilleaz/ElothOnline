@@ -7,6 +7,7 @@ use Game\Dungeon\Dungeon;
 use Game\Dungeon\DungeonRepository;
 use Game\Client;
 use Game\Player\Player;
+use Game\UI\Scene\Input\HttpInput;
 use Twig\Environment;
 
 abstract class AbstractScene implements SceneInterface
@@ -32,12 +33,15 @@ abstract class AbstractScene implements SceneInterface
     }
 
     /**
-     * @param class-string<SceneInterface> $scene
+     * @param class-string<SceneInterface> $sceneName
      * @return string
      */
-    protected function switchToScene(string $scene): string
+    protected function switchToScene(string $sceneName): string
     {
-        return \DI::getService($scene)->run();
+        /** @var SceneInterface $scene */
+        $scene =\DI::getService($sceneName);
+
+        return $scene->run(new HttpInput());
     }
 
     protected function getCurrentPlayer(): Player

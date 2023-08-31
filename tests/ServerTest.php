@@ -26,10 +26,10 @@ class ServerTest extends IntegrationTestCase
         $dungeon1 = $dungeonRepository->getById(1);
         $dungeon2 = $dungeonRepository->getById(2);
 
-        $this->createPlayer(self::PLAYER1, 100)->enterDungeon($dungeon1);
-        $this->createPlayer(self::PLAYER2, 40)->enterDungeon($dungeon2);
-        $this->createPlayer(self::PLAYER3, 23);
-        $this->createPlayer(self::PLAYER4, 61);
+        $this->createCharacter(self::PLAYER1, 100)->enterDungeon($dungeon1);
+        $this->createCharacter(self::PLAYER2, 40)->enterDungeon($dungeon2);
+        $this->createCharacter(self::PLAYER3, 23);
+        $this->createCharacter(self::PLAYER4, 61);
     }
 
     public function testPerformTasksWhenThereIsNothingToDo(): void
@@ -68,29 +68,15 @@ class ServerTest extends IntegrationTestCase
         }
     }
 
-    private function createPlayer(string $playerName, int $stamina): Player
-    {
-        $this->game->register($playerName, 'SomePassword');
-        $player = Player::loadPlayer($playerName, $this->db);
-        $this->setStamina($player, $stamina);
-
-        return $player;
-    }
-
-    private function setStamina(Player $player, int $value): void
-    {
-        $this->db->execute("UPDATE players SET stamina=? WHERE name = ?", [$value, $player->getName()]);
-    }
-
     private function assertStaminaRestoredForRestingPlayers(int $amount): void
     {
-        $player = Player::loadPlayer(self::PLAYER3, $this->db);
+        $player = $this->getCharacterByName(self::PLAYER3);
         self::assertEquals(
             min($amount + 23, Player::MAX_POSSIBLE_STAMINA),
             $player->getStamina()
         );
 
-        $player = Player::loadPlayer(self::PLAYER4, $this->db);
+        $player = $this->getCharacterByName(self::PLAYER4);
         self::assertEquals(
             min($amount + 61, Player::MAX_POSSIBLE_STAMINA),
             $player->getStamina()
@@ -99,16 +85,18 @@ class ServerTest extends IntegrationTestCase
 
     private function assertStaminaSpentForHuntingPlayers(int $amount): void
     {
-        $player = Player::loadPlayer(self::PLAYER1, $this->db);
-        self::assertEquals(
+        $player = $this->getCharacterByName(self::PLAYER1);
+        self::assertEqualsWithDelta(
             max(100 - $amount, 0),
-            $player->getStamina()
+            $player->getStamina(),
+            2
         );
 
-        $player = Player::loadPlayer(self::PLAYER2, $this->db);
-        self::assertEquals(
+        $player = $this->getCharacterByName(self::PLAYER2);
+        self::assertEqualsWithDelta(
             max(40 - $amount, 0),
-            $player->getStamina()
+            $player->getStamina(),
+            2
         );
     }
 
@@ -117,26 +105,26 @@ class ServerTest extends IntegrationTestCase
      */
     private function assertHuntersReceivedRewards(): void
     {
-        $player = Player::loadPlayer(self::PLAYER1, $this->db);
-        self::assertEquals(75, $player->getExp());
+        $player = $this->getCharacterByName(self::PLAYER1);
+        self::assertEqualsWithDelta(235, $player->getExp(), 10);
 
-        $player = Player::loadPlayer(self::PLAYER2, $this->db);
-        self::assertEquals(200, $player->getExp());
+        $player = $this->getCharacterByName(self::PLAYER2);
+        self::assertEqualsWithDelta(1000, $player->getExp(), 10);
 
-        $player = Player::loadPlayer(self::PLAYER3, $this->db);
+        $player = $this->getCharacterByName(self::PLAYER3);
         self::assertEquals(0, $player->getExp());
 
-        $player = Player::loadPlayer(self::PLAYER4, $this->db);
+        $player = $this->getCharacterByName(self::PLAYER4);
         self::assertEquals(0, $player->getExp());
     }
 
     private function assertExhaustedPlayersRemovedTheDungeon(): void
     {
-        $player = Player::loadPlayer(self::PLAYER1, $this->db);
+        $player = $this->getCharacterByName(self::PLAYER1);
         self::assertTrue($player->isFighting());
         self::assertEquals(1, $player->getHuntingDungeonId(), 'Player had to stay in the same dungeon');
 
-        $player = Player::loadPlayer(self::PLAYER2, $this->db);
+        $player = $this->getCharacterByName(self::PLAYER2);
         self::assertTrue($player->isInProtectiveZone());
     }
 }

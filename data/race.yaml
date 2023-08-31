@@ -1,0 +1,41 @@
+-   id: 1
+    name: Wouldren
+    description: Farmer, harvester and lumberjack. Come from Timberhart.
+    canCraft: false
+    canMine: false
+    canWoodcut: true
+    canHarvest: true
+    canGather: false
+    canBrew: false
+    stats:
+        strength: 10
+        defence: 5
+        maxHealth: 20
+
+-   id: 2
+    name: Ironhart
+    description: Miners and crafters. Come from Orveil city.
+    canCraft: true
+    canMine: true
+    canWoodcut: false
+    canHarvest: false
+    canGather: false
+    canBrew: false
+    stats:
+        strength: 15
+        defence: 8
+        maxHealth: 25
+
+-   id: 3
+    name: Highlander
+    description: Herb gatherers and brewers. Come from Pit.
+    canCraft: false
+    canMine: false
+    canWoodcut: false
+    canHarvest: false
+    canGather: true
+    canBrew: true
+    stats:
+        strength: 10
+        defence: 3
+        maxHealth: 30

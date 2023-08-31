@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Eloth Online</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="/js/popup-notifier.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<style>
+    table{
+        width: 100%;
+    }
+    td {
+        width:50%;
+        border:1px solid gray;
+    }
+</style>
+<body>
+<div class="row">
+    {% if error != '' %}
+        <p style='color:red'>{{ error }}</p>
+    {% endif %}
+    {% for race in races %}
+        <div
+                class="col card" style="box-shadow: 0 0 2px black; text-align: center; padding: 5px; cursor: pointer;"
+                onclick="window.location.href='/?race={{ race.id }}';"
+                title="Select this race"
+        >
+            <div>{{ race.name }}</div>
+            <hr>
+            <div>{{ race.description }}</div>
+            <div>
+                <p>Base stats</p>
+                <table>
+                    <tbody>
+                    <tr>
+                        <td>Health</td>
+                        <td>{{ race.stats.maxHealth }}</td>
+                    </tr>
+                    <tr>
+                        <td>Strength</td>
+                        <td>{{ race.stats.strength }}</td>
+                    </tr>
+                    <tr>
+                        <td>Defence</td>
+                        <td>{{ race.stats.defence }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <p>Perks</p>
+                <p>Not implemented yet</p>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+</body>

@@ -12,12 +12,12 @@ use Twig\Environment;
 class Library extends AbstractScene
 {
     public function __construct(
-        Client                             $game,
+        Client                             $client,
         Environment                        $renderer,
         DungeonRepository                  $dungeonRepository,
-        private readonly MonsterRepository $monsterRepository)
-    {
-        parent::__construct($game, $renderer, $dungeonRepository);
+        private readonly MonsterRepository $monsterRepository
+    ) {
+        parent::__construct($client, $renderer, $dungeonRepository);
     }
 
     public function run(InputInterface $input): string

@@ -11,9 +11,9 @@ use Twig\Environment;
 
 class Shop extends AbstractScene
 {
-    public function __construct(Client $game, Environment $renderer, DungeonRepository $dungeonRepository, private readonly ShopRepository $shopRepository)
+    public function __construct(Client $client, Environment $renderer, DungeonRepository $dungeonRepository, private readonly ShopRepository $shopRepository)
     {
-        parent::__construct($game, $renderer, $dungeonRepository);
+        parent::__construct($client, $renderer, $dungeonRepository);
     }
 
     public function run(InputInterface $input): string
@@ -28,7 +28,7 @@ class Shop extends AbstractScene
             return $this->switchToScene(Shops::class);
         }
 
-        $player = $this->client->getCurrentPlayer();
+        $player = $this->getCurrentPlayer();
 
         return $this->renderTemplate('shop', [
             'playerGold' => $player->getGold(),

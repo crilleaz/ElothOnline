@@ -18,6 +18,7 @@ enum Navigation: string
     case SHOPS = 'shops';
 
     case SHOP = 'shop';
+    case CHARACTER_CREATION = 'charCreation';
 
     public function load(): void
     {
@@ -42,6 +43,8 @@ enum Navigation: string
                 return DI::getService(Scene\Shops::class);
             case self::SHOP:
                 return DI::getService(Scene\Shop::class);
+            case self::CHARACTER_CREATION:
+                return DI::getService(Scene\CharacterCreation::class);
             default:
                 return DI::getService(Scene\Auth::class);
         }
@@ -50,15 +53,19 @@ enum Navigation: string
 
 session_start();
 
-if (isset($_GET['scene']) && is_string($_GET['scene'])) {
+$gameClient = DI::getService(\Game\Client::class);
+
+if (!$gameClient->isRunning()) {
+    $navigation = Navigation::AUTH;
+} elseif ($gameClient->getCurrentPlayer() === null) {
+    $navigation = Navigation::CHARACTER_CREATION;
+} else if (isset($_GET['scene']) && is_string($_GET['scene'])) {
     $navigation = Navigation::tryFrom($_GET['scene']);
     if ($navigation === null) {
         exit('Unknown scene');
     }
-} else if (DI::getService(\Game\Client::class)->getCurrentPlayer() !== null) {
-    $navigation = Navigation::MAIN;
 } else {
-    $navigation = Navigation::AUTH;
+    $navigation = Navigation::MAIN;
 }
 
 $navigation->load();

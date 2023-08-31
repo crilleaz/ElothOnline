@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Game\Player;
 
+use Game\Auth\AuthService;
 use Game\Dungeon\Drop;
 use Game\Dungeon\DungeonRepository;
 use Game\IntegrationTestCase;
@@ -20,10 +21,7 @@ class PlayerTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $this->db->execute("INSERT INTO players(name, experience, health, health_max, defence, strength)
-                            VALUES ('Mick', '0', 120, 120, 5, 100)");
-        $this->player = Player::loadPlayer('Mick', $this->db);
-
+        $this->player = $this->createCharacter('Mick');
         $this->dungeonRepository = $this->getService(DungeonRepository::class);
     }
 

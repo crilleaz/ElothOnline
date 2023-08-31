@@ -8,6 +8,7 @@ use Game\Dungeon\DungeonRepository;
 use Game\Dungeon\RewardCalculator;
 use Game\Engine\DBConnection;
 use Game\Engine\DbTimeFactory;
+use Game\Player\CharacterRepository;
 use Game\Player\Player;
 
 class Server
@@ -19,7 +20,8 @@ class Server
     public function __construct(
         private readonly DBConnection $db,
         private readonly RewardCalculator $rewardCalculator,
-        private readonly DungeonRepository $dungeonRepository
+        private readonly DungeonRepository $dungeonRepository,
+        private readonly CharacterRepository $characterRepository
     ){}
 
     /**
@@ -68,12 +70,12 @@ class Server
 
     private function stopExhaustedHunters(): void
     {
-        $huntingPlayers = $this->db->fetchRows("SELECT name, in_combat, stamina FROM players WHERE stamina <= 0 AND in_combat = 1");
+        $huntingPlayers = $this->db->fetchRows("SELECT id, name, in_combat, stamina FROM players WHERE stamina <= 0 AND in_combat = 1");
         foreach ($huntingPlayers as $row) {
             $playerNameWithNoStamina = $row['name'];
 
-            $this->db->execute('DELETE from hunting WHERE username = ?', [$playerNameWithNoStamina]);
-            $this->db->execute('UPDATE players SET in_combat = 0, stamina=0 WHERE name = ?', [$playerNameWithNoStamina]);
+            $this->db->execute('DELETE from hunting WHERE character_id = ?', [$row['id']]);
+            $this->db->execute('UPDATE players SET in_combat = 0, stamina=0 WHERE id = ?', [$row['id']]);
             $this->logs[] = sprintf('<Exhausted player="%s"/>', $playerNameWithNoStamina);
         }
     }
@@ -91,8 +93,7 @@ class Server
         $rewardLogs[] = '<Rewards>';
         $now = CarbonImmutable::now();
         foreach ($this->getHunters() as $row) {
-            $playerName = $row['username'];
-            $hunter = Player::loadPlayer($playerName, $this->db);
+            $hunter = $this->characterRepository->getById($row['character_id']);
             $huntingZone = $this->dungeonRepository->getById($row['dungeon_id']);
 
             $lastCheckedAt = CarbonImmutable::create($row['checked_at']);
@@ -111,16 +112,16 @@ class Server
                 $minutesSinceLastReward = $lastRewardedAt->diffInMinutes($lastCheckedAt, false) + $remainingStamina;
             }
 
-            $this->db->execute('UPDATE players SET stamina = GREATEST(stamina - ?, 0)  WHERE name = ?', [$minutesSinceLastCheck, $playerName]);
+            $this->db->execute('UPDATE players SET stamina = GREATEST(stamina - ?, 0)  WHERE id = ?', [$minutesSinceLastCheck, $hunter->getId()]);
 
             $reward = $this->rewardCalculator->calculate($huntingZone, $hunter, $minutesSinceLastReward);
             if ($reward->isEmpty()) {
-                $this->db->execute('UPDATE hunting SET checked_at = ? WHERE username = ?', [DbTimeFactory::createTimestamp($now), $playerName]);
+                $this->db->execute('UPDATE hunting SET checked_at = ? WHERE character_id = ?', [DbTimeFactory::createTimestamp($now), $hunter->getId()]);
 
                 continue;
             }
 
-            $this->db->execute('UPDATE hunting SET checked_at = ?, last_reward_at = ? WHERE username = ?', [DbTimeFactory::createTimestamp($now), DbTimeFactory::createTimestamp($now), $playerName]);
+            $this->db->execute('UPDATE hunting SET checked_at = ?, last_reward_at = ? WHERE character_id = ?', [DbTimeFactory::createTimestamp($now), DbTimeFactory::createTimestamp($now), $hunter->getId()]);
 
             $hunter->addExp($reward->exp);
 
@@ -132,7 +133,7 @@ class Server
 
             $rewardLogs[] = sprintf(
                 $logTemplate,
-                $playerName,
+                $hunter->getName(),
                 $huntingZone->name,
                 $minutesSinceLastReward . 'minutes',
                 $reward->exp,
@@ -151,14 +152,15 @@ class Server
     }
 
     /**
-     * @return iterable<array{checked_at: int, last_reward_at: int, username: string, dungeon_id: int}>
+     * @return iterable<array{checked_at: int, last_reward_at: int, character_id: int, dungeon_id: int}>
      */
     private function getHunters(): iterable
     {
         $lastCheckedAt = $this->currentTime->subMinute();
 
+        // TODO change username to id
         return $this->db->fetchRows(
-            'SELECT username, dungeon_id, last_reward_at, checked_at FROM hunting WHERE checked_at < ?',
+            'SELECT character_id, dungeon_id, last_reward_at, checked_at FROM hunting WHERE checked_at < ?',
             [DbTimeFactory::createTimestamp($lastCheckedAt)]
         );
     }

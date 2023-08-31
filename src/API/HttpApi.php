@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace Game\API;
 
+use Game\Auth\AuthService;
 use Game\Chat\Chat;
 use Game\Engine\Error;
 use Game\Client;
 use Game\Item\Item;
-use Game\Item\ItemPrototypeRepository;
 use Game\Player\Player;
 use Game\Trade\Offer;
 use Game\Trade\ShopRepository;
@@ -19,14 +19,14 @@ class HttpApi
 {
     private Player $player;
 
-    public function __construct(private readonly Client $game)
+    public function __construct(private readonly Client $client, private readonly AuthService $authService)
     {
 
     }
 
     public function handle(Request $request): Response
     {
-        $currentPlayer = $this->game->getCurrentPlayer();
+        $currentPlayer = $this->client->getCurrentPlayer();
         if ($currentPlayer === null) {
             return $this->failure('Player is not authenticated. Please, sign in first.');
         }
@@ -88,11 +88,13 @@ class HttpApi
             return $this->failure('Username is empty');
         }
 
-        if (!$this->player->isAdmin()) {
+        $user = $this->authService->getCurrentUser();
+        if ($user === null || !$user->isAdmin()) {
             return $this->failure('Only admin can perform this action');
         }
 
-        \DI::getService(Client::class)->banPlayer($username);
+        \DI::getService(AuthService::class)->banPlayer($username);
+        \DI::getService(Chat::class)->addSystemMessage(sprintf('User "%s" has been banned', $username));
 
         return $this->success();
     }

@@ -13,13 +13,8 @@
                         <th style="width:20%;">Experience</th>
                     </tr>
                     {% for topPlayer in topPlayers %}
-                        {% if topPlayer.isAdmin %}
-                            <tr title="This player is a gamemaster.">
-                            <td><font color="red">{{ topPlayer.name }}</font></td>
-                        {% else %}
-                            <tr>
-                            <td>{{ topPlayer.name }}</td>
-                        {% endif %}
+                        <tr>
+                        <td>{{ topPlayer.name }}</td>
                         <td>{{ topPlayer.level }}</td>
                         <td>{{ topPlayer.exp }}</td>
                         </tr>

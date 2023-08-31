@@ -36,7 +36,7 @@ class Dungeons extends AbstractScene
     private function handleInteraction(InputInterface $input): void
     {
         $selectedDungeon = $input->getInt('hunt');
-        if ($selectedDungeon !== null) {
+        if ($selectedDungeon !== 0) {
             $dungeon = $this->dungeonRepository->findById($selectedDungeon);
 
             $result = $this->getCurrentPlayer()->enterDungeon($dungeon);
