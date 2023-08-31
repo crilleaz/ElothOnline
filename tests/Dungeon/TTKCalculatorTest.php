@@ -76,35 +76,35 @@ class TTKCalculatorTest extends IntegrationTestCase
     #[DataProvider('ttkMonsterProvider')]
     public function testCalculateForPlayer(array $playerStats, Monster $prey, TimeInterval $expectedTTK): void
     {
-        $hunter = $this->createPlayer(...$playerStats);
+        $hunter = $this->createCharacterWithStats(...$playerStats);
         $result = $this->calculator->calculate($hunter, $prey);
 
         self::assertEquals($expectedTTK->seconds, $result->seconds);
     }
 
-
     #[DataProvider('ttkPlayerProvider')]
     public function testCalculateForMonster(array $playerStats, Monster $hunter, TimeInterval $expectedTTK): void
     {
-        $prey = $this->createPlayer(...$playerStats);
+        $prey = $this->createCharacterWithStats(...$playerStats);
         $result = $this->calculator->calculateForMonster($hunter, $prey);
 
         self::assertEquals($expectedTTK->seconds, $result->seconds);
     }
 
-    private function createPlayer(int $attack, int $defence, int $health): Player
+    private function createCharacterWithStats(int $attack, int $defence, int $health): Player
     {
-        $playerName = 'SomeRandomName' . uniqid();
+        $characterName = 'SomeRandomName' . uniqid();
+        $character = $this->createCharacter($characterName);
 
         $params = [
-            $playerName,
             $attack,
             $defence,
             $health,
+            $character->getId(),
         ];
 
-        $this->db->execute('INSERT INTO players(name, strength, defence, health) VALUE(?, ?, ?, ?)', $params);
+        $this->db->execute('UPDATE players SET strength = ?, defence = ?, health = ? WHERE id = ?', $params);
 
-        return Player::loadPlayer($playerName, $this->db);
+        return $this->getCharacterByName($characterName);
     }
 }

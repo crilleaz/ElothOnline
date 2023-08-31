@@ -5,21 +5,22 @@ namespace Game\UI\Scene;
 
 use Game\Dungeon\DungeonRepository;
 use Game\Dungeon\MonsterRepository;
-use Game\Game;
+use Game\Client;
+use Game\UI\Scene\Input\InputInterface;
 use Twig\Environment;
 
 class Library extends AbstractScene
 {
     public function __construct(
-        Game $game,
-        Environment $renderer,
-        DungeonRepository $dungeonRepository,
-        private readonly MonsterRepository $monsterRepository)
-    {
-        parent::__construct($game, $renderer, $dungeonRepository);
+        Client                             $client,
+        Environment                        $renderer,
+        DungeonRepository                  $dungeonRepository,
+        private readonly MonsterRepository $monsterRepository
+    ) {
+        parent::__construct($client, $renderer, $dungeonRepository);
     }
 
-    public function run(): string
+    public function run(InputInterface $input): string
     {
         return $this->renderTemplate('library', [
             'monsters' => $this->monsterRepository->listMonsters(),

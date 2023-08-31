@@ -9,18 +9,18 @@ readonly class PlayerLog
 {
     public function __construct(private DBConnection $db) {}
 
-    public function add(string $playerName, string $log): void
+    public function add(int $characterId, string $log): void
     {
-        $this->db->execute("INSERT INTO log (username, message) VALUES (?, ?)", [$playerName, $log]);
+        $this->db->execute("INSERT INTO log (character_id, message) VALUES (?, ?)", [$characterId, $log]);
     }
 
     /**
      * @return iterable<string>
      */
-    public function readLogs(string $playerName, int $amount): iterable
+    public function readLogs(int $characterId, int $amount): iterable
     {
         $logs = $this->db
-            ->fetchRows("SELECT message FROM log WHERE username=? ORDER BY tid DESC LIMIT ?", [$playerName, $amount]);
+            ->fetchRows("SELECT message FROM log WHERE id=? ORDER BY tid DESC LIMIT ?", [$characterId, $amount]);
 
         foreach ($logs as $log) {
             yield $log['message'];

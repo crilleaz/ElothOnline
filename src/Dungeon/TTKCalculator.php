@@ -20,7 +20,7 @@ class TTKCalculator
 
     public function calculateForMonster(Monster $hunter, Player $prey): TimeInterval
     {
-        return $this->calculateTtk($hunter->attack, $prey->getDefence(), $prey->getMaxHealth());
+        return $this->calculateTtk($hunter->attack, $prey->getDefence(), $prey->getCurrentHealth());
     }
 
     private function calculateTtk(int $attack, int $defence, int $health): TimeInterval

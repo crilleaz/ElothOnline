@@ -5,6 +5,7 @@ namespace Game\Chat;
 
 use Game\Engine\DBConnection;
 use Game\Player\Player;
+use Game\User;
 
 readonly class Chat
 {
@@ -40,6 +41,6 @@ readonly class Chat
 
     private function isFromAdmin(string $sender): bool
     {
-        return $sender === 'System' || Player::loadPlayer($sender, $this->db)->isAdmin();
+        return $sender === 'System' || User::hasAdminAccess($sender);
     }
 }

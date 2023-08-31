@@ -5,21 +5,20 @@ namespace Game\UI\Scene;
 
 use Game\Dungeon\Dungeon;
 use Game\Dungeon\DungeonRepository;
-use Game\Game;
+use Game\Client;
 use Game\Player\Player;
+use Game\UI\Scene\Input\HttpInput;
 use Twig\Environment;
 
 abstract class AbstractScene implements SceneInterface
 {
     public function __construct(
-        protected readonly Game $game,
+        protected readonly Client          $client,
         private readonly Environment       $renderer,
         private readonly DungeonRepository $dungeonRepository
     ) {
 
     }
-
-    abstract public function run(): string;
 
     protected function renderTemplate(string $templateName, array $parameters = []): string
     {
@@ -34,17 +33,20 @@ abstract class AbstractScene implements SceneInterface
     }
 
     /**
-     * @param class-string<SceneInterface> $scene
+     * @param class-string<SceneInterface> $sceneName
      * @return string
      */
-    protected function switchToScene(string $scene): string
+    protected function switchToScene(string $sceneName): string
     {
-        return \DI::getService($scene)->run();
+        /** @var SceneInterface $scene */
+        $scene =\DI::getService($sceneName);
+
+        return $scene->run(new HttpInput());
     }
 
     protected function getCurrentPlayer(): Player
     {
-        return $this->game->getCurrentPlayer();
+        return $this->client->getCurrentPlayer();
     }
 
     protected function getHuntingDungeon(): ?Dungeon

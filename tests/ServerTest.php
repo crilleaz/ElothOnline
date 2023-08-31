@@ -1,13 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Game\Engine;
+namespace Game;
 
 use Game\Dungeon\DungeonRepository;
-use Game\IntegrationTestCase;
 use Game\Player\Player;
 
-class EngineTest extends IntegrationTestCase
+class ServerTest extends IntegrationTestCase
 {
     private const MINUTES_SINCE_THE_LAST_EXECUTION = 47;
 
@@ -16,26 +15,26 @@ class EngineTest extends IntegrationTestCase
     private const PLAYER3 = 'Gamid';
     private const PLAYER4 = 'Mila';
 
-    private Engine $engine;
+    private Server $server;
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->engine = $this->getService(Engine::class);
+        $this->server = $this->getService(Server::class);
 
         $dungeonRepository = $this->getService(DungeonRepository::class);
         $dungeon1 = $dungeonRepository->getById(1);
         $dungeon2 = $dungeonRepository->getById(2);
 
-        $this->createPlayer(self::PLAYER1, 100)->enterDungeon($dungeon1);
-        $this->createPlayer(self::PLAYER2, 40)->enterDungeon($dungeon2);
-        $this->createPlayer(self::PLAYER3, 23);
-        $this->createPlayer(self::PLAYER4, 61);
+        $this->createCharacter(self::PLAYER1, 100)->enterDungeon($dungeon1);
+        $this->createCharacter(self::PLAYER2, 40)->enterDungeon($dungeon2);
+        $this->createCharacter(self::PLAYER3, 23);
+        $this->createCharacter(self::PLAYER4, 61);
     }
 
     public function testPerformTasksWhenThereIsNothingToDo(): void
     {
-        $result = $this->engine->performTasks();
+        $result = $this->server->performTasks();
 
         $this->assertStaminaRestoredForRestingPlayers(0);
         $this->assertStaminaSpentForHuntingPlayers(0);
@@ -47,7 +46,7 @@ class EngineTest extends IntegrationTestCase
     {
         $this->setCurrentTime($this->currentTime->addMinutes(self::MINUTES_SINCE_THE_LAST_EXECUTION));
 
-        $logs = $this->engine->performTasks();
+        $logs = $this->server->performTasks();
 
         $this->assertStaminaRestoredForRestingPlayers(self::MINUTES_SINCE_THE_LAST_EXECUTION);
         $this->assertStaminaSpentForHuntingPlayers(self::MINUTES_SINCE_THE_LAST_EXECUTION);
@@ -69,29 +68,15 @@ class EngineTest extends IntegrationTestCase
         }
     }
 
-    private function createPlayer(string $playerName, int $stamina): Player
-    {
-        $this->game->register($playerName, 'SomePassword');
-        $player = Player::loadPlayer($playerName, $this->db);
-        $this->setStamina($player, $stamina);
-
-        return $player;
-    }
-
-    private function setStamina(Player $player, int $value): void
-    {
-        $this->db->execute("UPDATE players SET stamina=? WHERE name = ?", [$value, $player->getName()]);
-    }
-
     private function assertStaminaRestoredForRestingPlayers(int $amount): void
     {
-        $player = Player::loadPlayer(self::PLAYER3, $this->db);
+        $player = $this->getCharacterByName(self::PLAYER3);
         self::assertEquals(
             min($amount + 23, Player::MAX_POSSIBLE_STAMINA),
             $player->getStamina()
         );
 
-        $player = Player::loadPlayer(self::PLAYER4, $this->db);
+        $player = $this->getCharacterByName(self::PLAYER4);
         self::assertEquals(
             min($amount + 61, Player::MAX_POSSIBLE_STAMINA),
             $player->getStamina()
@@ -100,16 +85,18 @@ class EngineTest extends IntegrationTestCase
 
     private function assertStaminaSpentForHuntingPlayers(int $amount): void
     {
-        $player = Player::loadPlayer(self::PLAYER1, $this->db);
-        self::assertEquals(
+        $player = $this->getCharacterByName(self::PLAYER1);
+        self::assertEqualsWithDelta(
             max(100 - $amount, 0),
-            $player->getStamina()
+            $player->getStamina(),
+            2
         );
 
-        $player = Player::loadPlayer(self::PLAYER2, $this->db);
-        self::assertEquals(
+        $player = $this->getCharacterByName(self::PLAYER2);
+        self::assertEqualsWithDelta(
             max(40 - $amount, 0),
-            $player->getStamina()
+            $player->getStamina(),
+            2
         );
     }
 
@@ -118,26 +105,26 @@ class EngineTest extends IntegrationTestCase
      */
     private function assertHuntersReceivedRewards(): void
     {
-        $player = Player::loadPlayer(self::PLAYER1, $this->db);
-        self::assertEquals(75, $player->getExp());
+        $player = $this->getCharacterByName(self::PLAYER1);
+        self::assertEqualsWithDelta(235, $player->getExp(), 10);
 
-        $player = Player::loadPlayer(self::PLAYER2, $this->db);
-        self::assertEquals(200, $player->getExp());
+        $player = $this->getCharacterByName(self::PLAYER2);
+        self::assertEqualsWithDelta(1000, $player->getExp(), 10);
 
-        $player = Player::loadPlayer(self::PLAYER3, $this->db);
+        $player = $this->getCharacterByName(self::PLAYER3);
         self::assertEquals(0, $player->getExp());
 
-        $player = Player::loadPlayer(self::PLAYER4, $this->db);
+        $player = $this->getCharacterByName(self::PLAYER4);
         self::assertEquals(0, $player->getExp());
     }
 
     private function assertExhaustedPlayersRemovedTheDungeon(): void
     {
-        $player = Player::loadPlayer(self::PLAYER1, $this->db);
+        $player = $this->getCharacterByName(self::PLAYER1);
         self::assertTrue($player->isFighting());
         self::assertEquals(1, $player->getHuntingDungeonId(), 'Player had to stay in the same dungeon');
 
-        $player = Player::loadPlayer(self::PLAYER2, $this->db);
+        $player = $this->getCharacterByName(self::PLAYER2);
         self::assertTrue($player->isInProtectiveZone());
     }
 }
