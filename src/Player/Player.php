@@ -7,7 +7,6 @@ use Game\Dungeon\Drop;
 use Game\Dungeon\Dungeon;
 use Game\Dungeon\TTKCalculator;
 use Game\Engine\DBConnection;
-use Game\Engine\DbTimeFactory;
 use Game\Engine\Error;
 use Game\Item\Item;
 use Game\Item\ItemPrototype as ItemPrototype;
@@ -19,17 +18,6 @@ class Player
     public const MAX_POSSIBLE_STAMINA = 100;
 
     private readonly PlayerLog $logger;
-
-    /**
-     * @param string $name
-     * @param DBConnection $connection
-     * @return self
-     * @deprecated will be removed
-     */
-    public static function loadPlayer(int $id, DBConnection $connection): self
-    {
-        return new self($id, $connection);
-    }
 
     /**
      * @internal Should not be used outside the current module
@@ -264,10 +252,7 @@ class Player
             if ($remainingItemsQuantity < 0) {
                 throw new \RuntimeException('Player does not have that many items');
             }
-
-            if ($remainingItemsQuantity === 0) {
-                $this->destroyItem($item);
-            }
+            $this->removeNonExistentItems();
         });
 
         return new Drop($item, $quantity);
