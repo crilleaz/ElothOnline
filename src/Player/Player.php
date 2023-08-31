@@ -208,9 +208,9 @@ class Player
         return (int) $this->getProperty('harvesting');
     }
 
-    public function getHerbalism(): int
+    public function getAlchemy(): int
     {
-        return (int) $this->getProperty('herbalism');
+        return (int) $this->getProperty('alchemy');
     }
 
     public function getBlacksmith(): int

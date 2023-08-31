@@ -52,11 +52,17 @@ class CreateCharacterTest extends IntegrationTestCase
         self::assertEquals(10, $character->getGold());
         self::assertFalse($character->isFighting());
         self::assertTrue($character->isInProtectiveZone());
-        self::assertEquals(0, $character->getWoodcutting());
-        self::assertEquals(0, $character->getHerbalism());
-        self::assertEquals(0, $character->getHarvesting());
-        self::assertEquals(0, $character->getBlacksmith());
-        self::assertEquals(0, $character->getMining());
-        self::assertEquals(0, $character->getGathering());
+        $lumberjackLvl = $expectedRace->perks->canWoodcut ? 1 : 0;
+        $minerLvl = $expectedRace->perks->canMine ? 1 : 0;
+        $craftsmanLvl = $expectedRace->perks->canCraft ? 1 : 0;
+        $gathererLvl = $expectedRace->perks->canGather ? 1 : 0;
+        $farmerLvl = $expectedRace->perks->canHarvest ? 1 : 0;
+        $alchemistLvl = $expectedRace->perks->canBrew ? 1 : 0;
+        self::assertEquals($lumberjackLvl, $character->getWoodcutting());
+        self::assertEquals($alchemistLvl, $character->getAlchemy());
+        self::assertEquals($farmerLvl, $character->getHarvesting());
+        self::assertEquals($craftsmanLvl, $character->getBlacksmith());
+        self::assertEquals($minerLvl, $character->getMining());
+        self::assertEquals($gathererLvl, $character->getGathering());
     }
 }

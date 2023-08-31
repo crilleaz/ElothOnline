@@ -26,12 +26,12 @@
                 <pre>Abilities</pre>
             </center>
             <font size="2">
-                Woodcutting: {{ player.woodcutting }}<br>
-                Mining: {{ player.mining }} <br>
-                Gathering: {{ player.gathering }} <br>
-                Harvesting: {{ player.harvesting }} <br>
-                Blacksmith: {{ player.blacksmith }} <br>
-                Herbalism: {{ player.herbalism }} <br>
+                {% if player.woodcutting > 0 %}Lumberjack: {{ player.woodcutting }}<br>{% endif %}
+                {% if player.mining > 0 %}Miner: {{ player.mining }} <br>{% endif %}
+                {% if player.gathering > 0 %}Gatherer: {{ player.gathering }} <br>{% endif %}
+                {% if player.harvesting > 0 %}Farmer: {{ player.harvesting }} <br>{% endif %}
+                {% if player.blacksmith > 0 %}Craft: {{ player.blacksmith }} <br>{% endif %}
+                {% if player.alchemy > 0 %}Alchemist: {{ player.alchemy }} <br>{% endif %}
             </font>
         </li>
         <li class="list-group-item rounded">
