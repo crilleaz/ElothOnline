@@ -18,3 +18,11 @@
     id: 5
     name: Leather
     worth: 5
+-
+    id: 6
+    name: Firewood
+    worth: 0
+-
+    id: 7
+    name: Oka plank
+    worth: 1

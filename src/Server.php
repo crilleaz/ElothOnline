@@ -149,6 +149,50 @@ class Server
                 $this->logs[] = $rewardLog;
             }
         }
+
+        $this->giveActivityRewards();
+    }
+
+    private function giveActivityRewards(): void
+    {
+        $lastCheckedAt = $this->currentTime->subMinute();
+
+        $activities = $this->db->fetchRows('SELECT character_id, last_reward_at, checked_at FROM activity WHERE checked_at < ?', [DbTimeFactory::createTimestamp($lastCheckedAt)]);
+
+        foreach ($activities as $data) {
+            $character = $this->characterRepository->getById($data['character_id']);
+            $activity = $character->getCurrentActivity();
+
+            $lastCheckedAt = CarbonImmutable::create($data['checked_at']);
+            $lastRewardedAt = CarbonImmutable::create($data['last_reward_at']);
+
+            $minutesSinceLastCheck = $lastCheckedAt->diffInMinutes($this->currentTime, false);
+            $minutesSinceLastReward = $lastRewardedAt->diffInMinutes($this->currentTime, false);
+            $remainingStamina = $character->getStamina();
+            // If player spent in dungeon more time than stamina he has, decrease spent time according that amount
+            if ($remainingStamina < $minutesSinceLastCheck) {
+                $minutesSinceLastCheck = $remainingStamina;
+                $minutesSinceLastReward = $lastRewardedAt->diffInMinutes($lastCheckedAt, false) + $remainingStamina;
+            }
+
+            $this->db->execute('UPDATE players SET stamina = GREATEST(stamina - ?, 0)  WHERE id = ?', [$minutesSinceLastCheck, $character->getId()]);
+            $this->db->execute('UPDATE activity SET checked_at=? WHERE character_id=?', [DbTimeFactory::createTimestamp($this->currentTime), $character->getId()]);
+
+            if ($minutesSinceLastReward < 60) {
+                continue;
+            }
+
+            $fullHoursPassed = (int) ($minutesSinceLastReward/60);
+            $rewardPerHour = $activity->calculateReward($character);
+            $reward = $rewardPerHour->multiply($fullHoursPassed);
+
+            $character->addExp($reward->exp);
+            foreach ($reward->listDrop() as $drop) {
+                $character->pickUp($drop);
+            }
+
+            $this->db->execute('UPDATE activity SET last_reward_at=last_reward_at + INTERVAL ? HOUR WHERE character_id=?', [$fullHoursPassed, $character->getId()]);
+        }
     }
 
     /**

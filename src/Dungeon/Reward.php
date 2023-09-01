@@ -36,7 +36,7 @@ class Reward
      */
     public function listDrop(): array
     {
-        return $this->drop;
+        return array_values($this->drop);
     }
 
     private function addDrop(Drop $drop): void
@@ -48,5 +48,20 @@ class Reward
         } else {
             $this->drop[$itemId] = $drop;
         }
+    }
+
+    public function multiply(float $modifier): static
+    {
+        $newExp = (int) round($this->exp * $modifier);
+        $newDrops = [];
+        foreach ($this->drop as $drop) {
+            $newAmount = (int) round($drop->quantity * $modifier);
+            if ($newAmount === 0) {
+                continue;
+            }
+            $newDrops[] = new Drop($drop->item, $newAmount);
+        }
+
+        return new self($newExp, $newDrops);
     }
 }

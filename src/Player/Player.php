@@ -10,6 +10,8 @@ use Game\Engine\DBConnection;
 use Game\Engine\Error;
 use Game\Item\Item;
 use Game\Item\ItemPrototype as ItemPrototype;
+use Game\Player\Activity\ActivityInterface;
+use Game\Player\Activity\Lumberjack;
 use Game\Skill\Effect\EffectApplier;
 use Game\Trade\Offer;
 
@@ -135,6 +137,45 @@ class Player
         });
 
         $this->logger->add($this->id, "You gained $amount experience points.");
+    }
+
+    public function startActivity(ActivityInterface $activity): ?Error
+    {
+        if (!$this->isInProtectiveZone()) {
+            return new Error('Can not go for activities when not in protective zone');
+        }
+
+        if ($this->getCurrentActivity() !== null) {
+            return new Error('Character is busy with another activity');
+        }
+
+        $this->connection->execute("
+                        INSERT INTO activity(character_id, name, selected_option)
+                        VALUE (?, ?, ?)
+        ", [$this->id, $activity->getName(), $activity->getOption()]);
+
+        return null;
+    }
+
+    public function getCurrentActivity(): ?ActivityInterface
+    {
+        $data = $this->connection->fetchRow('SELECT name, selected_option FROM activity WHERE character_id=' . $this->id);
+        if ($data === []) {
+            return null;
+        }
+
+        // TODO some inflector would be good to resolve the values
+        switch ($data['name']) {
+            case 'Lumberjack':
+                return new Lumberjack($data['selected_option']);
+            default:
+                throw new \RuntimeException('Unknown activity');
+        }
+    }
+
+    public function stopActivity(): void
+    {
+        $this->connection->execute('DELETE FROM activity WHERE character_id=' . $this->id);
     }
 
     public function getLevel(): int

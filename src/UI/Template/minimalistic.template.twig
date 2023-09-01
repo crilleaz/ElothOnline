@@ -48,15 +48,15 @@
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
                    aria-haspopup="true" aria-expanded="false">
-                    World
+                    Activity
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="#">Woodcutting</a>
-                    <a class="dropdown-item" href="#">Mining</a>
-                    <a class="dropdown-item" href="#">Gathering</a>
-                    <a class="dropdown-item" href="#">Harvesting</a>
-                    <a class="dropdown-item" href="#">Blacksmith</a>
-                    <a class="dropdown-item" href="#">Herbalism</a>
+                    {% if player.woodcutting > 0 %}<a class="dropdown-item" href="/?scene=lumberjack">Lumberjack</a>{% endif %}
+                    {% if player.mining > 0 %}<a class="dropdown-item" title="Not implemented yet" href="#">Miner</a>{% endif %}
+                    {% if player.gathering > 0 %}<a class="dropdown-item" title="Not implemented yet" href="#">Gatherer</a>{% endif %}
+                    {% if player.harvesting > 0 %}<a class="dropdown-item" title="Not implemented yet" href="#">Farmer</a>{% endif %}
+                    {% if player.blacksmith > 0 %}<a class="dropdown-item" title="Not implemented yet" href="#">Crafter</a>{% endif %}
+                    {% if player.alchemy > 0 %}<a class="dropdown-item" title="Not implemented yet" href="#">Alchemist</a>{% endif %}
                 </div>
             </li>
             <li class="nav-item">

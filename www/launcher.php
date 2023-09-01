@@ -20,6 +20,8 @@ enum Navigation: string
     case SHOP = 'shop';
     case CHARACTER_CREATION = 'charCreation';
 
+    case ACTIVITY_LUMBERJACK = 'lumberjack';
+
     public function load(): void
     {
         $userInput = new HttpInput();
@@ -45,6 +47,8 @@ enum Navigation: string
                 return DI::getService(Scene\Shop::class);
             case self::CHARACTER_CREATION:
                 return DI::getService(Scene\CharacterCreation::class);
+            case self::ACTIVITY_LUMBERJACK:
+                return DI::getService(Scene\Activity\Lumberjack::class);
             default:
                 return DI::getService(Scene\Auth::class);
         }
