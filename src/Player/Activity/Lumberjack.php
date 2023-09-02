@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace Game\Player\Activity;
 
-use Game\Dungeon\Drop;
-use Game\Item\ItemPrototypeRepository;
+use Game\Item\Item;
 use Game\Player\Player;
 use Game\Player\Reward;
 
@@ -70,9 +69,7 @@ readonly class Lumberjack implements ActivityInterface
             return Reward::none();
         }
 
-        $itemRepository = \DI::getService(ItemPrototypeRepository::class);
-
-        return new Reward($option['rewardExp'], [new Drop($itemRepository->getById($option['rewardItem']), $efficiency)]);
+        return new Reward($option['rewardExp'], [new Item($option['rewardItem'], $efficiency)]);
     }
 
     public function isSame(ActivityInterface $activity): bool

@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Game\Player;
 
-use Game\Dungeon\Drop;
 use Game\Dungeon\Dungeon;
 use Game\Dungeon\TTKCalculator;
 use Game\Engine\DBConnection;
@@ -267,24 +266,25 @@ class Player
         return $this->logger->readLogs($this->id, $amount);
     }
 
-    public function pickUp(Drop $drop): void
+    public function pickUp(Item $item): void
     {
-        $this->obtainItem($drop->item, $drop->quantity);
-        $this->logger->add($this->id, sprintf("You picked up %d %s", $drop->quantity, $drop->item->name));
+        $this->obtainItem($item);
+
+        $this->logger->add($this->id, sprintf("You picked up %d %s", $item->quantity, $item->name));
     }
 
-    public function obtainItem(ItemPrototype $item, int $quantity): void
+    public function obtainItem(Item $item): void
     {
         if ($this->getItemQuantity($item->id) === 0) {
             $this->connection
-                ->execute('INSERT INTO inventory (character_id, item_id, amount, worth) VALUES (?, ?, ?, ?)', [$this->id, $item->id, $quantity, $item->worth]);
+                ->execute('INSERT INTO inventory (character_id, item_id, amount, worth) VALUES (?, ?, ?, ?)', [$this->id, $item->id, $item->quantity, $item->worth]);
         } else {
             $this->connection
-                ->execute('UPDATE inventory SET amount = amount + ? WHERE item_id = ? AND character_id = ?', [$quantity, $item->id, $this->id]);
+                ->execute('UPDATE inventory SET amount = amount + ? WHERE item_id = ? AND character_id = ?', [$item->quantity, $item->id, $this->id]);
         }
     }
 
-    public function dropItem(ItemPrototype $item, int $quantity): Drop
+    public function dropItem(ItemPrototype $item, int $quantity): Item
     {
         $this->connection->transaction(function () use ($item, $quantity) {
             $this->connection->execute('UPDATE inventory SET amount = amount - ? WHERE item_id = ? AND character_id = ?', [$quantity, $item->id, $this->id]);
@@ -296,7 +296,7 @@ class Player
             $this->removeNonExistentItems();
         });
 
-        return new Drop($item, $quantity);
+        return new Item($item->id, $quantity);
     }
 
     public function destroyItem(ItemPrototype $item, int $quantity = null): void
@@ -378,7 +378,7 @@ class Player
         $this->connection->transaction(function () use ($offer) {
             // TODO drop returns actually dropped item which means that it can be used for actual trade player<=>seller
             $this->dropItem($offer->inExchange->prototype, $offer->inExchange->quantity);
-            $this->obtainItem($offer->item->prototype, $offer->item->quantity);
+            $this->obtainItem($offer->item);
         });
 
         return null;

@@ -34,7 +34,7 @@ class Lumberjack extends AbstractScene
             } else {
                 $option['gainPerHour'] = [
                     'exp'   => $reward->exp,
-                    'drop' => $reward->listDrop()[0],
+                    'drop' => $reward->items[0],
                 ];
             }
             $options[] = $option;

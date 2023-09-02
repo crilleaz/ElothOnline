@@ -3,14 +3,14 @@ declare(strict_types=1);
 
 namespace Game\Player;
 
-use Game\Dungeon\Drop;
+use Game\Item\Item;
 
-class Reward
+readonly class Reward
 {
     /**
-     * @var Drop[]
+     * @var Item[]
      */
-    private array $drop = [];
+    public array $items;
 
     public static function none(): self
     {
@@ -19,51 +19,59 @@ class Reward
 
     /**
      * @param int $exp
-     * @param Drop[] $drop
+     * @param Item[] $items
      */
-    public function __construct(public readonly int $exp, array $drop)
+    public function __construct(public int $exp, array $items)
     {
-        foreach ($drop as $entry) {
-            $this->addDrop($entry);
-        }
+        $this->items = $this->groupItems($items);
     }
 
     public function isEmpty(): bool
     {
-        return $this->exp === 0 && $this->drop === [];
+        return $this->exp === 0 && $this->items === [];
     }
 
     /**
-     * @return Drop[]
+     * @param Item[] $items
+     *
+     * @return Item[]
      */
-    public function listDrop(): array
+    private function groupItems(array $items): array
     {
-        return array_values($this->drop);
-    }
-
-    private function addDrop(Drop $drop): void
-    {
-        $itemId = $drop->item->id;
-        if (isset($this->drop[$itemId])) {
-            $existingDrop = $this->drop[$itemId];
-            $this->drop[$itemId] = new Drop($existingDrop->item, $existingDrop->quantity + $drop->quantity);
-        } else {
-            $this->drop[$itemId] = $drop;
+        $groupedItems = [];
+        foreach ($items as $item) {
+            $itemId = $item->id;
+            if (isset($groupedItems[$itemId])) {
+                $existingItem = $groupedItems[$itemId];
+                $groupedItems[$itemId] = new Item($existingItem->item->id, $existingItem->quantity + $item->quantity);
+            } else {
+                $groupedItems[$itemId] = $item;
+            }
         }
+
+        return array_values($groupedItems);
     }
 
     public function multiply(float $modifier): static
     {
-        $newExp = (int) round($this->exp * $modifier);
-        $newDrops = [];
-        foreach ($this->drop as $drop) {
-            $newAmount = (int) round($drop->quantity * $modifier);
+        if ($modifier < 0) {
+            throw new \RuntimeException('Negative modifier is not allowed');
+        }
+
+        if ($modifier == 0) {
+            return self::none();
+        }
+
+        $newExp = (int)round($this->exp * $modifier);
+        $newItems = [];
+        foreach ($this->items as $item) {
+            $newAmount = (int)round($item->quantity * $modifier);
             if ($newAmount === 0) {
                 continue;
             }
-            $newDrops[] = new Drop($drop->item, $newAmount);
+            $newItems[] = new Item($item->id, $newAmount);
         }
 
-        return new self($newExp, $newDrops);
+        return new self($newExp, $newItems);
     }
 }

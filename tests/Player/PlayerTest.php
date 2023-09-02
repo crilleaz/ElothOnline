@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Game\Player;
 
-use Game\Auth\AuthService;
-use Game\Dungeon\Drop;
 use Game\Dungeon\DungeonRepository;
 use Game\IntegrationTestCase;
 use Game\Item\Item;
@@ -114,9 +112,9 @@ class PlayerTest extends IntegrationTestCase
         $gold = $this->getService(ItemPrototypeRepository::class)->getById(1);
         $cheese = $this->getService(ItemPrototypeRepository::class)->getById(2);
 
-        $this->player->obtainItem($gold, 123);
-        $this->player->obtainItem($cheese, 3);
-        $this->player->obtainItem($gold, 15);
+        $this->player->obtainItem(new Item($gold->id, 123));
+        $this->player->obtainItem(new Item($cheese->id, 3));
+        $this->player->obtainItem(new Item($gold->id, 15));
 
         self::assertEquals(123 + 15, $this->player->getGold());
 
@@ -140,9 +138,9 @@ class PlayerTest extends IntegrationTestCase
         $gold = $this->getService(ItemPrototypeRepository::class)->getById(1);
         $cheese = $this->getService(ItemPrototypeRepository::class)->getById(2);
 
-        $this->player->pickUp(new Drop($gold, 123));
-        $this->player->pickUp(new Drop($cheese, 3));
-        $this->player->pickUp(new Drop($gold, 15));
+        $this->player->pickUp(new Item($gold->id, 123));
+        $this->player->pickUp(new Item($cheese->id, 3));
+        $this->player->pickUp(new Item($gold->id, 15));
 
         self::assertEquals(123 + 15, $this->player->getGold());
 

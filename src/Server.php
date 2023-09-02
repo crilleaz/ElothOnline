@@ -126,9 +126,9 @@ class Server
             $hunter->addExp($reward->exp);
 
             $lootDetails = '';
-            foreach ($reward->listDrop() as $drop) {
-                $hunter->pickUp($drop);
-                $lootDetails .= sprintf('<Item name="%s" quantity="%d"/>', $drop->item->name, $drop->quantity);
+            foreach ($reward->items as $item) {
+                $hunter->pickUp($item);
+                $lootDetails .= sprintf('<Item name="%s" quantity="%d"/>', $item->name, $item->quantity);
             }
 
             $rewardLogs[] = sprintf(
@@ -187,8 +187,8 @@ class Server
             $reward = $rewardPerHour->multiply($fullHoursPassed);
 
             $character->addExp($reward->exp);
-            foreach ($reward->listDrop() as $drop) {
-                $character->pickUp($drop);
+            foreach ($reward->items as $item) {
+                $character->pickUp($item);
             }
 
             $lastRewardedAt = $this->currentTime->addHours($fullHoursPassed);

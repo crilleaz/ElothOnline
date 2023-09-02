@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Game\Dungeon;
 
+use Game\Item\Item;
 use Game\Player\Player;
 use Game\Player\Reward;
 
@@ -38,14 +39,14 @@ readonly class RewardCalculator
 
         $expEarned = $unitsKilled * $dungeon->inhabitant->exp;
 
-        $drops = [];
+        $items = [];
         foreach ($this->dropRepository->getMonsterDrop($dungeon->inhabitant) as $dropChance) {
             $quantity = $dropChance->roll($unitsKilled);
             if ($quantity > 0) {
-                $drops[] = new Drop($dropChance->itemPrototype, $quantity);
+                $items[] = new Item($dropChance->itemPrototype->id, $quantity);
             }
         }
 
-        return new Reward($expEarned, $drops);
+        return new Reward($expEarned, $items);
     }
 }

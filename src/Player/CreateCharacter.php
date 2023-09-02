@@ -5,7 +5,7 @@ namespace Game\Player;
 
 use Game\Chat\Chat;
 use Game\Engine\DBConnection;
-use Game\Item\ItemPrototypeRepository;
+use Game\Item\Item;
 use Game\User;
 
 readonly class CreateCharacter
@@ -13,7 +13,6 @@ readonly class CreateCharacter
     public function __construct(
         private DBConnection $db,
         private CharacterRepository $characterRepository,
-        private ItemPrototypeRepository $itemPrototypeRepository,
         private Chat $chat
     ) {}
 
@@ -52,11 +51,11 @@ readonly class CreateCharacter
             ]
         );
 
-        $gold = $this->itemPrototypeRepository->getById(1);
+        $goldId = 1;
 
         $character = $this->characterRepository->getByUser($forUser);
 
-        $character->obtainItem($gold, 10);
+        $character->obtainItem(new Item($goldId, 10));
         $this->chat->addSystemMessage(sprintf('New character %s appears in the world', $characterName));
 
         return $character;
