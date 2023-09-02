@@ -96,12 +96,12 @@ class PlayerTest extends IntegrationTestCase
             'moderate(<50 mobs/h)',
         ];
 
-        yield 'hard' => [
+        yield 'impossible 1' => [
             4,
-            'hard(<20 mobs/h)',
+            'impossible(0 mobs/h)',
         ];
 
-        yield 'impossible' => [
+        yield 'impossible 2' => [
             3,
             'impossible(0 mobs/h)',
         ];

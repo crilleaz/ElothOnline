@@ -53,7 +53,7 @@ class ServerTest extends IntegrationTestCase
         $this->assertHuntersReceivedRewards();
         $this->assertExhaustedPlayersRemovedTheDungeon();
 
-        $this->assertContainsLogs(['<RestoredStamina>47</RestoredStamina>'], $logs);
+        $this->assertContainsLogs(['<RestoredStamina>'. self::MINUTES_SINCE_THE_LAST_EXECUTION . '</RestoredStamina>'], $logs);
     }
 
     private function assertContainsLogs(array $logs, array $actualLogs): void
@@ -86,18 +86,10 @@ class ServerTest extends IntegrationTestCase
     private function assertStaminaSpentForHuntingPlayers(int $amount): void
     {
         $player = $this->getCharacterByName(self::PLAYER1);
-        self::assertEqualsWithDelta(
-            max(100 - $amount, 0),
-            $player->getStamina(),
-            2
-        );
+        self::assertEquals(max(100 - $amount, 0), $player->getStamina());
 
         $player = $this->getCharacterByName(self::PLAYER2);
-        self::assertEqualsWithDelta(
-            max(40 - $amount, 0),
-            $player->getStamina(),
-            2
-        );
+        self::assertEquals(max(40 - $amount, 0), $player->getStamina());
     }
 
     /**
@@ -106,10 +98,10 @@ class ServerTest extends IntegrationTestCase
     private function assertHuntersReceivedRewards(): void
     {
         $player = $this->getCharacterByName(self::PLAYER1);
-        self::assertEqualsWithDelta(235, $player->getExp(), 10);
+        self::assertEquals(75, $player->getExp());
 
         $player = $this->getCharacterByName(self::PLAYER2);
-        self::assertEqualsWithDelta(1000, $player->getExp(), 10);
+        self::assertEquals(200, $player->getExp());
 
         $player = $this->getCharacterByName(self::PLAYER3);
         self::assertEquals(0, $player->getExp());

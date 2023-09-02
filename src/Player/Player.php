@@ -6,6 +6,7 @@ namespace Game\Player;
 use Game\Dungeon\Dungeon;
 use Game\Dungeon\TTKCalculator;
 use Game\Engine\DBConnection;
+use Game\Engine\DbTimeFactory;
 use Game\Engine\Error;
 use Game\Item\Item;
 use Game\Item\ItemPrototype as ItemPrototype;
@@ -66,7 +67,8 @@ class Player
             return new Error('You are already hunting in a dungeon');
         }
 
-        $this->connection->execute('INSERT INTO hunting (character_id, dungeon_id) VALUES (?, ?)', [$this->id, $dungeon->id]);
+        $now = DbTimeFactory::createCurrentTimestamp();
+        $this->connection->execute('INSERT INTO hunting (character_id, dungeon_id, checked_at, last_reward_at) VALUES (?, ?, ?, ?)', [$this->id, $dungeon->id, $now, $now]);
         $this->connection->execute('UPDATE players SET in_combat = 1 WHERE id = ?', [$this->id]);
 
         return null;
@@ -148,10 +150,12 @@ class Player
             return new Error('Character is busy with another activity');
         }
 
+        $now = DbTimeFactory::createCurrentTimestamp();
+
         $this->connection->execute("
-                        INSERT INTO activity(character_id, name, selected_option)
-                        VALUE (?, ?, ?)
-        ", [$this->id, $activity->getName(), $activity->getOption()]);
+                        INSERT INTO activity(character_id, name, selected_option, checked_at, last_reward_at)
+                        VALUE (?, ?, ?, ?, ?)
+        ", [$this->id, $activity->getName(), $activity->getOption(), $now, $now]);
 
         return null;
     }

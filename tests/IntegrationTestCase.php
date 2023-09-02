@@ -93,7 +93,7 @@ abstract class IntegrationTestCase extends TestCase
         $user = $this->authService->getCurrentUser();
 
         $this->db->execute("INSERT INTO players(user_id, name, experience, health, health_max, defence, strength)
-                            VALUE ($user->id, '$name', '0', 120, 120, 5, 100)");
+                            VALUE ($user->id, '$name', 0, 500, 50, 5, 10)");
 
         $character = $this->getService(CharacterRepository::class)->getByUser($user);
 
