@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Game\Player\Activity;
 
-use Game\Dungeon\Reward;
 use Game\Player\Player;
+use Game\Player\Reward;
 
 interface ActivityInterface
 {

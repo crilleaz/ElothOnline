@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Game\Dungeon;
 
 use Game\Player\Player;
-use Game\Utils\TimeInterval;
+use Game\Player\Reward;
 
 readonly class RewardCalculator
 {

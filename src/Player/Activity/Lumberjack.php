@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace Game\Player\Activity;
 
 use Game\Dungeon\Drop;
-use Game\Dungeon\Reward;
 use Game\Item\ItemPrototypeRepository;
 use Game\Player\Player;
+use Game\Player\Reward;
 
 readonly class Lumberjack implements ActivityInterface
 {
