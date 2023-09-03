@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Player;
@@ -19,7 +20,7 @@ class PlayerTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $this->player = $this->createCharacter('Mick');
+        $this->player            = $this->createCharacter('Mick');
         $this->dungeonRepository = $this->getService(DungeonRepository::class);
     }
 
@@ -36,7 +37,7 @@ class PlayerTest extends IntegrationTestCase
 
     public function testStates(): void
     {
-        $dungeon = $this->dungeonRepository->findById(1);
+        $dungeon  = $this->dungeonRepository->findById(1);
         $dungeon2 = $this->dungeonRepository->findById(2);
 
         self::assertFalse($this->player->isFighting());
@@ -60,7 +61,7 @@ class PlayerTest extends IntegrationTestCase
 
     public function testEnterDungeonWhileAlreadyInOne(): void
     {
-        $dungeon = $this->dungeonRepository->findById(1);
+        $dungeon  = $this->dungeonRepository->findById(1);
         $dungeon2 = $this->dungeonRepository->findById(2);
 
         $firstEnter = $this->player->enterDungeon($dungeon);
@@ -69,7 +70,6 @@ class PlayerTest extends IntegrationTestCase
         $this->setCurrentTime($this->currentTime->addMinutes(2));
 
         // TODO check that attempt to enter the same dungeon twice doesn't modify anything
-
         $secondEnter = $this->player->enterDungeon($dungeon2);
         self::assertErrorOccurred($secondEnter, 'You are already hunting in a dungeon');
     }
@@ -109,7 +109,7 @@ class PlayerTest extends IntegrationTestCase
 
     public function testObtainItem(): void
     {
-        $gold = $this->getService(ItemPrototypeRepository::class)->getById(1);
+        $gold   = $this->getService(ItemPrototypeRepository::class)->getById(1);
         $cheese = $this->getService(ItemPrototypeRepository::class)->getById(2);
 
         $this->player->obtainItem(new Item($gold->id, 123));
@@ -135,7 +135,7 @@ class PlayerTest extends IntegrationTestCase
 
     public function testPickUp(): void
     {
-        $gold = $this->getService(ItemPrototypeRepository::class)->getById(1);
+        $gold   = $this->getService(ItemPrototypeRepository::class)->getById(1);
         $cheese = $this->getService(ItemPrototypeRepository::class)->getById(2);
 
         $this->player->pickUp(new Item($gold->id, 123));

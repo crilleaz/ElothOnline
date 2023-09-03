@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game;
@@ -28,9 +29,9 @@ abstract class IntegrationTestCase extends TestCase
 
         $this->setCurrentTime(CarbonImmutable::now());
         $this->authService = $this->getService(AuthService::class);
-        $this->db = $this->getService(DBConnection::class);
+        $this->db          = $this->getService(DBConnection::class);
         $this->db->startTransaction();
-        $this->db->execute("UPDATE timetable SET tid = ?", [DbTimeFactory::createTimestamp($this->currentTime)]);
+        $this->db->execute('UPDATE timetable SET tid = ?', [DbTimeFactory::createTimestamp($this->currentTime)]);
     }
 
     protected function tearDown(): void
@@ -47,7 +48,7 @@ abstract class IntegrationTestCase extends TestCase
 
     /**
      * @template T
-     * @param class-string<T> $className
+     * @param    class-string<T> $className
      *
      * @return T
      */
@@ -106,6 +107,6 @@ abstract class IntegrationTestCase extends TestCase
 
     private function setStamina(Player $character, int $value): void
     {
-        $this->db->execute("UPDATE players SET stamina=? WHERE id = ?", [$value, $character->getId()]);
+        $this->db->execute('UPDATE players SET stamina=? WHERE id = ?', [$value, $character->getId()]);
     }
 }

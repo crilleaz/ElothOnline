@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Player;
@@ -19,19 +20,19 @@ class CharacterRepositoryTest extends IntegrationTestCase
     public function testListTopPlayers(): void
     {
         $lvls = [
-            'MisterTester1' => LvlCalculator::minExpRequired(10),
-            'MisterTester2' => LvlCalculator::minExpRequired(5),
-            'MisterTester3' => LvlCalculator::minExpRequired(3),
-            'MisterTester4' => LvlCalculator::minExpRequired(4),
-            'MisterTester5' => LvlCalculator::minExpRequired(7),
-            'MisterTester6' => LvlCalculator::minExpRequired(2),
-            'MisterTester7' => LvlCalculator::minExpRequired(12),
-            'MisterTester8' => LvlCalculator::minExpRequired(9),
-            'MisterTester9' => LvlCalculator::minExpRequired(1),
+            'MisterTester1'  => LvlCalculator::minExpRequired(10),
+            'MisterTester2'  => LvlCalculator::minExpRequired(5),
+            'MisterTester3'  => LvlCalculator::minExpRequired(3),
+            'MisterTester4'  => LvlCalculator::minExpRequired(4),
+            'MisterTester5'  => LvlCalculator::minExpRequired(7),
+            'MisterTester6'  => LvlCalculator::minExpRequired(2),
+            'MisterTester7'  => LvlCalculator::minExpRequired(12),
+            'MisterTester8'  => LvlCalculator::minExpRequired(9),
+            'MisterTester9'  => LvlCalculator::minExpRequired(1),
             'MisterTester10' => LvlCalculator::minExpRequired(6),
         ];
 
-        foreach($lvls as $newPlayerName => $exp) {
+        foreach ($lvls as $newPlayerName => $exp) {
             $character = $this->createCharacter($newPlayerName);
             $character->addExp($exp);
         }

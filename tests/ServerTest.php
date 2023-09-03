@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game;
@@ -23,8 +24,8 @@ class ServerTest extends IntegrationTestCase
         $this->server = $this->getService(Server::class);
 
         $dungeonRepository = $this->getService(DungeonRepository::class);
-        $dungeon1 = $dungeonRepository->getById(1);
-        $dungeon2 = $dungeonRepository->getById(2);
+        $dungeon1          = $dungeonRepository->getById(1);
+        $dungeon2          = $dungeonRepository->getById(2);
 
         $this->createCharacter(self::PLAYER1, 100)->enterDungeon($dungeon1);
         $this->createCharacter(self::PLAYER2, 40)->enterDungeon($dungeon2);
@@ -53,7 +54,7 @@ class ServerTest extends IntegrationTestCase
         $this->assertHuntersReceivedRewards();
         $this->assertExhaustedPlayersRemovedTheDungeon();
 
-        $this->assertContainsLogs(['<RestoredStamina>'. self::MINUTES_SINCE_THE_LAST_EXECUTION . '</RestoredStamina>'], $logs);
+        $this->assertContainsLogs(['<RestoredStamina>' . self::MINUTES_SINCE_THE_LAST_EXECUTION . '</RestoredStamina>'], $logs);
     }
 
     private function assertContainsLogs(array $logs, array $actualLogs): void

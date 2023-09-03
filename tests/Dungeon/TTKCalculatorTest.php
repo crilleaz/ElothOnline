@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Dungeon;
@@ -22,25 +23,41 @@ class TTKCalculatorTest extends IntegrationTestCase
     public static function ttkMonsterProvider(): iterable
     {
         yield 'monster without defence' => [
-            [10, 5, 100],
+            [
+        10,
+        5,
+        100,
+            ],
             new Monster(123, 'SomeMonster', 50, 0, 10, 0),
             TimeInterval::fromMinutes(5),
         ];
 
         yield 'monster has some defence' => [
-            [10, 5, 100],
+            [
+        10,
+        5,
+        100,
+            ],
             new Monster(123, 'SomeMonster', 50, 0, 10, 4),
             TimeInterval::fromMinutes(9),
         ];
 
         yield 'monster has too much defence' => [
-            [10, 5, 100],
+            [
+        10,
+        5,
+        100,
+            ],
             new Monster(123, 'SomeMonster', 50, 0, 10, 100),
             TimeInterval::fromMinutes(50),
         ];
 
         yield 'player has too much attack' => [
-            [1000, 5, 100],
+            [
+        1000,
+        5,
+        100,
+            ],
             new Monster(123, 'SomeMonster', 50, 0, 10, 0),
             TimeInterval::fromMinutes(1),
         ];
@@ -49,25 +66,41 @@ class TTKCalculatorTest extends IntegrationTestCase
     public static function ttkPlayerProvider(): iterable
     {
         yield 'player without defence' => [
-            [10, 0, 100],
+            [
+        10,
+        0,
+        100,
+            ],
             new Monster(123, 'SomeMonster', 50, 0, 10, 0),
             TimeInterval::fromMinutes(10),
         ];
 
         yield 'player has some defence' => [
-            [10, 4, 100],
+            [
+        10,
+        4,
+        100,
+            ],
             new Monster(123, 'SomeMonster', 50, 0, 10, 0),
             TimeInterval::fromMinutes(17),
         ];
 
         yield 'player has too much defence' => [
-            [2, 1000, 100],
+            [
+        2,
+        1000,
+        100,
+            ],
             new Monster(123, 'SomeMonster', 50, 0, 10, 0),
             TimeInterval::fromMinutes(100),
         ];
 
         yield 'monster has too much attack' => [
-            [2, 5, 100],
+            [
+        2,
+        5,
+        100,
+            ],
             new Monster(123, 'SomeMonster', 50, 0, 1000, 0),
             TimeInterval::fromMinutes(1),
         ];
@@ -85,7 +118,7 @@ class TTKCalculatorTest extends IntegrationTestCase
     #[DataProvider('ttkPlayerProvider')]
     public function testCalculateForMonster(array $playerStats, Monster $hunter, TimeInterval $expectedTTK): void
     {
-        $prey = $this->createCharacterWithStats(...$playerStats);
+        $prey   = $this->createCharacterWithStats(...$playerStats);
         $result = $this->calculator->calculateForMonster($hunter, $prey);
 
         self::assertEquals($expectedTTK->seconds, $result->seconds);
@@ -94,7 +127,7 @@ class TTKCalculatorTest extends IntegrationTestCase
     private function createCharacterWithStats(int $attack, int $defence, int $health): Player
     {
         $characterName = 'SomeRandomName' . uniqid();
-        $character = $this->createCharacter($characterName);
+        $character     = $this->createCharacter($characterName);
 
         $params = [
             $attack,

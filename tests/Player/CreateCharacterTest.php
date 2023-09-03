@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Player;
@@ -53,11 +54,11 @@ class CreateCharacterTest extends IntegrationTestCase
         self::assertFalse($character->isFighting());
         self::assertTrue($character->isInProtectiveZone());
         $lumberjackLvl = $expectedRace->perks->canWoodcut ? 1 : 0;
-        $minerLvl = $expectedRace->perks->canMine ? 1 : 0;
-        $craftsmanLvl = $expectedRace->perks->canCraft ? 1 : 0;
-        $gathererLvl = $expectedRace->perks->canGather ? 1 : 0;
-        $farmerLvl = $expectedRace->perks->canHarvest ? 1 : 0;
-        $alchemistLvl = $expectedRace->perks->canBrew ? 1 : 0;
+        $minerLvl      = $expectedRace->perks->canMine ? 1 : 0;
+        $craftsmanLvl  = $expectedRace->perks->canCraft ? 1 : 0;
+        $gathererLvl   = $expectedRace->perks->canGather ? 1 : 0;
+        $farmerLvl     = $expectedRace->perks->canHarvest ? 1 : 0;
+        $alchemistLvl  = $expectedRace->perks->canBrew ? 1 : 0;
         self::assertEquals($lumberjackLvl, $character->getWoodcutting());
         self::assertEquals($alchemistLvl, $character->getAlchemy());
         self::assertEquals($farmerLvl, $character->getHarvesting());

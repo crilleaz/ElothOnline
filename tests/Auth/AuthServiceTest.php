@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Auth;
@@ -7,7 +8,7 @@ use Game\IntegrationTestCase;
 
 class AuthServiceTest extends IntegrationTestCase
 {
-    private const PLAYER_NAME = 'MisterTester';
+    private const PLAYER_NAME     = 'MisterTester';
     private const PLAYER_PASSWORD = '123123123';
 
     private AuthService $authService;

@@ -77,5 +77,6 @@
     </rule>
 Squiz.Commenting.FunctionComment.MissingParamTag
     <file>src/</file>
+    <file>tests/</file>
 
 </ruleset>
