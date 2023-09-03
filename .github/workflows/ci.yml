@@ -25,6 +25,7 @@ jobs:
       - uses: nanasess/setup-php@master
         with:
           php-version: '8.2'
+          extensions: xdebug
       - name: install vendors
         run: composer install --no-interaction
       - name: install project
@@ -34,4 +35,4 @@ jobs:
       - name: static analyze
         run: ./vendor/bin/phpstan
       - name: tests
-        run: ./vendor/bin/phpunit
+        run: php -dxdebug.mode=coverage ./vendor/bin/phpunit --coverage-text
