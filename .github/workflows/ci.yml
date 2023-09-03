@@ -22,7 +22,7 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - uses: actions/checkout@v2
-      - uses: nanasess/setup-php@master
+      - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
           extensions: xdebug
