@@ -48,6 +48,14 @@
             <severity>0</severity>
     </rule>
 
+    <rule ref="Generic.Files.LineLength.TooLong">
+            <message>Line is too long. This might be difficult to read.</message>
+            <severity>3</severity>
+    </rule>
+    <rule ref="Generic.CodeAnalysis.UselessOverridingMethod.Found">
+            <message>Double check. This rule has to be re-enabled once phpcs fix the php8.2 readonly issue.</message>
+            <severity>3</severity>
+    </rule>
     <rule ref="Generic.Commenting.DocComment.NonParamGroup">
             <severity>0</severity>
     </rule>
