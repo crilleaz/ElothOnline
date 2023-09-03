@@ -3,7 +3,7 @@ name: CI
 on: [ push ]
 
 jobs:
-  tests:
+  qa:
     runs-on: ubuntu-20.04
     env:
       DB_HOST: 127.0.0.1
@@ -29,9 +29,9 @@ jobs:
         run: composer install --no-interaction
       - name: install project
         run: php install.php
-#      - name: codestyle
-#        run: ./vendor/bin/phpcs
-#      - name: static analyze
-#        run: ./vendor/bin/phpstan
+      - name: codestyle
+        run: ./vendor/bin/phpcs
+      - name: static analyze
+        run: ./vendor/bin/phpstan
       - name: tests
         run: ./vendor/bin/phpunit
