@@ -6,6 +6,7 @@ namespace Game\Player\Activity;
 
 use Game\Player\Player;
 use Game\Player\Reward;
+use Game\Utils\TimeInterval;
 
 interface ActivityInterface
 {
@@ -23,7 +24,7 @@ interface ActivityInterface
 
     public function getOptionName(): string;
 
-    public function calculateReward(Player $for): Reward;
+    public function calculateReward(Player $for, TimeInterval $duration): Reward;
 
     public function isSame(ActivityInterface $activity): bool;
 }

@@ -154,27 +154,26 @@ class Player
         $now = DbTimeFactory::createCurrentTimestamp();
 
         $this->connection->execute('
-                        INSERT INTO activity(character_id, name, selected_option, checked_at, last_reward_at)
-                        VALUE (?, ?, ?, ?, ?)
-        ', [$this->id, $activity->getName(), $activity->getOption(), $now, $now]);
+                        INSERT INTO activity(character_id, name, selected_option, started_at, checked_at, last_reward_at)
+                        VALUE (?, ?, ?, ?, ?, ?)
+        ', [$this->id, $activity->getName(), $activity->getOption(), $now, $now, $now]);
 
         return null;
     }
 
-    public function getCurrentActivity(): ?ActivityInterface
+    public function getCurrentActivity(): ?CharacterActivity
     {
-        $data = $this->connection->fetchRow('SELECT name, selected_option FROM activity WHERE character_id=' . $this->id);
+        $data = $this->connection->fetchRow('SELECT name, selected_option, checked_at, last_reward_at FROM activity WHERE character_id=' . $this->id);
         if ($data === []) {
             return null;
         }
 
-        // TODO some inflector would be good to resolve the values
-        switch ($data['name']) {
-            case 'Lumberjack':
-                return new Lumberjack($data['selected_option']);
-            default:
-                throw new \RuntimeException('Unknown activity');
-        }
+        return new CharacterActivity(
+            $data['name'],
+            $data['selected_option'],
+            DbTimeFactory::fromTimestamp($data['checked_at']),
+            DbTimeFactory::fromTimestamp($data['last_reward_at'])
+        );
     }
 
     public function stopActivity(): void

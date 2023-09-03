@@ -11,6 +11,7 @@ use Game\Auth\AuthService;
 use Game\Engine\DBConnection;
 use Game\Engine\DbTimeFactory;
 use Game\Engine\Error;
+use Game\Player\Activity\ActivityInterface;
 use Game\Player\CharacterRepository;
 use Game\Player\Player;
 use PHPUnit\Framework\TestCase;
@@ -103,6 +104,19 @@ abstract class IntegrationTestCase extends TestCase
         }
 
         return $character;
+    }
+
+    protected function characterCanNowPerformActivity(Player $character, ActivityInterface $activity): void
+    {
+        switch ($activity->getName()) {
+            case 'Lumberjack':
+                $activitySkill = 'woodcutting';
+                break;
+            default:
+                throw new \RuntimeException('Unknown activity. Implement it.');
+        }
+
+        $this->db->execute("UPDATE players SET $activitySkill=1 WHERE id= {$character->getId()}");
     }
 
     private function setStamina(Player $character, int $value): void

@@ -7,6 +7,7 @@ namespace Game\Player\Activity;
 use Game\Item\Item;
 use Game\Player\Player;
 use Game\Player\Reward;
+use Game\Utils\TimeInterval;
 
 readonly class Lumberjack implements ActivityInterface
 {
@@ -57,7 +58,7 @@ readonly class Lumberjack implements ActivityInterface
         return $this->optionName;
     }
 
-    public function calculateReward(Player $for): Reward
+    public function calculateReward(Player $for, TimeInterval $duration): Reward
     {
         $playerGeneralEfficiency = $for->getWoodcutting();
         if ($playerGeneralEfficiency === 0) {
@@ -70,7 +71,9 @@ readonly class Lumberjack implements ActivityInterface
             return Reward::none();
         }
 
-        return new Reward($option['rewardExp'], [new Item($option['rewardItem'], $efficiency)]);
+        $rewardPerHour = new Reward($option['rewardExp'], [new Item($option['rewardItem'], $efficiency)]);
+
+        return $rewardPerHour->multiply($duration->toHours());
     }
 
     public function isSame(ActivityInterface $activity): bool

@@ -8,6 +8,7 @@ use Game\Player\Player;
 use Game\UI\Scene\AbstractScene;
 use Game\UI\Scene\Input\InputInterface;
 use Game\UI\Scene\MainMenu;
+use Game\Utils\TimeInterval;
 
 class Lumberjack extends AbstractScene
 {
@@ -28,7 +29,7 @@ class Lumberjack extends AbstractScene
         foreach (\Game\Player\Activity\Lumberjack::OPTIONS as $option) {
             $activity            = new \Game\Player\Activity\Lumberjack($option['id']);
             $option['isCurrent'] = $currentActivity !== null && $activity->isSame($currentActivity);
-            $reward              = $activity->calculateReward($player);
+            $reward              = $activity->calculateReward($player, TimeInterval::fromHours(1));
             if ($reward->isEmpty()) {
                 $option['gainPerHour'] = null;
             } else {

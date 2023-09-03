@@ -13,6 +13,11 @@ readonly class TimeInterval
         return new self($minutes * 60);
     }
 
+    public static function fromHours(int $hours): self
+    {
+        return self::fromMinutes($hours * 60);
+    }
+
     public static function between(DateTimeInterface $from, DateTimeInterface $to): self
     {
         return new self($to->getTimestamp() - $from->getTimestamp());
@@ -28,6 +33,11 @@ readonly class TimeInterval
     public function toMinutes(): float
     {
         return $this->seconds / 60;
+    }
+
+    public function toHours(): float
+    {
+        return $this->toMinutes() / 60;
     }
 
     public function isGreaterThan(self $interval): bool

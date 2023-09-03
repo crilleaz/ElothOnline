@@ -48,7 +48,7 @@ class Server
         $this->db->transaction(function () {
             $this->regenerateStamina();
             $this->giveRewards();
-            $this->stopExhaustedHunters();
+            $this->stopExhaustedCharacters();
         });
 
         $logs       = $this->logs;
@@ -73,9 +73,9 @@ class Server
 
         $this->logs[] = sprintf('<RestoredStamina>%d</RestoredStamina>', min($minutesPassed, Player::MAX_POSSIBLE_STAMINA));
 
-        // TODO stop regenerating stamina for players with activities. Introduce playerState instead of in_combat
+        // TODO Introduce playerState instead of in_combat
         $this->db->execute(
-            'UPDATE players SET stamina = LEAST(stamina + ?, ?) WHERE in_combat = 0 AND stamina < ?',
+            'UPDATE players p LEFT JOIN activity a ON a.character_id=p.id SET stamina = LEAST(stamina + ?, ?) WHERE in_combat = 0 AND stamina < ? AND a.id IS NULL',
             [
             $minutesPassed,
             Player::MAX_POSSIBLE_STAMINA,
@@ -85,10 +85,18 @@ class Server
         $this->db->execute("UPDATE timetable SET tid = NOW() WHERE name='stamina'");
     }
 
-    private function stopExhaustedHunters(): void
+    private function stopExhaustedCharacters(): void
     {
-        $huntingPlayers = $this->db->fetchRows('SELECT id, name, in_combat, stamina FROM players WHERE stamina <= 0 AND in_combat = 1');
-        foreach ($huntingPlayers as $row) {
+        $labourers = $this->db->fetchRows('SELECT p.id, p.name, in_combat, stamina FROM players p INNER JOIN activity a ON p.id = a.character_id WHERE stamina <= 0 AND in_combat = 0');
+        foreach ($labourers as $row) {
+            $playerNameWithNoStamina = $row['name'];
+
+            $this->db->execute('DELETE from activity WHERE character_id = ?', [$row['id']]);
+            $this->logs[] = sprintf('<Exhausted player="%s"/>', $playerNameWithNoStamina);
+        }
+
+        $hunters = $this->db->fetchRows('SELECT id, name, in_combat, stamina FROM players WHERE stamina <= 0 AND in_combat = 1');
+        foreach ($hunters as $row) {
             $playerNameWithNoStamina = $row['name'];
 
             $this->db->execute('DELETE from hunting WHERE character_id = ?', [$row['id']]);
@@ -194,8 +202,8 @@ class Server
                 continue;
             }
 
-            $lastCheckedAt  = DbTimeFactory::fromTimestamp($data['checked_at']);
-            $lastRewardedAt = DbTimeFactory::fromTimestamp($data['last_reward_at']);
+            $lastCheckedAt  = $activity->checkedAt;
+            $lastRewardedAt = $activity->rewardedAt;
 
             $minutesSinceLastCheck  = $lastCheckedAt->diffInMinutes($this->currentTime, false);
             $minutesSinceLastReward = $lastRewardedAt->diffInMinutes($this->currentTime, false);
@@ -214,9 +222,8 @@ class Server
             }
 
             $fullHoursPassed = (int) ($minutesSinceLastReward / 60);
-            $rewardPerHour   = $activity->calculateReward($character);
-            $reward          = $rewardPerHour->multiply($fullHoursPassed);
 
+            $reward = $activity->calculateReward($character, TimeInterval::fromHours($fullHoursPassed));
             $character->addExp($reward->exp);
             foreach ($reward->items as $item) {
                 $character->pickUp($item);

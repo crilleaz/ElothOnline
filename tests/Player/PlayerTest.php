@@ -8,6 +8,7 @@ use Game\Dungeon\DungeonRepository;
 use Game\IntegrationTestCase;
 use Game\Item\Item;
 use Game\Item\ItemPrototypeRepository;
+use Game\Player\Activity\Lumberjack;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class PlayerTest extends IntegrationTestCase
@@ -157,5 +158,33 @@ class PlayerTest extends IntegrationTestCase
         self::assertEquals(3, $itemsInInventory[1]->quantity);
         self::assertEquals($cheese->worth, $itemsInInventory[1]->worth);
         self::assertEquals($cheese->isSellable(), $itemsInInventory[1]->isSellable);
+    }
+
+    public function testStartActivity(): void
+    {
+        self::assertNull($this->player->getCurrentActivity());
+
+        $activity = new Lumberjack(1);
+        $result   = $this->player->startActivity($activity);
+        $this->assertNoErrorOccurred($result);
+
+        $currentActivity = $this->player->getCurrentActivity();
+        self::assertNotNull($currentActivity);
+
+        self::assertTrue($currentActivity->isSame($activity));
+    }
+
+    public function testStopActivity(): void
+    {
+        $activity = new Lumberjack(1);
+        $result   = $this->player->startActivity($activity);
+        $this->assertNoErrorOccurred($result);
+
+        $currentActivity = $this->player->getCurrentActivity();
+        self::assertNotNull($currentActivity);
+
+        $this->player->stopActivity();
+
+        self::assertNull($this->player->getCurrentActivity());
     }
 }
