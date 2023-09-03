@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Utils;
@@ -26,7 +27,7 @@ readonly class TimeInterval
 
     public function toMinutes(): float
     {
-        return $this->seconds/60;
+        return $this->seconds / 60;
     }
 
     public function isGreaterThan(self $interval): bool

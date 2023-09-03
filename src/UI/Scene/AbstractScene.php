@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\UI\Scene;
@@ -13,15 +14,14 @@ use Twig\Environment;
 abstract class AbstractScene implements SceneInterface
 {
     public function __construct(
-        protected readonly Client          $client,
-        private readonly Environment       $renderer,
+        protected readonly Client $client,
+        private readonly Environment $renderer,
         private readonly DungeonRepository $dungeonRepository
     ) {
-
     }
 
     /**
-     * @param string $templateName
+     * @param string       $templateName
      * @param array<mixed> $parameters
      *
      * @return string
@@ -31,7 +31,7 @@ abstract class AbstractScene implements SceneInterface
         $fullTemplateName = sprintf('%s.html.twig', $templateName);
 
         $parameters += [
-            'player' => $this->getCurrentPlayer(),
+            'player'         => $this->getCurrentPlayer(),
             'huntingDungeon' => $this->getHuntingDungeon(),
         ];
 
@@ -39,13 +39,13 @@ abstract class AbstractScene implements SceneInterface
     }
 
     /**
-     * @param class-string<SceneInterface> $sceneName
+     * @param  class-string<SceneInterface> $sceneName
      * @return string
      */
     protected function switchToScene(string $sceneName): string
     {
         /** @var SceneInterface $scene */
-        $scene =\DI::getService($sceneName);
+        $scene = \DI::getService($sceneName);
 
         return $scene->run(new HttpInput());
     }

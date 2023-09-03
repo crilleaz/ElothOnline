@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Trade;
@@ -14,7 +15,6 @@ readonly class Shop
         public string $name,
         public string $description
     ) {
-
     }
 
     /**

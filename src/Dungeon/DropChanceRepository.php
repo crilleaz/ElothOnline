@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Dungeon;
@@ -29,7 +30,7 @@ class DropChanceRepository extends AbstractDataAccessor
         foreach ($data as $dropDetails) {
             if ($dropDetails['monster_id'] == $monster->id) {
                 yield new DropChance(
-                    Chance::percentage((float)$dropDetails['chance']),
+                    Chance::percentage((float) $dropDetails['chance']),
                     $this->itemPrototypeRepository->getById($dropDetails['item_id']),
                     $dropDetails['quantity_min'],
                     $dropDetails['quantity_max']

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Player;
@@ -18,7 +19,7 @@ readonly class Reward
     }
 
     /**
-     * @param int $exp
+     * @param int    $exp
      * @param Item[] $items
      */
     public function __construct(public int $exp, array $items)
@@ -43,7 +44,7 @@ readonly class Reward
         foreach ($items as $item) {
             $itemId = $item->id;
             if (isset($groupedItems[$itemId])) {
-                $existingItem = $groupedItems[$itemId];
+                $existingItem          = $groupedItems[$itemId];
                 $groupedItems[$itemId] = new Item($existingItem->id, $existingItem->quantity + $item->quantity);
             } else {
                 $groupedItems[$itemId] = $item;
@@ -63,10 +64,10 @@ readonly class Reward
             return self::none();
         }
 
-        $newExp = (int)round($this->exp * $modifier);
+        $newExp   = (int) round($this->exp * $modifier);
         $newItems = [];
         foreach ($this->items as $item) {
-            $newAmount = (int)round($item->quantity * $modifier);
+            $newAmount = (int) round($item->quantity * $modifier);
             if ($newAmount === 0) {
                 continue;
             }

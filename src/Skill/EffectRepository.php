@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Skill;
@@ -9,7 +10,7 @@ use Game\Utils\AbstractDataAccessor;
 class EffectRepository extends AbstractDataAccessor
 {
     /**
-     * @param int $itemId
+     * @param  int $itemId
      * @return iterable<Effect>
      */
     public function findByItem(int $itemId): iterable

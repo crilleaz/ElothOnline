@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game;
@@ -12,7 +13,8 @@ readonly class Client
     public function __construct(
         private AuthService $authService,
         private CharacterRepository $characterRepository
-    ){}
+    ) {
+    }
 
     public function run(): void
     {

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Item;
@@ -19,13 +20,14 @@ readonly class Item
 
     public function __construct(int $itemId, int $quantity)
     {
-        $prototype = \DI::getService(ItemPrototypeRepository::class)->getById($itemId);
-        $this->prototype = $prototype;
-        $this->id =  $prototype->id;
-        $this->name = $prototype->name;
-        $this->quantity = $quantity;
-        $this->worth = $prototype->worth;
-        $this->isSellable = $prototype->isSellable(); // todo replace with Type
+        $prototype        = \DI::getService(ItemPrototypeRepository::class)->getById($itemId);
+        $this->prototype  = $prototype;
+        $this->id         = $prototype->id;
+        $this->name       = $prototype->name;
+        $this->quantity   = $quantity;
+        $this->worth      = $prototype->worth;
+        $this->isSellable = $prototype->isSellable();
+// todo replace with Type
     }
 
     /**

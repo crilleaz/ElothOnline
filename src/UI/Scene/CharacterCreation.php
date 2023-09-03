@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\UI\Scene;
@@ -15,13 +16,12 @@ use Twig\Environment;
 readonly class CharacterCreation implements SceneInterface
 {
     public function __construct(
-        private Client          $client,
-        private Environment     $renderer,
-        private RaceRepository  $raceRepository,
+        private Client $client,
+        private Environment $renderer,
+        private RaceRepository $raceRepository,
         private CreateCharacter $createCharacter,
-        private AuthService     $authService
-    )
-    {
+        private AuthService $authService
+    ) {
     }
 
     public function run(InputInterface $input): string
@@ -31,7 +31,7 @@ readonly class CharacterCreation implements SceneInterface
             return $this->switchToMainMenu();
         }
 
-        $error = '';
+        $error        = '';
         $selectedRace = $input->getInt('race');
         if ($selectedRace > 0) {
             $user = $this->getCurrentUser();
@@ -52,7 +52,7 @@ readonly class CharacterCreation implements SceneInterface
     private function switchToMainMenu(): string
     {
         /** @var SceneInterface $scene */
-        $scene =\DI::getService(MainMenu::class);
+        $scene = \DI::getService(MainMenu::class);
 
         return $scene->run(new HttpInput());
     }

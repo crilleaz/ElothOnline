@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\UI\Scene\Activity;
@@ -10,7 +11,6 @@ use Game\UI\Scene\MainMenu;
 
 class Lumberjack extends AbstractScene
 {
-
     public function run(InputInterface $input): string
     {
         $player = $this->getCurrentPlayer();
@@ -19,21 +19,21 @@ class Lumberjack extends AbstractScene
             return $this->switchToScene(MainMenu::class);
         }
         $errorMsg = '';
-        $infoMsg = '';
+        $infoMsg  = '';
 
         $this->handleInput($input, $player);
 
         $currentActivity = $player->getCurrentActivity();
-        $options = [];
+        $options         = [];
         foreach (\Game\Player\Activity\Lumberjack::OPTIONS as $option) {
-            $activity = new \Game\Player\Activity\Lumberjack($option['id']);
+            $activity            = new \Game\Player\Activity\Lumberjack($option['id']);
             $option['isCurrent'] = $currentActivity !== null && $activity->isSame($currentActivity);
-            $reward = $activity->calculateReward($player);
+            $reward              = $activity->calculateReward($player);
             if ($reward->isEmpty()) {
                 $option['gainPerHour'] = null;
             } else {
                 $option['gainPerHour'] = [
-                    'exp'   => $reward->exp,
+                    'exp'  => $reward->exp,
                     'drop' => $reward->items[0],
                 ];
             }
@@ -41,9 +41,9 @@ class Lumberjack extends AbstractScene
         }
 
         return $this->renderTemplate('activity/lumberjack', [
-            'options' => $options,
+            'options'  => $options,
             'errorMsg' => $errorMsg,
-            'infoMsg' => $infoMsg,
+            'infoMsg'  => $infoMsg,
         ]);
     }
 

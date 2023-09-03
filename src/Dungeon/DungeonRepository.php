@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Dungeon;
@@ -10,7 +11,9 @@ use Game\Utils\AbstractDataAccessor;
  */
 class DungeonRepository extends AbstractDataAccessor
 {
-    public function __construct(private readonly MonsterRepository $monsterRepository) {}
+    public function __construct(private readonly MonsterRepository $monsterRepository)
+    {
+    }
 
     public function findById(int $id): ?Dungeon
     {

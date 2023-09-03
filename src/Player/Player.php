@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Player;
@@ -48,7 +49,7 @@ class Player
 
     public function getHuntingDungeonId(): ?int
     {
-        $hunt = $this->connection->fetchRow('SELECT dungeon_id FROM hunting WHERE character_id = ?',[$this->id]);
+        $hunt = $this->connection->fetchRow('SELECT dungeon_id FROM hunting WHERE character_id = ?', [$this->id]);
         if ($hunt === []) {
             return null;
         }
@@ -76,12 +77,12 @@ class Player
 
     public function measureDifficulty(Dungeon $dungeon): string
     {
-        $ttkCalculator = new TTKCalculator();
-        $ttkMonster = $ttkCalculator->calculate($this, $dungeon->inhabitant)->seconds;
-        $ttkPlayer = $ttkCalculator->calculateForMonster($dungeon->inhabitant, $this)->seconds;
+        $ttkCalculator   = new TTKCalculator();
+        $ttkMonster      = $ttkCalculator->calculate($this, $dungeon->inhabitant)->seconds;
+        $ttkPlayer       = $ttkCalculator->calculateForMonster($dungeon->inhabitant, $this)->seconds;
         $difficultyRatio = $ttkPlayer / $ttkMonster;
 
-        switch(true) {
+        switch (true) {
             case $difficultyRatio > 50:
                 return 'easy(>50 mobs/h)';
             case $difficultyRatio > 20:
@@ -133,7 +134,7 @@ class Player
 
             // Update max hp
             $amountToAdd = 15;
-            $maxHealth = $level * $amountToAdd;
+            $maxHealth   = $level * $amountToAdd;
             $db->execute("UPDATE players SET health_max = {$maxHealth} WHERE id = {$this->id}");
         });
 
@@ -152,10 +153,10 @@ class Player
 
         $now = DbTimeFactory::createCurrentTimestamp();
 
-        $this->connection->execute("
+        $this->connection->execute('
                         INSERT INTO activity(character_id, name, selected_option, checked_at, last_reward_at)
                         VALUE (?, ?, ?, ?, ?)
-        ", [$this->id, $activity->getName(), $activity->getOption(), $now, $now]);
+        ', [$this->id, $activity->getName(), $activity->getOption(), $now, $now]);
 
         return null;
     }
@@ -274,7 +275,7 @@ class Player
     {
         $this->obtainItem($item);
 
-        $this->logger->add($this->id, sprintf("You picked up %d %s", $item->quantity, $item->name));
+        $this->logger->add($this->id, sprintf('You picked up %d %s', $item->quantity, $item->name));
     }
 
     public function obtainItem(Item $item): void

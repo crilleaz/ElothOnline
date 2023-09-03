@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Player;
@@ -8,7 +9,9 @@ use Game\User;
 
 readonly class CharacterRepository
 {
-    public function __construct(private DBConnection $db) {}
+    public function __construct(private DBConnection $db)
+    {
+    }
 
     public function getByUser(User $user): Player
     {
@@ -51,7 +54,7 @@ readonly class CharacterRepository
     }
 
     /**
-     * @param int $amount
+     * @param  int $amount
      * @return iterable<Player>
      */
     public function listTopCharacters(int $amount): iterable

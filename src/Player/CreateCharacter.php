@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Player;
@@ -14,12 +15,13 @@ readonly class CreateCharacter
         private DBConnection $db,
         private CharacterRepository $characterRepository,
         private Chat $chat
-    ) {}
+    ) {
+    }
 
     public function execute(string $characterName, Race $race, User $forUser): Player
     {
         $this->db->execute(
-            "INSERT INTO players(
+            'INSERT INTO players(
                     user_id,
                     race,
                     name,
@@ -33,7 +35,7 @@ readonly class CreateCharacter
                     blacksmith,
                     gathering,
                     alchemy
-                ) VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                ) VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [
                 $forUser->id,
                 $race->id,

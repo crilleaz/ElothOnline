@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game;
@@ -29,7 +30,8 @@ class Server
         private readonly RewardCalculator $rewardCalculator,
         private readonly DungeonRepository $dungeonRepository,
         private readonly CharacterRepository $characterRepository
-    ){}
+    ) {
+    }
 
     /**
      * @return string[] list of logs
@@ -40,8 +42,8 @@ class Server
     {
         $this->currentTime = CarbonImmutable::now();
 
-        $this->logs = [];
-        $this->logs[] = sprintf('<StartedAt>%s</StartedAt>', $this->currentTime->format("H:i:s d-m-Y"));
+        $this->logs   = [];
+        $this->logs[] = sprintf('<StartedAt>%s</StartedAt>', $this->currentTime->format('H:i:s d-m-Y'));
 
         $this->db->transaction(function () {
             $this->regenerateStamina();
@@ -49,19 +51,21 @@ class Server
             $this->stopExhaustedHunters();
         });
 
-        $logs = $this->logs;
+        $logs       = $this->logs;
         $this->logs = [];
 
         return $logs;
     }
 
-    // Regenerates resting hunters stamina
+    /**
+     * Regenerates resting hunters stamina
+     */
     private function regenerateStamina(): void
     {
         // Basically means timestamp when last action was applied. Implied that action is taken only by Engine
         $row = $this->db->fetchRow("SELECT tid FROM timetable WHERE name = 'stamina'");
 
-        $lastUpdateAt = DbTimeFactory::fromTimestamp($row['tid']);
+        $lastUpdateAt  = DbTimeFactory::fromTimestamp($row['tid']);
         $minutesPassed = $this->currentTime->diffInMinutes($lastUpdateAt);
         if ($minutesPassed === 0) {
             return;
@@ -72,14 +76,18 @@ class Server
         // TODO stop regenerating stamina for players with activities. Introduce playerState instead of in_combat
         $this->db->execute(
             'UPDATE players SET stamina = LEAST(stamina + ?, ?) WHERE in_combat = 0 AND stamina < ?',
-            [$minutesPassed, Player::MAX_POSSIBLE_STAMINA, Player::MAX_POSSIBLE_STAMINA]
+            [
+            $minutesPassed,
+            Player::MAX_POSSIBLE_STAMINA,
+            Player::MAX_POSSIBLE_STAMINA,
+            ]
         );
         $this->db->execute("UPDATE timetable SET tid = NOW() WHERE name='stamina'");
     }
 
     private function stopExhaustedHunters(): void
     {
-        $huntingPlayers = $this->db->fetchRows("SELECT id, name, in_combat, stamina FROM players WHERE stamina <= 0 AND in_combat = 1");
+        $huntingPlayers = $this->db->fetchRows('SELECT id, name, in_combat, stamina FROM players WHERE stamina <= 0 AND in_combat = 1');
         foreach ($huntingPlayers as $row) {
             $playerNameWithNoStamina = $row['name'];
 
@@ -103,10 +111,10 @@ class Server
 
         $rewardLogs[] = '<Rewards>';
         foreach ($this->getHunters() as $row) {
-            $hunter = $this->characterRepository->getById($row['character_id']);
+            $hunter      = $this->characterRepository->getById($row['character_id']);
             $huntingZone = $this->dungeonRepository->getById($row['dungeon_id']);
 
-            $lastCheckedAt = DbTimeFactory::fromTimestamp($row['checked_at']);
+            $lastCheckedAt  = DbTimeFactory::fromTimestamp($row['checked_at']);
             $lastRewardedAt = DbTimeFactory::fromTimestamp($row['last_reward_at']);
 
             $minutesSinceLastCheck = $lastCheckedAt->diffInMinutes($this->currentTime, false);
@@ -115,16 +123,19 @@ class Server
             }
 
             $minutesSinceLastReward = $lastRewardedAt->diffInMinutes($this->currentTime, false);
-            $remainingStamina = $hunter->getStamina();
+            $remainingStamina       = $hunter->getStamina();
             // If player spent in dungeon more time than stamina he has, decrease spent time according that amount
             if ($remainingStamina < $minutesSinceLastCheck) {
-                $minutesSinceLastCheck = $remainingStamina;
+                $minutesSinceLastCheck  = $remainingStamina;
                 $minutesSinceLastReward = $lastRewardedAt->diffInMinutes($lastCheckedAt, false) + $remainingStamina;
             }
 
             $this->db->execute('UPDATE players SET stamina = GREATEST(stamina - ?, 0)  WHERE id = ?', [$minutesSinceLastCheck, $hunter->getId()]);
 
-            ['unitsKilled' => $unitsKilled, 'withinTime' => $timeSpent] = $this->calculateKillCount($hunter, $huntingZone->inhabitant, TimeInterval::fromMinutes($minutesSinceLastReward));
+            [
+            'unitsKilled' => $unitsKilled,
+            'withinTime'  => $timeSpent,
+            ] = $this->calculateKillCount($hunter, $huntingZone->inhabitant, TimeInterval::fromMinutes($minutesSinceLastReward));
 
             if ($unitsKilled < 1) {
                 $this->db->execute('UPDATE hunting SET checked_at = ? WHERE character_id = ?', [DbTimeFactory::createTimestamp($this->currentTime), $hunter->getId()]);
@@ -177,21 +188,21 @@ class Server
 
         foreach ($activities as $data) {
             $character = $this->characterRepository->getById($data['character_id']);
-            $activity = $character->getCurrentActivity();
+            $activity  = $character->getCurrentActivity();
             if ($activity === null) {
                 $this->logs[] = sprintf('<Error>Character %s expected to have activity but it is missing</Error>', $character->getName());
                 continue;
             }
 
-            $lastCheckedAt = DbTimeFactory::fromTimestamp($data['checked_at']);
+            $lastCheckedAt  = DbTimeFactory::fromTimestamp($data['checked_at']);
             $lastRewardedAt = DbTimeFactory::fromTimestamp($data['last_reward_at']);
 
-            $minutesSinceLastCheck = $lastCheckedAt->diffInMinutes($this->currentTime, false);
+            $minutesSinceLastCheck  = $lastCheckedAt->diffInMinutes($this->currentTime, false);
             $minutesSinceLastReward = $lastRewardedAt->diffInMinutes($this->currentTime, false);
-            $remainingStamina = $character->getStamina();
+            $remainingStamina       = $character->getStamina();
             // If player spent in dungeon more time than stamina he has, decrease spent time according that amount
             if ($remainingStamina < $minutesSinceLastCheck) {
-                $minutesSinceLastCheck = $remainingStamina;
+                $minutesSinceLastCheck  = $remainingStamina;
                 $minutesSinceLastReward = $lastRewardedAt->diffInMinutes($lastCheckedAt, false) + $remainingStamina;
             }
 
@@ -202,9 +213,9 @@ class Server
                 continue;
             }
 
-            $fullHoursPassed = (int) ($minutesSinceLastReward/60);
-            $rewardPerHour = $activity->calculateReward($character);
-            $reward = $rewardPerHour->multiply($fullHoursPassed);
+            $fullHoursPassed = (int) ($minutesSinceLastReward / 60);
+            $rewardPerHour   = $activity->calculateReward($character);
+            $reward          = $rewardPerHour->multiply($fullHoursPassed);
 
             $character->addExp($reward->exp);
             foreach ($reward->items as $item) {
@@ -231,7 +242,7 @@ class Server
     }
 
     /**
-     * @param Player $hunter
+     * @param Player  $hunter
      * @param Monster $monster
      *
      * @return array{unitsKilled: int, withinTime: TimeInterval}
@@ -239,21 +250,27 @@ class Server
     private function calculateKillCount(Player $hunter, Monster $monster, TimeInterval $withinTime): array
     {
         $ttkMonster = $this->ttkCalculator->calculate($hunter, $monster);
-        $ttkPlayer = $this->ttkCalculator->calculateForMonster($monster, $hunter);
+        $ttkPlayer  = $this->ttkCalculator->calculateForMonster($monster, $hunter);
 
         // If player needs more time to kill monster than monsters needs to kill player
         if ($ttkMonster->isGreaterThan($ttkPlayer)) {
-            return ['unitsKilled' => 0, 'withinTime' => $withinTime];
+            return [
+            'unitsKilled' => 0,
+            'withinTime'  => $withinTime,
+            ];
         }
 
-        $unitsKilled = (int)floor($withinTime->toMinutes() / $ttkMonster->toMinutes());
+        $unitsKilled = (int) floor($withinTime->toMinutes() / $ttkMonster->toMinutes());
         if ($unitsKilled === 0) {
-            return ['unitsKilled' => 0, 'withinTime' => $withinTime];
+            return [
+            'unitsKilled' => 0,
+            'withinTime'  => $withinTime,
+            ];
         }
 
         return [
             'unitsKilled' => $unitsKilled,
-            'withinTime' => new TimeInterval($ttkMonster->seconds * $unitsKilled),
+            'withinTime'  => new TimeInterval($ttkMonster->seconds * $unitsKilled),
         ];
     }
 }

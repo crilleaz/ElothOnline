@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Player;
@@ -9,5 +10,6 @@ readonly class Stats
         public int $maxHealth,
         public int $strength,
         public int $defence,
-    ) {}
+    ) {
+    }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\UI\Scene;
@@ -12,9 +13,9 @@ use Twig\Environment;
 class Library extends AbstractScene
 {
     public function __construct(
-        Client                             $client,
-        Environment                        $renderer,
-        DungeonRepository                  $dungeonRepository,
+        Client $client,
+        Environment $renderer,
+        DungeonRepository $dungeonRepository,
         private readonly MonsterRepository $monsterRepository
     ) {
         parent::__construct($client, $renderer, $dungeonRepository);

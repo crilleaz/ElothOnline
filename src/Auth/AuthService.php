@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Auth;
@@ -11,11 +12,13 @@ class AuthService
 {
     private ?User $currentUser = null;
 
-    public function __construct(private readonly DBConnection $db) {}
+    public function __construct(private readonly DBConnection $db)
+    {
+    }
 
     public function banPlayer(string $name): void
     {
-        $this->db->execute("UPDATE users set banned = 1 WHERE anv = ?", [$name]);
+        $this->db->execute('UPDATE users set banned = 1 WHERE anv = ?', [$name]);
     }
 
     public function register(string $playerName, string $password, ?string $ip = ''): null|Error
@@ -58,7 +61,7 @@ class AuthService
             return new Error('User is banned');
         }
 
-        $this->currentUser = null;
+        $this->currentUser    = null;
         $_SESSION['username'] = $user['anv'];
 
         return null;

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Trade;
@@ -29,7 +30,7 @@ class ShopRepository extends AbstractDataAccessor
         }
     }
 
-    protected function  getDataName(): string
+    protected function getDataName(): string
     {
         return 'shop';
     }

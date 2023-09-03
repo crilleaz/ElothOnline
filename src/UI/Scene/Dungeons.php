@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\UI\Scene;
@@ -11,12 +12,12 @@ use Twig\Environment;
 
 class Dungeons extends AbstractScene
 {
-    private string $infoMsg = '';
+    private string $infoMsg  = '';
     private string $errorMsg = '';
 
     public function __construct(
-        Client                             $game,
-        Environment                        $renderer,
+        Client $game,
+        Environment $renderer,
         private readonly DungeonRepository $dungeonRepository
     ) {
         parent::__construct($game, $renderer, $dungeonRepository);
@@ -29,7 +30,7 @@ class Dungeons extends AbstractScene
         return $this->renderTemplate('dungeons', [
             'dungeons' => $this->dungeonRepository->listDungeons(),
             'errorMsg' => $this->errorMsg,
-            'infoMsg' => $this->infoMsg,
+            'infoMsg'  => $this->infoMsg,
         ]);
     }
 

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Chat;
@@ -9,11 +10,13 @@ use Game\User;
 
 readonly class Chat
 {
-    public function __construct(private DBConnection $db) {}
+    public function __construct(private DBConnection $db)
+    {
+    }
 
     public function addMessage(Player $player, string $message): void
     {
-        $this->db->execute("INSERT INTO chat (username, messages) VALUES (?, ?)", [$player->getName(), $message]);
+        $this->db->execute('INSERT INTO chat (username, messages) VALUES (?, ?)', [$player->getName(), $message]);
     }
 
     public function addSystemMessage(string $message): void
@@ -22,13 +25,13 @@ readonly class Chat
     }
 
     /**
-     * @param int $amount
+     * @param  int $amount
      * @return iterable<ChatMessage>
      */
     public function getLastMessages(int $amount): iterable
     {
         // TODO Need to filter out message from banned users?
-        $result = $this->db->fetchRows("SELECT * FROM chat ORDER BY id DESC LIMIT " . $amount);
+        $result = $this->db->fetchRows('SELECT * FROM chat ORDER BY id DESC LIMIT ' . $amount);
         foreach ($result as $message) {
             yield new ChatMessage(
                 $message['username'],

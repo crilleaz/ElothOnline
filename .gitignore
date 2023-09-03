@@ -9,3 +9,4 @@ log.txt
 var/**
 !var/.gitkeep
 .phpstan
+.phpcs-cache

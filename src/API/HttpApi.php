@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\API;
@@ -21,7 +22,6 @@ class HttpApi
 
     public function __construct(private readonly Client $client, private readonly AuthService $authService)
     {
-
     }
 
     public function handle(Request $request): Response
@@ -67,14 +67,14 @@ class HttpApi
 
     private function getLastChatMessages(): Response
     {
-        $messages = \DI::getService(Chat::class)->getLastMessages(10);
+        $messages     = \DI::getService(Chat::class)->getLastMessages(10);
         $messagesData = [];
         foreach ($messages as $message) {
             $messagesData[] = [
                 'isFromAdmin' => $message->isFromAdmin,
-                'sender' => $message->sender,
-                'message' => $message->content,
-                'sentAt' => $message->sentAt->format(DATE_ATOM),
+                'sender'      => $message->sender,
+                'message'     => $message->content,
+                'sentAt'      => $message->sentAt->format(DATE_ATOM),
             ];
         }
 
@@ -101,7 +101,7 @@ class HttpApi
 
     private function buyItem(Request $request): Response
     {
-        $itemId = $request->request->getInt('itemId');
+        $itemId   = $request->request->getInt('itemId');
         $fromShop = $request->request->getString('shop');
 
         $shop = \DI::getService(ShopRepository::class)->findShopByName($fromShop);
@@ -124,7 +124,7 @@ class HttpApi
 
     private function sellItem(Request $request): Response
     {
-        $itemId = $request->request->getInt('itemId');
+        $itemId   = $request->request->getInt('itemId');
         $quantity = 1;
 
         $sellingItem = new Item($itemId, $quantity);
@@ -167,7 +167,7 @@ class HttpApi
     }
 
     /**
-     * @param array<mixed> $data
+     * @param  array<mixed> $data
      * @return Response
      */
     private function success(array $data = []): Response
@@ -175,7 +175,7 @@ class HttpApi
         return new JsonResponse([
             'success' => true,
             'message' => '',
-            'data' => $data,
+            'data'    => $data,
         ]);
     }
 
@@ -184,7 +184,7 @@ class HttpApi
         return new JsonResponse([
             'success' => false,
             'message' => $message,
-            'data' => [],
+            'data'    => [],
         ]);
     }
 }

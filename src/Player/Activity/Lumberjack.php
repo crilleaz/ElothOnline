@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Player\Activity;
@@ -11,20 +12,20 @@ readonly class Lumberjack implements ActivityInterface
 {
     public const OPTIONS = [
         1 => [
-            'id' => 1,
-            'name' => 'Hollow tree',
+            'id'          => 1,
+            'name'        => 'Hollow tree',
             'description' => 'Hollow tree. Can be sold as fuel for a coin or two.',
-            'complexity' => 1,
-            'rewardExp' => 5,
-            'rewardItem' => 6,
+            'complexity'  => 1,
+            'rewardExp'   => 5,
+            'rewardItem'  => 6,
         ],
         2 => [
-            'id' => 2,
-            'name' => 'Oak tree',
+            'id'          => 2,
+            'name'        => 'Oak tree',
             'description' => 'Strong tree. They say hogs love hanging around it.',
-            'complexity' => 3,
-            'rewardExp' => 8,
-            'rewardItem' => 7,
+            'complexity'  => 3,
+            'rewardExp'   => 8,
+            'rewardItem'  => 7,
         ],
     ];
 
@@ -37,7 +38,7 @@ readonly class Lumberjack implements ActivityInterface
             throw new \RuntimeException('Unknown option passed');
         }
 
-        $this->optionId = $option;
+        $this->optionId   = $option;
         $this->optionName = self::OPTIONS[$option]['name'];
     }
 
@@ -63,9 +64,9 @@ readonly class Lumberjack implements ActivityInterface
             return Reward::none();
         }
 
-        $option = self::OPTIONS[$this->optionId];
-        $efficiency = (int)round($playerGeneralEfficiency/$option['complexity']);
-        if ($efficiency === 0){
+        $option     = self::OPTIONS[$this->optionId];
+        $efficiency = (int) round($playerGeneralEfficiency / $option['complexity']);
+        if ($efficiency === 0) {
             return Reward::none();
         }
 
