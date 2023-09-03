@@ -161,11 +161,15 @@ class HttpApi
 
     private function viewLogs(Request $request): Response
     {
-        $logs = iterator_to_array($this->player->getLogs(5));
+        $logs = iterable_to_array($this->player->getLogs(5));
 
         return $this->success(['logs' => $logs]);
     }
 
+    /**
+     * @param array<mixed> $data
+     * @return Response
+     */
     private function success(array $data = []): Response
     {
         return new JsonResponse([

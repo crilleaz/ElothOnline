@@ -20,6 +20,12 @@ abstract class AbstractScene implements SceneInterface
 
     }
 
+    /**
+     * @param string $templateName
+     * @param array<mixed> $parameters
+     *
+     * @return string
+     */
     protected function renderTemplate(string $templateName, array $parameters = []): string
     {
         $fullTemplateName = sprintf('%s.html.twig', $templateName);
@@ -46,7 +52,13 @@ abstract class AbstractScene implements SceneInterface
 
     protected function getCurrentPlayer(): Player
     {
-        return $this->client->getCurrentPlayer();
+        $player = $this->client->getCurrentPlayer();
+
+        if ($player === null) {
+            throw new \RuntimeException('Unexpected access to the scene. Player expected to be present.');
+        }
+
+        return $player;
     }
 
     protected function getHuntingDungeon(): ?Dungeon

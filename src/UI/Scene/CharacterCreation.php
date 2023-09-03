@@ -9,6 +9,7 @@ use Game\Player\CreateCharacter;
 use Game\Player\RaceRepository;
 use Game\UI\Scene\Input\HttpInput;
 use Game\UI\Scene\Input\InputInterface;
+use Game\User;
 use Twig\Environment;
 
 readonly class CharacterCreation implements SceneInterface
@@ -33,14 +34,14 @@ readonly class CharacterCreation implements SceneInterface
         $error = '';
         $selectedRace = $input->getInt('race');
         if ($selectedRace > 0) {
-            $user = $this->authService->getCurrentUser();
+            $user = $this->getCurrentUser();
             $race = $this->raceRepository->getById($selectedRace);
             $this->createCharacter->execute($user->name, $race, $user);
 
             return $this->switchToMainMenu();
         }
 
-        $races = iterator_to_array($this->raceRepository->listAll());
+        $races = iterable_to_array($this->raceRepository->listAll());
 
         return $this->renderer->render('character-creation.html.twig', [
             'races' => $races,
@@ -54,5 +55,16 @@ readonly class CharacterCreation implements SceneInterface
         $scene =\DI::getService(MainMenu::class);
 
         return $scene->run(new HttpInput());
+    }
+
+    private function getCurrentUser(): User
+    {
+        $user = $this->authService->getCurrentUser();
+
+        if ($user === null) {
+            throw new \RuntimeException('Unauthenticated access was not expected');
+        }
+
+        return $user;
     }
 }

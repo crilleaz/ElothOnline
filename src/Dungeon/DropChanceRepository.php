@@ -7,6 +7,9 @@ use Game\Item\ItemPrototypeRepository;
 use Game\Utils\Chance;
 use Game\Utils\AbstractDataAccessor;
 
+/**
+ * @phpstan-type RawData array{monster_id: int, item_id: int, chance: float, quantity_min: int, quantity_max: int}
+ */
 class DropChanceRepository extends AbstractDataAccessor
 {
     public function __construct(private readonly ItemPrototypeRepository $itemPrototypeRepository)
@@ -22,6 +25,7 @@ class DropChanceRepository extends AbstractDataAccessor
     {
         $data = $this->getData();
 
+        /** @var RawData $dropDetails */
         foreach ($data as $dropDetails) {
             if ($dropDetails['monster_id'] == $monster->id) {
                 yield new DropChance(

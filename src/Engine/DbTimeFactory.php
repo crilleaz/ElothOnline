@@ -17,4 +17,14 @@ class DbTimeFactory
     {
         return $from->format('Y-m-d H:i:s');
     }
+
+    public static function fromTimestamp(string $dbTimeStamp): CarbonImmutable
+    {
+        $timestamp = strtotime($dbTimeStamp);
+        if ($timestamp === false) {
+            throw new \RuntimeException('Could not parse time');
+        }
+
+        return CarbonImmutable::createFromTimestamp($timestamp);
+    }
 }

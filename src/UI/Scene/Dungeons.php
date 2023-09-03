@@ -37,7 +37,7 @@ class Dungeons extends AbstractScene
     {
         $selectedDungeon = $input->getInt('hunt');
         if ($selectedDungeon !== 0) {
-            $dungeon = $this->dungeonRepository->findById($selectedDungeon);
+            $dungeon = $this->dungeonRepository->getById($selectedDungeon);
 
             $result = $this->getCurrentPlayer()->enterDungeon($dungeon);
             if ($result instanceof Error) {

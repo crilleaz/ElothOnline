@@ -10,10 +10,19 @@ abstract class AbstractDataAccessor
 {
     abstract protected function getDataName(): string;
 
+    /**
+     * @return array<mixed>
+     */
     protected function getData(): array
     {
         $dataFile = sprintf('%s/data/%s.yaml', PROJECT_ROOT, $this->getDataName());
 
-        return Yaml::parseFile($dataFile);
+        $result = Yaml::parseFile($dataFile);
+
+        if (!is_array($result)) {
+            return [];
+        }
+
+        return $result;
     }
 }

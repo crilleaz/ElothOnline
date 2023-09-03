@@ -17,6 +17,7 @@ class EffectApplier
             return null;
         }
 
+        // @phpstan-ignore-next-line
         throw new \RuntimeException('Effect type is unknown');
     }
 }

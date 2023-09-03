@@ -38,12 +38,13 @@ readonly class Reward
      */
     private function groupItems(array $items): array
     {
+        /** @var Item[] $groupedItems */
         $groupedItems = [];
         foreach ($items as $item) {
             $itemId = $item->id;
             if (isset($groupedItems[$itemId])) {
                 $existingItem = $groupedItems[$itemId];
-                $groupedItems[$itemId] = new Item($existingItem->item->id, $existingItem->quantity + $item->quantity);
+                $groupedItems[$itemId] = new Item($existingItem->id, $existingItem->quantity + $item->quantity);
             } else {
                 $groupedItems[$itemId] = $item;
             }
@@ -52,7 +53,7 @@ readonly class Reward
         return array_values($groupedItems);
     }
 
-    public function multiply(float $modifier): static
+    public function multiply(float $modifier): self
     {
         if ($modifier < 0) {
             throw new \RuntimeException('Negative modifier is not allowed');

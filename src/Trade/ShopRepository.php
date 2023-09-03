@@ -23,6 +23,7 @@ class ShopRepository extends AbstractDataAccessor
      */
     public function listShops(): iterable
     {
+        /** @var array{id: int, name: string, description: string} $shop */
         foreach ($this->getData() as $shop) {
             yield new Shop($shop['id'], $shop['name'], $shop['description']);
         }

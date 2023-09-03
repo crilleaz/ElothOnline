@@ -26,7 +26,7 @@
                         <button type="button" class="btn btn-success" onclick="sellItem({{ item.id }})">Sell</button>
                     {% endif %}
                     {% if item.isConsumable %}
-                        <button type="button" class="btn btn-success" onclick="useItem({{ item.id }})">Use</button>
+                        <button type="button" class="btn btn-success" title="{{ item.listEffects | map(effect => effect.name) | join(', ') }}" onclick="useItem({{ item.id }})">Use</button>
                     {% endif %}
                     </td>
                     </tr>

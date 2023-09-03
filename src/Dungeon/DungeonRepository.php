@@ -5,6 +5,9 @@ namespace Game\Dungeon;
 
 use Game\Utils\AbstractDataAccessor;
 
+/**
+ * @phpstan-type RawData array{id: int, name: string, description: string, monster_id: int}
+ */
 class DungeonRepository extends AbstractDataAccessor
 {
     public function __construct(private readonly MonsterRepository $monsterRepository) {}
@@ -30,8 +33,12 @@ class DungeonRepository extends AbstractDataAccessor
         return $dungeon;
     }
 
+    /**
+     * @return iterable<Dungeon>
+     */
     public function listDungeons(): iterable
     {
+        /** @var RawData $dungeon */
         foreach ($this->getData() as $dungeon) {
             yield new Dungeon(
                 $dungeon['id'],

@@ -5,14 +5,18 @@ namespace Game\Item;
 
 use Game\Utils\AbstractDataAccessor;
 
-final class ItemPrototypeRepository extends AbstractDataAccessor
+class ItemPrototypeRepository extends AbstractDataAccessor
 {
+    /**
+     * @var array<int, ItemPrototype>
+     */
     private array $cache = [];
 
     public function getById(int $id): ItemPrototype
     {
         if (!isset($this->cache[$id])) {
             $prototype = [];
+            /** @var array{id: int, name: string, worth: int} $itemData */
             foreach ($this->getData() as $itemData) {
                 if ($itemData['id'] === $id) {
                     $prototype = $itemData;

@@ -18,6 +18,9 @@ class Server
 {
     private CarbonImmutable $currentTime;
 
+    /**
+     * @var string[]
+     */
     private array $logs = [];
 
     public function __construct(
@@ -58,7 +61,7 @@ class Server
         // Basically means timestamp when last action was applied. Implied that action is taken only by Engine
         $row = $this->db->fetchRow("SELECT tid FROM timetable WHERE name = 'stamina'");
 
-        $lastUpdateAt = CarbonImmutable::create($row['tid']);
+        $lastUpdateAt = DbTimeFactory::fromTimestamp($row['tid']);
         $minutesPassed = $this->currentTime->diffInMinutes($lastUpdateAt);
         if ($minutesPassed === 0) {
             return;
@@ -103,8 +106,8 @@ class Server
             $hunter = $this->characterRepository->getById($row['character_id']);
             $huntingZone = $this->dungeonRepository->getById($row['dungeon_id']);
 
-            $lastCheckedAt = CarbonImmutable::create($row['checked_at']);
-            $lastRewardedAt = CarbonImmutable::create($row['last_reward_at']);
+            $lastCheckedAt = DbTimeFactory::fromTimestamp($row['checked_at']);
+            $lastRewardedAt = DbTimeFactory::fromTimestamp($row['last_reward_at']);
 
             $minutesSinceLastCheck = $lastCheckedAt->diffInMinutes($this->currentTime, false);
             if ($minutesSinceLastCheck < 1) {
@@ -175,9 +178,13 @@ class Server
         foreach ($activities as $data) {
             $character = $this->characterRepository->getById($data['character_id']);
             $activity = $character->getCurrentActivity();
+            if ($activity === null) {
+                $this->logs[] = sprintf('<Error>Character %s expected to have activity but it is missing</Error>', $character->getName());
+                continue;
+            }
 
-            $lastCheckedAt = CarbonImmutable::create($data['checked_at']);
-            $lastRewardedAt = CarbonImmutable::create($data['last_reward_at']);
+            $lastCheckedAt = DbTimeFactory::fromTimestamp($data['checked_at']);
+            $lastRewardedAt = DbTimeFactory::fromTimestamp($data['last_reward_at']);
 
             $minutesSinceLastCheck = $lastCheckedAt->diffInMinutes($this->currentTime, false);
             $minutesSinceLastReward = $lastRewardedAt->diffInMinutes($this->currentTime, false);
@@ -210,7 +217,7 @@ class Server
     }
 
     /**
-     * @return iterable<array{checked_at: int, last_reward_at: int, character_id: int, dungeon_id: int}>
+     * @return iterable<array{checked_at: string, last_reward_at: string, character_id: int, dungeon_id: int}>
      */
     private function getHunters(): iterable
     {
