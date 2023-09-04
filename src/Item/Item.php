@@ -20,14 +20,12 @@ readonly class Item
 
     public function __construct(int $itemId, int $quantity)
     {
-        $prototype        = \DI::getService(ItemPrototypeRepository::class)->getById($itemId);
-        $this->prototype  = $prototype;
-        $this->id         = $prototype->id;
-        $this->name       = $prototype->name;
+        $this->prototype  = \DI::getService(ItemPrototypeRepository::class)->getById($itemId);
+        $this->id         = $this->prototype->id;
+        $this->name       = $this->prototype->name;
         $this->quantity   = $quantity;
-        $this->worth      = $prototype->worth;
-        $this->isSellable = $prototype->isSellable();
-// todo replace with Type
+        $this->worth      = $this->prototype->worth;
+        $this->isSellable = $this->prototype->isSellable();
     }
 
     /**
@@ -40,7 +38,6 @@ readonly class Item
 
     public function isConsumable(): bool
     {
-        // TODO implement item types
-        return $this->id === 2;
+        return $this->prototype->type === ItemType::CONSUMABLE;
     }
 }

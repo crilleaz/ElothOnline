@@ -2,35 +2,44 @@
     id: 1
     name: 'Gold Coins'
     worth: 1
+    type: 'currency'
 -
     id: 2
     name: Cheese
     worth: 2
+    type: 'consumable'
 -
     id: 3
     name: 'Short Sword'
     worth: 18
+    type: 'weapon'
 -
     id: 4
     name: 'Animal hide'
     worth: 2
+    type: 'material'
 -
     id: 5
     name: Leather
     worth: 5
+    type: 'material'
 -
     id: 6
     name: 'Firewood bundle'
     worth: 1
+    type: 'material'
 -
     id: 7
     name: Oak plank
     worth: 2
+    type: 'material'
 -
     id: 8
     name: 'Hay bale'
     worth: 1
+    type: 'material'
 -
     id: 9
     name: 'Potato'
     worth: 2
+    type: 'consumable'

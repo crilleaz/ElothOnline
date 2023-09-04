@@ -3,3 +3,8 @@
     name: 'Restore stamina'
     type: 1
     power: 5
+-
+    item_id: 9
+    name: 'Restore stamina'
+    type: 1
+    power: 3
