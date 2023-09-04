@@ -20,9 +20,17 @@
     worth: 5
 -
     id: 6
-    name: Firewood
-    worth: 0
+    name: 'Firewood bundle'
+    worth: 1
 -
     id: 7
-    name: Oka plank
+    name: Oak plank
+    worth: 2
+-
+    id: 8
+    name: 'Hay bale'
     worth: 1
+-
+    id: 9
+    name: 'Potato'
+    worth: 2

@@ -2,7 +2,7 @@
 
 {% block content %}
     <div class="card-body flex-column">
-        <h5>Lumberjack</h5>
+        <h5>{{ activityName }}</h5>
         <div class="mdb-lightbox card-text">
             <div class="container-fluid">
                 <div class="container">
@@ -29,9 +29,9 @@
                                         <span>Skill level is too low</span><br>
                                     {% endif %}
                                     {% if option.isCurrent %}
-                                        <a href="/?scene=lumberjack&action=stop"><button class="btn btn-warning">Stop chopping</button></a>
+                                        <a href="/?scene=activity&activity={{ activityName }}&action=stop"><button class="btn btn-warning">Stop activity</button></a>
                                     {% else %}
-                                        <a href="/?scene=lumberjack&tree={{ option.id }}"><button class="btn btn-primary">Start chopping</button></a>
+                                        <a href="/?scene=activity&activity={{ activityName }}&option={{ option.id }}"><button class="btn btn-primary">Start activity</button></a>
                                     {% endif %}
                                 </div>
                         {% if column == 2 %}

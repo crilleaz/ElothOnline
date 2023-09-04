@@ -20,7 +20,7 @@ enum Navigation: string
     case SHOP = 'shop';
     case CHARACTER_CREATION = 'charCreation';
 
-    case ACTIVITY_LUMBERJACK = 'lumberjack';
+    case ACTIVITY_LUMBERJACK = 'activity';
 
     public function load(): void
     {
@@ -48,7 +48,7 @@ enum Navigation: string
             case self::CHARACTER_CREATION:
                 return DI::getService(Scene\CharacterCreation::class);
             case self::ACTIVITY_LUMBERJACK:
-                return DI::getService(Scene\Activity\Lumberjack::class);
+                return DI::getService(Scene\Activity::class);
             default:
                 return DI::getService(Scene\Auth::class);
         }

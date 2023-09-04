@@ -11,8 +11,8 @@ use Game\Engine\DbTimeFactory;
 use Game\Engine\Error;
 use Game\Item\Item;
 use Game\Item\ItemPrototype as ItemPrototype;
+use Game\Player\Activity\Activity;
 use Game\Player\Activity\ActivityInterface;
-use Game\Player\Activity\Lumberjack;
 use Game\Skill\Effect\EffectApplier;
 use Game\Trade\Offer;
 
@@ -139,6 +139,31 @@ class Player
         });
 
         $this->logger->add($this->id, "You gained $amount experience points.");
+    }
+
+    public function canPerformActivity(string $activity): bool
+    {
+        return $this->getActivitySkillLevel($activity) > 0;
+    }
+
+    public function getActivitySkillLevel(string $activity): int
+    {
+        switch ($activity) {
+            case Activity::NAME_LUMBERJACK:
+                return $this->getWoodcutting();
+            case Activity::NAME_FARMER:
+                return $this->getHarvesting();
+            case Activity::NAME_MINER:
+                return $this->getMining();
+            case Activity::NAME_GATHERER:
+                return $this->getGathering();
+            case Activity::NAME_CRAFTER:
+                return $this->getBlacksmith();
+            case Activity::NAME_ALCHEMIST:
+                return $this->getAlchemy();
+            default:
+                return 0;
+        }
     }
 
     public function startActivity(ActivityInterface $activity): ?Error

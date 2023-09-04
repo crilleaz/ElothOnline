@@ -8,7 +8,7 @@ use Game\Dungeon\DungeonRepository;
 use Game\IntegrationTestCase;
 use Game\Item\Item;
 use Game\Item\ItemPrototypeRepository;
-use Game\Player\Activity\Lumberjack;
+use Game\Player\Activity\Activity;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class PlayerTest extends IntegrationTestCase
@@ -164,7 +164,7 @@ class PlayerTest extends IntegrationTestCase
     {
         self::assertNull($this->player->getCurrentActivity());
 
-        $activity = new Lumberjack(1);
+        $activity = Activity::lumberjack(1);
         $result   = $this->player->startActivity($activity);
         $this->assertNoErrorOccurred($result);
 
@@ -176,7 +176,7 @@ class PlayerTest extends IntegrationTestCase
 
     public function testStopActivity(): void
     {
-        $activity = new Lumberjack(1);
+        $activity = Activity::lumberjack(1);
         $result   = $this->player->startActivity($activity);
         $this->assertNoErrorOccurred($result);
 

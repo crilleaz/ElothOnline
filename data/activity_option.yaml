@@ -1,0 +1,27 @@
+Lumberjack:
+    -   id: 1
+        name: 'Hollow tree'
+        description: 'Hollow tree. Can be sold as fuel for a coin or two.'
+        complexity: 1
+        reward_exp: 5
+        reward_item_id: 6
+
+    -   id: 2
+        name: 'Oak tree'
+        description: 'Strong tree. They say hogs love hanging around it.'
+        complexity: 3
+        reward_exp: 8
+        reward_item_id: 7
+Farmer:
+    -  id: 1
+       name: 'Hay field'
+       description: 'Dried grass that is usually used to feed cows.'
+       complexity: 1
+       reward_exp: 5
+       reward_item_id: 8
+    -  id: 2
+       name: 'Potato field'
+       description: 'Grows underground. Does not need much and yields plenty of resource.'
+       complexity: 3
+       reward_exp: 8
+       reward_item_id: 9

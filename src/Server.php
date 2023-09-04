@@ -229,7 +229,7 @@ class Server
                 $character->pickUp($item);
             }
 
-            $lastRewardedAt = $this->currentTime->addHours($fullHoursPassed);
+            $lastRewardedAt = $lastRewardedAt->addHours($fullHoursPassed);
             $this->db->execute('UPDATE activity SET last_reward_at=? WHERE character_id=?', [DbTimeFactory::createTimestamp($lastRewardedAt), $character->getId()]);
         }
     }

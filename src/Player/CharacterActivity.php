@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Game\Player;
 
 use Carbon\CarbonImmutable;
+use Game\Player\Activity\Activity;
 use Game\Player\Activity\ActivityInterface;
-use Game\Player\Activity\Lumberjack;
 use Game\Utils\TimeInterval;
 
 readonly class CharacterActivity implements ActivityInterface
@@ -19,7 +19,7 @@ readonly class CharacterActivity implements ActivityInterface
         public CarbonImmutable $checkedAt,
         public CarbonImmutable $rewardedAt
     ) {
-        $this->activity = $this->resolveActivity($name, $option);
+        $this->activity = new Activity($name, $option);
     }
 
     public function getName(): string
@@ -45,15 +45,5 @@ readonly class CharacterActivity implements ActivityInterface
     public function isSame(ActivityInterface $activity): bool
     {
         return $this->activity->isSame($activity);
-    }
-
-    private function resolveActivity(string $name, int $option): ActivityInterface
-    {
-        switch ($name) {
-            case 'Lumberjack':
-                return new Lumberjack($option);
-            default:
-                throw new \RuntimeException('Unknown activity');
-        }
     }
 }

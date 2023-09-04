@@ -51,12 +51,12 @@
                     Activity
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    {% if player.woodcutting > 0 %}<a class="dropdown-item" href="/?scene=lumberjack">Lumberjack</a>{% endif %}
-                    {% if player.mining > 0 %}<a class="dropdown-item" title="Not implemented yet" href="#">Miner</a>{% endif %}
-                    {% if player.gathering > 0 %}<a class="dropdown-item" title="Not implemented yet" href="#">Gatherer</a>{% endif %}
-                    {% if player.harvesting > 0 %}<a class="dropdown-item" title="Not implemented yet" href="#">Farmer</a>{% endif %}
-                    {% if player.blacksmith > 0 %}<a class="dropdown-item" title="Not implemented yet" href="#">Crafter</a>{% endif %}
-                    {% if player.alchemy > 0 %}<a class="dropdown-item" title="Not implemented yet" href="#">Alchemist</a>{% endif %}
+                    {% if player.canPerformActivity('Lumberjack') %}<a class="dropdown-item" href="/?scene=activity&activity=Lumberjack">Lumberjack</a>{% endif %}
+                    {% if player.canPerformActivity('Miner') %}<a class="dropdown-item" href="/?scene=activity&activity=Miner">Miner</a>{% endif %}
+                    {% if player.canPerformActivity('Gatherer') %}<a class="dropdown-item" href="/?scene=activity&activity=Gatherer">Gatherer</a>{% endif %}
+                    {% if player.canPerformActivity('Farmer') %}<a class="dropdown-item" href="/?scene=activity&activity=Farmer">Farmer</a>{% endif %}
+                    {% if player.canPerformActivity('Crafter') %}<a class="dropdown-item" href="/?scene=activity&activity=Crafter">Crafter</a>{% endif %}
+                    {% if player.canPerformActivity('Alchemist') %}<a class="dropdown-item" href="/?scene=activity&activity=Alchemist">Alchemist</a>{% endif %}
                 </div>
             </li>
             <li class="nav-item">

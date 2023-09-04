@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Game;
 
 use Game\Dungeon\DungeonRepository;
-use Game\Player\Activity\Lumberjack;
+use Game\Player\Activity\Activity;
+use Game\Player\Activity\ActivityRepository;
 use Game\Player\Player;
 
 class ServerTest extends IntegrationTestCase
@@ -35,7 +36,7 @@ class ServerTest extends IntegrationTestCase
         $this->createCharacter(self::PLAYER4, 61);
         $character = $this->createCharacter(self::PLAYER5, 65);
 
-        $activity = new Lumberjack(1);
+        $activity = Activity::lumberjack(1);
         $this->characterCanNowPerformActivity($character, $activity);
         $character->startActivity($activity);
     }
@@ -130,10 +131,12 @@ class ServerTest extends IntegrationTestCase
 
     private function assertLabourersReceivedRewards(): void
     {
-        $character = $this->getCharacterByName(self::PLAYER5);
+        $character    = $this->getCharacterByName(self::PLAYER5);
+        $pickedOption = $this->getService(ActivityRepository::class)->findActivityOption(Activity::NAME_LUMBERJACK, 1);
 
-        self::assertEquals(Lumberjack::OPTIONS[1]['rewardExp'], $character->getExp());
-        $item = $character->findInInventory(Lumberjack::OPTIONS[1]['rewardItem']);
+        self::assertNotNull($pickedOption);
+        self::assertEquals($pickedOption->rewardExp, $character->getExp());
+        $item = $character->findInInventory($pickedOption->rewardItemId);
         self::assertNotNull($item);
         self::assertEquals(1, $item->quantity);
     }
