@@ -23,7 +23,7 @@ readonly class PlayerLog
     public function readLogs(int $characterId, int $amount): iterable
     {
         $logs = $this->db
-            ->fetchRows('SELECT message FROM log WHERE id=? ORDER BY tid DESC LIMIT ?', [$characterId, $amount]);
+            ->fetchRows('SELECT message FROM log WHERE character_id=? ORDER BY tid DESC LIMIT ?', [$characterId, $amount]);
 
         foreach ($logs as $log) {
             yield $log['message'];
