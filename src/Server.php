@@ -241,7 +241,6 @@ class Server
     {
         $lastCheckedAt = $this->currentTime->subMinute();
 
-        // TODO change username to id
         return $this->db->fetchRows(
             'SELECT character_id, dungeon_id, last_reward_at, checked_at FROM hunting WHERE checked_at < ?',
             [DbTimeFactory::createTimestamp($lastCheckedAt)]

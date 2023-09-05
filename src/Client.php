@@ -47,7 +47,7 @@ readonly class Client
     public function run(): void
     {
         $userInput = new HttpInput();
-        if (!$this->isRunning()) {
+        if (!$this->isSignedIn()) {
             $scene = $this->getScene(self::SCENE_AUTH);
         } elseif ($this->getCurrentPlayer() === null) {
             $scene = $this->getScene(self::SCENE_CHARACTER_CREATION);
@@ -70,13 +70,7 @@ readonly class Client
         return $this->characterRepository->findByUser($currentUser);
     }
 
-    /**
-     * Basically pretends to say that client is not running unless user is signed in
-     *
-     * @return bool
-     * @todo   requires rethinking
-     */
-    private function isRunning(): bool
+    private function isSignedIn(): bool
     {
         $currentUser = $this->authService->getCurrentUser();
 
