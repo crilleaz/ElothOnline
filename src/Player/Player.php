@@ -18,6 +18,10 @@ use Game\Trade\Offer;
 
 class Player
 {
+    public const STATE_IDLE                = 0;
+    public const STATE_IN_COMBAT           = 1;
+    public const STATE_PERFORMING_ACTIVITY = 2;
+
     public const MAX_POSSIBLE_STAMINA = 100;
 
     private readonly PlayerLog $logger;
@@ -34,12 +38,12 @@ class Player
 
     public function isFighting(): bool
     {
-        return 1 === (int) $this->getProperty('in_combat');
+        return $this->isInState(self::STATE_IN_COMBAT);
     }
 
     public function isInProtectiveZone(): bool
     {
-        return !$this->isFighting();
+        return $this->isInState(self::STATE_IDLE);
     }
 
     public function isInDungeon(Dungeon $dungeon): bool
@@ -68,14 +72,13 @@ class Player
             return new Error('You are already hunting in a dungeon');
         }
 
-        $currentActivity = $this->getCurrentActivity();
-        if ($currentActivity !== null) {
-            return new Error(sprintf('Can not go to the dungeon while performing "%s" activity', $currentActivity->getName()));
+        if (!$this->isInState(self::STATE_IDLE)) {
+            return new Error('Can not go to the dungeon if not idle');
         }
 
         $now = DbTimeFactory::createCurrentTimestamp();
         $this->connection->execute('INSERT INTO hunting (character_id, dungeon_id, checked_at, last_reward_at) VALUES (?, ?, ?, ?)', [$this->id, $dungeon->id, $now, $now]);
-        $this->connection->execute('UPDATE players SET in_combat = 1 WHERE id = ?', [$this->id]);
+        $this->moveToState(self::STATE_IN_COMBAT);
 
         return null;
     }
@@ -101,8 +104,12 @@ class Player
 
     public function leaveDungeon(): void
     {
+        if (!$this->isInState(self::STATE_IN_COMBAT)) {
+            return;
+        }
+
         $this->connection->execute('DELETE from hunting WHERE character_id = ?', [$this->id]);
-        $this->connection->execute('UPDATE players SET in_combat = 0  WHERE id = ?', [$this->id]);
+        $this->moveToState(self::STATE_IDLE);
     }
 
     public function getId(): int
@@ -173,12 +180,8 @@ class Player
 
     public function startActivity(ActivityInterface $activity): ?Error
     {
-        if (!$this->isInProtectiveZone()) {
+        if (!$this->isInState(self::STATE_IDLE)) {
             return new Error('Can not go for activities when not in protective zone');
-        }
-
-        if ($this->getCurrentActivity() !== null) {
-            return new Error('Character is busy with another activity');
         }
 
         $now = DbTimeFactory::createCurrentTimestamp();
@@ -187,6 +190,8 @@ class Player
                         INSERT INTO activity(character_id, name, selected_option, started_at, checked_at, last_reward_at)
                         VALUE (?, ?, ?, ?, ?, ?)
         ', [$this->id, $activity->getName(), $activity->getOption(), $now, $now, $now]);
+
+        $this->moveToState(self::STATE_PERFORMING_ACTIVITY);
 
         return null;
     }
@@ -208,7 +213,12 @@ class Player
 
     public function stopActivity(): void
     {
+        if (!$this->isInState(self::STATE_PERFORMING_ACTIVITY)) {
+            return;
+        }
+
         $this->connection->execute('DELETE FROM activity WHERE character_id=' . $this->id);
+        $this->moveToState(self::STATE_IDLE);
     }
 
     public function getLevel(): int
@@ -426,6 +436,23 @@ class Player
         }
 
         return $result[$property];
+    }
+
+    private function isInState(int $state): bool
+    {
+        return (int) $this->getProperty('state') === $state;
+    }
+
+    private function moveToState(int $state): void
+    {
+        // Dummy state-machine. Check transitions before applying new state
+        if ($state === self::STATE_IN_COMBAT || $state === self::STATE_PERFORMING_ACTIVITY) {
+            if (!$this->isInState(self::STATE_IDLE)) {
+                throw new \DomainException('Impossible transition');
+            }
+        }
+
+        $this->connection->execute('UPDATE players SET state = ? WHERE id = ?', [$state, $this->id]);
     }
 
     private function getItemQuantity(int $itemId): int

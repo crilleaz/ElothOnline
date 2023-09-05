@@ -73,12 +73,12 @@ class Server
 
         $this->logs[] = sprintf('<RestoredStamina>%d</RestoredStamina>', min($minutesPassed, Player::MAX_POSSIBLE_STAMINA));
 
-        // TODO Introduce playerState instead of in_combat
         $this->db->execute(
-            'UPDATE players p LEFT JOIN activity a ON a.character_id=p.id SET stamina = LEAST(stamina + ?, ?) WHERE in_combat = 0 AND stamina < ? AND a.id IS NULL',
+            'UPDATE players SET stamina = LEAST(stamina + ?, ?) WHERE state = ? AND stamina < ?',
             [
             $minutesPassed,
             Player::MAX_POSSIBLE_STAMINA,
+            Player::STATE_IDLE,
             Player::MAX_POSSIBLE_STAMINA,
             ]
         );
@@ -87,7 +87,7 @@ class Server
 
     private function stopExhaustedCharacters(): void
     {
-        $labourers = $this->db->fetchRows('SELECT p.id, p.name, in_combat, stamina FROM players p INNER JOIN activity a ON p.id = a.character_id WHERE stamina <= 0 AND in_combat = 0');
+        $labourers = $this->db->fetchRows('SELECT id, name FROM players WHERE stamina <= 0 AND state = ' . Player::STATE_PERFORMING_ACTIVITY);
         foreach ($labourers as $row) {
             $playerNameWithNoStamina = $row['name'];
 
@@ -95,7 +95,7 @@ class Server
             $this->logs[] = sprintf('<Exhausted player="%s"/>', $playerNameWithNoStamina);
         }
 
-        $hunters = $this->db->fetchRows('SELECT id, name, in_combat, stamina FROM players WHERE stamina <= 0 AND in_combat = 1');
+        $hunters = $this->db->fetchRows('SELECT id, name, stamina FROM players WHERE stamina <= 0 AND state = ' . Player::STATE_IN_COMBAT);
         foreach ($hunters as $row) {
             $playerNameWithNoStamina = $row['name'];
 
@@ -103,7 +103,7 @@ class Server
             $this->logs[] = sprintf('<Exhausted player="%s"/>', $playerNameWithNoStamina);
         }
 
-        $this->db->execute('UPDATE players SET in_combat = 0, stamina = 0 WHERE stamina <= 0 AND in_combat = 1');
+        $this->db->execute('UPDATE players SET state = ?, stamina = 0 WHERE stamina <= 0 AND state IN (?, ?)', [Player::STATE_IDLE, Player::STATE_IN_COMBAT, Player::STATE_PERFORMING_ACTIVITY]);
     }
 
     private function giveRewards(): void

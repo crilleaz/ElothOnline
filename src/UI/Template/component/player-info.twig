@@ -14,8 +14,10 @@
 
             {% if player.isFighting %}
                 <p>Status: <img width="18" src="./images/combat.gif" title="Raiding {{ huntingDungeon.name }}"></p>
+            {% elseif player.getCurrentActivity %}
+                <p>Status: <img width="18" src="./images/pz.gif" title="Perorming activity"></p>
             {% else %}
-                <p>Status: <img width="18" src="./images/pz.gif" title="Resting in protective zone"></p>
+                <p>Status: <img width="18" src="./images/pz.gif" title="In protective zone"></p>
             {% endif %}
             <hr>
             <center>
