@@ -5,7 +5,7 @@
             <font size="2">HP: {{ player.currentHealth }}/{{ player.maxHealth }}</font>
             |
             {% if player.stamina < 50 %}
-                <font size="2">Stamina: <font color="yellow"> {{ player.stamina }}</font>/100</font>
+                <font size="2">Stamina: <font style="color:yellow; text-shadow: 1px 1px 1px black;"> {{ player.stamina }}</font>/100</font>
             {% elseif player.stamina < 10 %}
                 <font size="2">Stamina: <font color="red"> {{ player.stamina }}</font>/100</font>
             {% else %}
