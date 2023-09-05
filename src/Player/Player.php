@@ -68,6 +68,11 @@ class Player
             return new Error('You are already hunting in a dungeon');
         }
 
+        $currentActivity = $this->getCurrentActivity();
+        if ($currentActivity !== null) {
+            return new Error(sprintf('Can not go to the dungeon while performing "%s" activity', $currentActivity->getName()));
+        }
+
         $now = DbTimeFactory::createCurrentTimestamp();
         $this->connection->execute('INSERT INTO hunting (character_id, dungeon_id, checked_at, last_reward_at) VALUES (?, ?, ?, ?)', [$this->id, $dungeon->id, $now, $now]);
         $this->connection->execute('UPDATE players SET in_combat = 1 WHERE id = ?', [$this->id]);
