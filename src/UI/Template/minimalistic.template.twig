@@ -36,7 +36,7 @@
                    aria-haspopup="true" aria-expanded="false">
                     Community
                 </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <div class="dropdown-menu bg-dark" aria-labelledby="navbarDropdown">
                     <a class="dropdown-item" href="#">News</a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="#">Arena</a>
@@ -50,7 +50,7 @@
                    aria-haspopup="true" aria-expanded="false">
                     Activity
                 </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <div class="dropdown-menu bg-dark" aria-labelledby="navbarDropdown">
                     {% if player.canPerformActivity('Lumberjack') %}<a class="dropdown-item" href="/?scene=activity&activity=Lumberjack">Lumberjack</a>{% endif %}
                     {% if player.canPerformActivity('Miner') %}<a class="dropdown-item" href="/?scene=activity&activity=Miner">Miner</a>{% endif %}
                     {% if player.canPerformActivity('Gatherer') %}<a class="dropdown-item" href="/?scene=activity&activity=Gatherer">Gatherer</a>{% endif %}
