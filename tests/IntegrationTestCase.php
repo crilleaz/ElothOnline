@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game;
@@ -10,6 +11,7 @@ use Game\Auth\AuthService;
 use Game\Engine\DBConnection;
 use Game\Engine\DbTimeFactory;
 use Game\Engine\Error;
+use Game\Player\Activity\ActivityInterface;
 use Game\Player\CharacterRepository;
 use Game\Player\Player;
 use PHPUnit\Framework\TestCase;
@@ -28,9 +30,9 @@ abstract class IntegrationTestCase extends TestCase
 
         $this->setCurrentTime(CarbonImmutable::now());
         $this->authService = $this->getService(AuthService::class);
-        $this->db = $this->getService(DBConnection::class);
+        $this->db          = $this->getService(DBConnection::class);
         $this->db->startTransaction();
-        $this->db->execute("UPDATE timetable SET tid = ?", [DbTimeFactory::createTimestamp($this->currentTime)]);
+        $this->db->execute('UPDATE timetable SET tid = ?', [DbTimeFactory::createTimestamp($this->currentTime)]);
     }
 
     protected function tearDown(): void
@@ -47,7 +49,7 @@ abstract class IntegrationTestCase extends TestCase
 
     /**
      * @template T
-     * @param class-string<T> $className
+     * @param    class-string<T> $className
      *
      * @return T
      */
@@ -93,7 +95,7 @@ abstract class IntegrationTestCase extends TestCase
         $user = $this->authService->getCurrentUser();
 
         $this->db->execute("INSERT INTO players(user_id, name, experience, health, health_max, defence, strength)
-                            VALUE ($user->id, '$name', '0', 120, 120, 5, 100)");
+                            VALUE ($user->id, '$name', 0, 500, 50, 5, 10)");
 
         $character = $this->getService(CharacterRepository::class)->getByUser($user);
 
@@ -104,8 +106,21 @@ abstract class IntegrationTestCase extends TestCase
         return $character;
     }
 
+    protected function characterCanNowPerformActivity(Player $character, ActivityInterface $activity): void
+    {
+        switch ($activity->getName()) {
+            case 'Lumberjack':
+                $activitySkill = 'woodcutting';
+                break;
+            default:
+                throw new \RuntimeException('Unknown activity. Implement it.');
+        }
+
+        $this->db->execute("UPDATE players SET $activitySkill=1 WHERE id= {$character->getId()}");
+    }
+
     private function setStamina(Player $character, int $value): void
     {
-        $this->db->execute("UPDATE players SET stamina=? WHERE id = ?", [$value, $character->getId()]);
+        $this->db->execute('UPDATE players SET stamina=? WHERE id = ?', [$value, $character->getId()]);
     }
 }

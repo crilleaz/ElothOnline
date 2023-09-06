@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game;
@@ -15,7 +16,7 @@ readonly class User
     }
 
     /**
-     * @param string $userName
+     * @param  string $userName
      * @return bool
      *
      * @TODO temporary solution. Remove it completely

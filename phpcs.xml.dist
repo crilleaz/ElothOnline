@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd">
+
+    <arg name="basepath" value="."/>
+    <arg name="cache" value=".phpcs-cache"/>
+    <arg name="colors"/>
+    <arg name="encoding" value="utf-8"/>
+    <arg name="extensions" value="php"/>
+    <arg value="wsp"/>
+
+    <rule ref="vendor/free2er/coding-standard/ruleset.xml"/>
+
+    <rule ref="Squiz.Commenting.ClassComment.Missing">
+            <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.FunctionComment.Missing">
+            <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.FunctionCommentThrowTag.Missing">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.FunctionComment.IncorrectTypeHint">
+            <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.FunctionComment.MissingParamTag">
+            <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.InlineComment.NotCapital">
+            <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.VariableComment.Missing">
+            <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.VariableComment.MissingVar">
+      <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.BlockComment.SingleLine">
+            <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.BlockComment.WrongStart">
+            <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.InlineComment.DocBlock">
+            <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.PHP.Heredoc.NotAllowed">
+            <severity>0</severity>
+    </rule>
+
+    <rule ref="Generic.Files.LineLength.TooLong">
+            <message>Line is too long. This might be difficult to read.</message>
+            <severity>3</severity>
+    </rule>
+    <rule ref="Generic.CodeAnalysis.UselessOverridingMethod.Found">
+            <message>Double check. This rule has to be re-enabled once phpcs fix the php8.2 readonly issue.</message>
+            <severity>3</severity>
+    </rule>
+    <rule ref="Generic.Commenting.DocComment.NonParamGroup">
+            <severity>0</severity>
+    </rule>
+    <rule ref="Generic.Commenting.DocComment.MissingShort">
+            <severity>0</severity>
+    </rule>
+    <rule ref="Generic.Commenting.DocComment.ContentAfterOpen">
+            <severity>0</severity>
+    </rule>
+    <rule ref="Generic.Commenting.DocComment.ContentBeforeClose">
+            <severity>0</severity>
+    </rule>
+    <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
+        <severity>0</severity>
+    </rule>
+
+    <rule ref="Squiz.Strings.DoubleQuoteUsage.ContainsVar">
+        <severity>0</severity>
+    </rule>
+Squiz.Commenting.FunctionComment.MissingParamTag
+    <file>src/</file>
+    <file>tests/</file>
+
+</ruleset>

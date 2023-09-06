@@ -1,0 +1,52 @@
+{% extends "minimalistic.template.twig" %}
+
+{% block content %}
+    <div class="card-body flex-column">
+        <h5>{{ activityName }}</h5>
+        <div class="mdb-lightbox card-text">
+            <div class="container-fluid">
+                <div class="container">
+                    {% if errorMsg %}
+                        <center><font color="red"> {{ errorMsg }}</font></center><br>
+                    {% elseif infoMsg %}
+                        <center><font color="green">{{ infoMsg }}</font></center><br>
+                    {% endif %}
+                    {% set column = 0 %}
+                    {% for option in options %}
+                        {% set column = column + 1 %}
+                        {% if column == 1 %}
+                            <div class="row">
+                        {% endif %}
+                                <div class="col" style="font-size: 1.5em; box-shadow: 0 0 2px gray; padding: 5px;">
+                                    <p>{{ option.name }}</p>
+                                    {% if option.gainPerHour is not null %}
+                                    <span>Per hour</span><br>
+                                    <span>Exp: {{ option.gainPerHour.exp }}</span><br>
+                                    <span>Resource: {{ option.gainPerHour.drop.quantity }} {{ option.gainPerHour.drop.name }}</span><br>
+                                    {% else %}
+                                        <br>
+                                        <br>
+                                        <span>Skill level is too low</span><br>
+                                    {% endif %}
+                                    {% if option.isCurrent %}
+                                        <a href="/?scene=activity&activity={{ activityName }}&action=stop"><button class="btn btn-warning">Stop activity</button></a>
+                                    {% else %}
+                                        <a href="/?scene=activity&activity={{ activityName }}&option={{ option.id }}"><button class="btn btn-primary">Start activity</button></a>
+                                    {% endif %}
+                                </div>
+                        {% if column == 2 %}
+                            {% set column = 0 %}
+                            </div>
+                            <hr>
+                        {% endif %}
+                    {% endfor %}
+                    {# helps to close an unclosed div-row #}
+                    {% if column == 1 %}
+                </div>
+                <hr>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    </div>
+{% endblock %}

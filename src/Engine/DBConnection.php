@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Engine;
@@ -18,17 +19,17 @@ readonly class DBConnection
         string $pass
     ) {
         $this->connection = DriverManager::getConnection([
-            'dbname' => $db,
-            'driver' => 'pdo_mysql',
-            'host' => $host,
-            'user' => $user,
+            'dbname'   => $db,
+            'driver'   => 'pdo_mysql',
+            'host'     => $host,
+            'user'     => $user,
             'password' => $pass,
         ]);
     }
 
     public function fetchRow(string $query, array $params = []): array
     {
-        $result = $this->connection->executeQuery($query, $params,  $this->detectTypes($params));
+        $result = $this->connection->executeQuery($query, $params, $this->detectTypes($params));
 
         return $result->fetchAssociative() ?: [];
     }

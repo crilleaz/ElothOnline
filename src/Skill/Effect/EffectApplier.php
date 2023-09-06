@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Skill\Effect;
@@ -17,6 +18,7 @@ class EffectApplier
             return null;
         }
 
+        // @phpstan-ignore-next-line
         throw new \RuntimeException('Effect type is unknown');
     }
 }

@@ -8,3 +8,5 @@ log.txt
 .phpunit.result.cache
 var/**
 !var/.gitkeep
+.phpstan
+.phpcs-cache

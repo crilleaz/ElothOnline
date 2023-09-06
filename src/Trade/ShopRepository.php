@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Trade;
@@ -23,12 +24,13 @@ class ShopRepository extends AbstractDataAccessor
      */
     public function listShops(): iterable
     {
+        /** @var array{id: int, name: string, description: string} $shop */
         foreach ($this->getData() as $shop) {
             yield new Shop($shop['id'], $shop['name'], $shop['description']);
         }
     }
 
-    protected function  getDataName(): string
+    protected function getDataName(): string
     {
         return 'shop';
     }

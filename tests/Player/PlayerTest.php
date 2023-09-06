@@ -1,14 +1,14 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Player;
 
-use Game\Auth\AuthService;
-use Game\Dungeon\Drop;
 use Game\Dungeon\DungeonRepository;
 use Game\IntegrationTestCase;
 use Game\Item\Item;
 use Game\Item\ItemPrototypeRepository;
+use Game\Player\Activity\Activity;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class PlayerTest extends IntegrationTestCase
@@ -21,7 +21,7 @@ class PlayerTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $this->player = $this->createCharacter('Mick');
+        $this->player            = $this->createCharacter('Mick');
         $this->dungeonRepository = $this->getService(DungeonRepository::class);
     }
 
@@ -38,7 +38,7 @@ class PlayerTest extends IntegrationTestCase
 
     public function testStates(): void
     {
-        $dungeon = $this->dungeonRepository->findById(1);
+        $dungeon  = $this->dungeonRepository->findById(1);
         $dungeon2 = $this->dungeonRepository->findById(2);
 
         self::assertFalse($this->player->isFighting());
@@ -62,7 +62,7 @@ class PlayerTest extends IntegrationTestCase
 
     public function testEnterDungeonWhileAlreadyInOne(): void
     {
-        $dungeon = $this->dungeonRepository->findById(1);
+        $dungeon  = $this->dungeonRepository->findById(1);
         $dungeon2 = $this->dungeonRepository->findById(2);
 
         $firstEnter = $this->player->enterDungeon($dungeon);
@@ -71,7 +71,6 @@ class PlayerTest extends IntegrationTestCase
         $this->setCurrentTime($this->currentTime->addMinutes(2));
 
         // TODO check that attempt to enter the same dungeon twice doesn't modify anything
-
         $secondEnter = $this->player->enterDungeon($dungeon2);
         self::assertErrorOccurred($secondEnter, 'You are already hunting in a dungeon');
     }
@@ -98,12 +97,12 @@ class PlayerTest extends IntegrationTestCase
             'moderate(<50 mobs/h)',
         ];
 
-        yield 'hard' => [
+        yield 'impossible 1' => [
             4,
-            'hard(<20 mobs/h)',
+            'impossible(0 mobs/h)',
         ];
 
-        yield 'impossible' => [
+        yield 'impossible 2' => [
             3,
             'impossible(0 mobs/h)',
         ];
@@ -111,12 +110,12 @@ class PlayerTest extends IntegrationTestCase
 
     public function testObtainItem(): void
     {
-        $gold = $this->getService(ItemPrototypeRepository::class)->getById(1);
+        $gold   = $this->getService(ItemPrototypeRepository::class)->getById(1);
         $cheese = $this->getService(ItemPrototypeRepository::class)->getById(2);
 
-        $this->player->obtainItem($gold, 123);
-        $this->player->obtainItem($cheese, 3);
-        $this->player->obtainItem($gold, 15);
+        $this->player->obtainItem(new Item($gold->id, 123));
+        $this->player->obtainItem(new Item($cheese->id, 3));
+        $this->player->obtainItem(new Item($gold->id, 15));
 
         self::assertEquals(123 + 15, $this->player->getGold());
 
@@ -137,12 +136,12 @@ class PlayerTest extends IntegrationTestCase
 
     public function testPickUp(): void
     {
-        $gold = $this->getService(ItemPrototypeRepository::class)->getById(1);
+        $gold   = $this->getService(ItemPrototypeRepository::class)->getById(1);
         $cheese = $this->getService(ItemPrototypeRepository::class)->getById(2);
 
-        $this->player->pickUp(new Drop($gold, 123));
-        $this->player->pickUp(new Drop($cheese, 3));
-        $this->player->pickUp(new Drop($gold, 15));
+        $this->player->pickUp(new Item($gold->id, 123));
+        $this->player->pickUp(new Item($cheese->id, 3));
+        $this->player->pickUp(new Item($gold->id, 15));
 
         self::assertEquals(123 + 15, $this->player->getGold());
 
@@ -159,5 +158,33 @@ class PlayerTest extends IntegrationTestCase
         self::assertEquals(3, $itemsInInventory[1]->quantity);
         self::assertEquals($cheese->worth, $itemsInInventory[1]->worth);
         self::assertEquals($cheese->isSellable(), $itemsInInventory[1]->isSellable);
+    }
+
+    public function testStartActivity(): void
+    {
+        self::assertNull($this->player->getCurrentActivity());
+
+        $activity = Activity::lumberjack(1);
+        $result   = $this->player->startActivity($activity);
+        $this->assertNoErrorOccurred($result);
+
+        $currentActivity = $this->player->getCurrentActivity();
+        self::assertNotNull($currentActivity);
+
+        self::assertTrue($currentActivity->isSame($activity));
+    }
+
+    public function testStopActivity(): void
+    {
+        $activity = Activity::lumberjack(1);
+        $result   = $this->player->startActivity($activity);
+        $this->assertNoErrorOccurred($result);
+
+        $currentActivity = $this->player->getCurrentActivity();
+        self::assertNotNull($currentActivity);
+
+        $this->player->stopActivity();
+
+        self::assertNull($this->player->getCurrentActivity());
     }
 }

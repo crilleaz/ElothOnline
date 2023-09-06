@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Player;
@@ -22,10 +23,10 @@ class LvlCalculator
 
     public static function minExpRequired(int $forLevel): int
     {
-        if ($forLevel < 5){
+        if ($forLevel < 5) {
             return ($forLevel - 1) * 100;
         }
 
-        return (int) (floor(((4.32126 * pow($forLevel, 3.35211)) - 185.195)/100) * 100);
+        return (int) (floor(((4.32126 * pow($forLevel, 3.35211)) - 185.195) / 100) * 100);
     }
 }

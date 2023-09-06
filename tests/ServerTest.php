@@ -1,19 +1,23 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game;
 
 use Game\Dungeon\DungeonRepository;
+use Game\Player\Activity\Activity;
+use Game\Player\Activity\ActivityRepository;
 use Game\Player\Player;
 
 class ServerTest extends IntegrationTestCase
 {
-    private const MINUTES_SINCE_THE_LAST_EXECUTION = 47;
+    private const MINUTES_SINCE_THE_LAST_EXECUTION = 67;
 
     private const PLAYER1 = 'Mark';
     private const PLAYER2 = 'Kyle';
     private const PLAYER3 = 'Gamid';
     private const PLAYER4 = 'Mila';
+    private const PLAYER5 = 'Gi';
 
     private Server $server;
     protected function setUp(): void
@@ -23,13 +27,18 @@ class ServerTest extends IntegrationTestCase
         $this->server = $this->getService(Server::class);
 
         $dungeonRepository = $this->getService(DungeonRepository::class);
-        $dungeon1 = $dungeonRepository->getById(1);
-        $dungeon2 = $dungeonRepository->getById(2);
+        $dungeon1          = $dungeonRepository->getById(1);
+        $dungeon2          = $dungeonRepository->getById(2);
 
         $this->createCharacter(self::PLAYER1, 100)->enterDungeon($dungeon1);
         $this->createCharacter(self::PLAYER2, 40)->enterDungeon($dungeon2);
         $this->createCharacter(self::PLAYER3, 23);
         $this->createCharacter(self::PLAYER4, 61);
+        $character = $this->createCharacter(self::PLAYER5, 65);
+
+        $activity = Activity::lumberjack(1);
+        $this->characterCanNowPerformActivity($character, $activity);
+        $character->startActivity($activity);
     }
 
     public function testPerformTasksWhenThereIsNothingToDo(): void
@@ -37,7 +46,8 @@ class ServerTest extends IntegrationTestCase
         $result = $this->server->performTasks();
 
         $this->assertStaminaRestoredForRestingPlayers(0);
-        $this->assertStaminaSpentForHuntingPlayers(0);
+        $this->assertStaminaSpentByHuntingCharacters(0);
+        $this->assertStaminaSpentByCharactersPerformingActivities(0);
 
         $this->assertContainsLogs([], $result);
     }
@@ -49,11 +59,14 @@ class ServerTest extends IntegrationTestCase
         $logs = $this->server->performTasks();
 
         $this->assertStaminaRestoredForRestingPlayers(self::MINUTES_SINCE_THE_LAST_EXECUTION);
-        $this->assertStaminaSpentForHuntingPlayers(self::MINUTES_SINCE_THE_LAST_EXECUTION);
+        $this->assertStaminaSpentByHuntingCharacters(self::MINUTES_SINCE_THE_LAST_EXECUTION);
+        $this->assertStaminaSpentByCharactersPerformingActivities(self::MINUTES_SINCE_THE_LAST_EXECUTION);
         $this->assertHuntersReceivedRewards();
-        $this->assertExhaustedPlayersRemovedTheDungeon();
+        $this->assertLabourersReceivedRewards();
+        $this->assertExhaustedCharactersLeftTheDungeon();
+        $this->assertExhaustedCharactersStoppedActivities();
 
-        $this->assertContainsLogs(['<RestoredStamina>47</RestoredStamina>'], $logs);
+        $this->assertContainsLogs(['<RestoredStamina>' . self::MINUTES_SINCE_THE_LAST_EXECUTION . '</RestoredStamina>'], $logs);
     }
 
     private function assertContainsLogs(array $logs, array $actualLogs): void
@@ -83,21 +96,19 @@ class ServerTest extends IntegrationTestCase
         );
     }
 
-    private function assertStaminaSpentForHuntingPlayers(int $amount): void
+    private function assertStaminaSpentByHuntingCharacters(int $amountOfSpentStamina): void
     {
-        $player = $this->getCharacterByName(self::PLAYER1);
-        self::assertEqualsWithDelta(
-            max(100 - $amount, 0),
-            $player->getStamina(),
-            2
-        );
+        $character = $this->getCharacterByName(self::PLAYER1);
+        self::assertEquals(max(100 - $amountOfSpentStamina, 0), $character->getStamina());
 
-        $player = $this->getCharacterByName(self::PLAYER2);
-        self::assertEqualsWithDelta(
-            max(40 - $amount, 0),
-            $player->getStamina(),
-            2
-        );
+        $character = $this->getCharacterByName(self::PLAYER2);
+        self::assertEquals(max(40 - $amountOfSpentStamina, 0), $character->getStamina());
+    }
+
+    private function assertStaminaSpentByCharactersPerformingActivities(int $amountOfSpentStamina): void
+    {
+        $character = $this->getCharacterByName(self::PLAYER5);
+        self::assertEquals(max(65 - $amountOfSpentStamina, 0), $character->getStamina());
     }
 
     /**
@@ -106,10 +117,10 @@ class ServerTest extends IntegrationTestCase
     private function assertHuntersReceivedRewards(): void
     {
         $player = $this->getCharacterByName(self::PLAYER1);
-        self::assertEqualsWithDelta(235, $player->getExp(), 10);
+        self::assertEquals(110, $player->getExp());
 
         $player = $this->getCharacterByName(self::PLAYER2);
-        self::assertEqualsWithDelta(1000, $player->getExp(), 10);
+        self::assertEquals(200, $player->getExp());
 
         $player = $this->getCharacterByName(self::PLAYER3);
         self::assertEquals(0, $player->getExp());
@@ -118,13 +129,32 @@ class ServerTest extends IntegrationTestCase
         self::assertEquals(0, $player->getExp());
     }
 
-    private function assertExhaustedPlayersRemovedTheDungeon(): void
+    private function assertLabourersReceivedRewards(): void
     {
-        $player = $this->getCharacterByName(self::PLAYER1);
-        self::assertTrue($player->isFighting());
-        self::assertEquals(1, $player->getHuntingDungeonId(), 'Player had to stay in the same dungeon');
+        $character    = $this->getCharacterByName(self::PLAYER5);
+        $pickedOption = $this->getService(ActivityRepository::class)->findActivityOption(Activity::NAME_LUMBERJACK, 1);
 
-        $player = $this->getCharacterByName(self::PLAYER2);
-        self::assertTrue($player->isInProtectiveZone());
+        self::assertNotNull($pickedOption);
+        self::assertEquals($pickedOption->rewardExp, $character->getExp());
+        $item = $character->findInInventory($pickedOption->rewardItemId);
+        self::assertNotNull($item);
+        self::assertEquals(1, $item->quantity);
+    }
+
+    private function assertExhaustedCharactersLeftTheDungeon(): void
+    {
+        $character = $this->getCharacterByName(self::PLAYER1);
+        self::assertTrue($character->isFighting());
+        self::assertEquals(1, $character->getHuntingDungeonId(), 'Player had to stay in the same dungeon');
+
+        $character = $this->getCharacterByName(self::PLAYER2);
+        self::assertTrue($character->isInProtectiveZone());
+    }
+
+    private function assertExhaustedCharactersStoppedActivities(): void
+    {
+        $character = $this->getCharacterByName(self::PLAYER5);
+        self::assertTrue($character->isInProtectiveZone());
+        self::assertNull($character->getCurrentActivity());
     }
 }

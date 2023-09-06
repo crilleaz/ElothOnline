@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\UI\Scene;
@@ -23,7 +24,7 @@ readonly class Auth implements SceneInterface
 
         if ($currentTab === 'logout') {
             $this->authService->logout();
-            header("Location: /");
+            header('Location: /');
 
             return '';
         }
@@ -33,7 +34,7 @@ readonly class Auth implements SceneInterface
 
     private function loginTab(InputInterface $input): string
     {
-        $error = '';
+        $error    = '';
         $username = '';
         if ($input->getString('login') !== '') {
             $username = $input->getString('username');
@@ -45,7 +46,7 @@ readonly class Auth implements SceneInterface
                 $result = $this->authService->login($username, $password);
                 if ($result === null) {
                     // todo Kind of meh. Think of smother toggle between scenes
-                    header("Location: /");
+                    header('Location: /');
 
                     return '';
                 }
@@ -56,23 +57,23 @@ readonly class Auth implements SceneInterface
 
         return $this->renderer->render('login.html.twig', [
             'username' => $username,
-            'error' => $error,
+            'error'    => $error,
         ]);
     }
 
     private function registerTab(InputInterface $input): string
     {
-        $error = '';
+        $error    = '';
         $username = '';
         if ($input->getString('register') !== '') {
-            $username = $input->getString('username');
-            $password = $input->getString('password');
+            $username        = $input->getString('username');
+            $password        = $input->getString('password');
             $passwordConfirm = $input->getString('password_confirm');
 
             if ($username === '' || $password === '' || $passwordConfirm === '') {
-                $error = "All fields are required";
-            } else if ($password !== $passwordConfirm) {
-                $error = "Passwords do not match";
+                $error = 'All fields are required';
+            } elseif ($password !== $passwordConfirm) {
+                $error = 'Passwords do not match';
             } else {
                 $result = $this->authService->register($username, $password);
                 if ($result === null) {
@@ -80,7 +81,7 @@ readonly class Auth implements SceneInterface
                     $this->authService->login($username, $password);
 
                     // todo Kind of meh. Think of smother toggle between scenes
-                    header("Location: /");
+                    header('Location: /');
 
                     return '';
                 }
@@ -91,7 +92,7 @@ readonly class Auth implements SceneInterface
 
         return $this->renderer->render('register.html.twig', [
             'username' => $username,
-            'error' => $error,
+            'error'    => $error,
         ]);
     }
 }

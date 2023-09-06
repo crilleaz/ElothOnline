@@ -15,8 +15,8 @@
     {% block head %}
     {% endblock %}
 </head>
-<body style="background-color: #eceef4">
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-dark">
     <a class="navbar-brand" href="?scene=main">GAME</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,7 +36,7 @@
                    aria-haspopup="true" aria-expanded="false">
                     Community
                 </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <div class="dropdown-menu bg-dark" aria-labelledby="navbarDropdown">
                     <a class="dropdown-item" href="#">News</a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="#">Arena</a>
@@ -48,15 +48,15 @@
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
                    aria-haspopup="true" aria-expanded="false">
-                    World
+                    Activity
                 </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="#">Woodcutting</a>
-                    <a class="dropdown-item" href="#">Mining</a>
-                    <a class="dropdown-item" href="#">Gathering</a>
-                    <a class="dropdown-item" href="#">Harvesting</a>
-                    <a class="dropdown-item" href="#">Blacksmith</a>
-                    <a class="dropdown-item" href="#">Herbalism</a>
+                <div class="dropdown-menu bg-dark" aria-labelledby="navbarDropdown">
+                    {% if player.canPerformActivity('Lumberjack') %}<a class="dropdown-item" href="/?scene=activity&activity=Lumberjack">Lumberjack</a>{% endif %}
+                    {% if player.canPerformActivity('Miner') %}<a class="dropdown-item" href="/?scene=activity&activity=Miner">Miner</a>{% endif %}
+                    {% if player.canPerformActivity('Gatherer') %}<a class="dropdown-item" href="/?scene=activity&activity=Gatherer">Gatherer</a>{% endif %}
+                    {% if player.canPerformActivity('Farmer') %}<a class="dropdown-item" href="/?scene=activity&activity=Farmer">Farmer</a>{% endif %}
+                    {% if player.canPerformActivity('Crafter') %}<a class="dropdown-item" href="/?scene=activity&activity=Crafter">Crafter</a>{% endif %}
+                    {% if player.canPerformActivity('Alchemist') %}<a class="dropdown-item" href="/?scene=activity&activity=Alchemist">Alchemist</a>{% endif %}
                 </div>
             </li>
             <li class="nav-item">
@@ -80,7 +80,7 @@
             </div>
         </div>
         <hr class="d-sm-none">
-        {% include 'component/player-status.twig' %}
+        {% include 'component/player-quick-actions.twig' %}
     </div>
 </div>
 

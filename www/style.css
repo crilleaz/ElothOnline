@@ -1,5 +1,14 @@
-.body {
-   background-color: rgb(236, 238, 244);
+body {
+   background-color: #aaa;
+}
+
+
+#navbarSupportedContent {
+    color:white;
+}
+
+#navbarSupportedContent a {
+    color:white;
 }
 
     .myStickyListGroup{
@@ -20,6 +29,8 @@
   .navbar-brand {
     left: 25%;
     position: absolute;
+
+      color:white !important;
   }
 
   .list-group-item{

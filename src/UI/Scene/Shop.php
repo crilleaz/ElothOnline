@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\UI\Scene;
@@ -32,7 +33,7 @@ class Shop extends AbstractScene
 
         return $this->renderTemplate('shop', [
             'playerGold' => $player->getGold(),
-            'shop' => $shop,
+            'shop'       => $shop,
         ]);
     }
 }

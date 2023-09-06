@@ -1,9 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Player;
 
-use Game\Dungeon\Drop;
 use Game\Dungeon\Dungeon;
 use Game\Dungeon\TTKCalculator;
 use Game\Engine\DBConnection;
@@ -11,25 +11,20 @@ use Game\Engine\DbTimeFactory;
 use Game\Engine\Error;
 use Game\Item\Item;
 use Game\Item\ItemPrototype as ItemPrototype;
+use Game\Player\Activity\Activity;
+use Game\Player\Activity\ActivityInterface;
 use Game\Skill\Effect\EffectApplier;
 use Game\Trade\Offer;
 
 class Player
 {
+    public const STATE_IDLE                = 0;
+    public const STATE_IN_COMBAT           = 1;
+    public const STATE_PERFORMING_ACTIVITY = 2;
+
     public const MAX_POSSIBLE_STAMINA = 100;
 
     private readonly PlayerLog $logger;
-
-    /**
-     * @param string $name
-     * @param DBConnection $connection
-     * @return self
-     * @deprecated will be removed
-     */
-    public static function loadPlayer(int $id, DBConnection $connection): self
-    {
-        return new self($id, $connection);
-    }
 
     /**
      * @internal Should not be used outside the current module
@@ -43,12 +38,12 @@ class Player
 
     public function isFighting(): bool
     {
-        return 1 === (int) $this->getProperty('in_combat');
+        return $this->isInState(self::STATE_IN_COMBAT);
     }
 
     public function isInProtectiveZone(): bool
     {
-        return !$this->isFighting();
+        return $this->isInState(self::STATE_IDLE);
     }
 
     public function isInDungeon(Dungeon $dungeon): bool
@@ -58,7 +53,7 @@ class Player
 
     public function getHuntingDungeonId(): ?int
     {
-        $hunt = $this->connection->fetchRow('SELECT dungeon_id FROM hunting WHERE character_id = ?',[$this->id]);
+        $hunt = $this->connection->fetchRow('SELECT dungeon_id FROM hunting WHERE character_id = ?', [$this->id]);
         if ($hunt === []) {
             return null;
         }
@@ -77,20 +72,25 @@ class Player
             return new Error('You are already hunting in a dungeon');
         }
 
-        $this->connection->execute('INSERT INTO hunting (character_id, dungeon_id) VALUES (?, ?)', [$this->id, $dungeon->id]);
-        $this->connection->execute('UPDATE players SET in_combat = 1 WHERE id = ?', [$this->id]);
+        if (!$this->isInState(self::STATE_IDLE)) {
+            return new Error('Can not go to the dungeon if not idle');
+        }
+
+        $now = DbTimeFactory::createCurrentTimestamp();
+        $this->connection->execute('INSERT INTO hunting (character_id, dungeon_id, checked_at, last_reward_at) VALUES (?, ?, ?, ?)', [$this->id, $dungeon->id, $now, $now]);
+        $this->moveToState(self::STATE_IN_COMBAT);
 
         return null;
     }
 
     public function measureDifficulty(Dungeon $dungeon): string
     {
-        $ttkCalculator = new TTKCalculator();
-        $ttkMonster = $ttkCalculator->calculate($this, $dungeon->inhabitant)->seconds;
-        $ttkPlayer = $ttkCalculator->calculateForMonster($dungeon->inhabitant, $this)->seconds;
+        $ttkCalculator   = new TTKCalculator();
+        $ttkMonster      = $ttkCalculator->calculate($this, $dungeon->inhabitant)->seconds;
+        $ttkPlayer       = $ttkCalculator->calculateForMonster($dungeon->inhabitant, $this)->seconds;
         $difficultyRatio = $ttkPlayer / $ttkMonster;
 
-        switch(true) {
+        switch (true) {
             case $difficultyRatio > 50:
                 return 'easy(>50 mobs/h)';
             case $difficultyRatio > 20:
@@ -104,8 +104,12 @@ class Player
 
     public function leaveDungeon(): void
     {
+        if (!$this->isInState(self::STATE_IN_COMBAT)) {
+            return;
+        }
+
         $this->connection->execute('DELETE from hunting WHERE character_id = ?', [$this->id]);
-        $this->connection->execute('UPDATE players SET in_combat = 0  WHERE id = ?', [$this->id]);
+        $this->moveToState(self::STATE_IDLE);
     }
 
     public function getId(): int
@@ -142,11 +146,79 @@ class Player
 
             // Update max hp
             $amountToAdd = 15;
-            $maxHealth = $level * $amountToAdd;
+            $maxHealth   = $level * $amountToAdd;
             $db->execute("UPDATE players SET health_max = {$maxHealth} WHERE id = {$this->id}");
         });
 
         $this->logger->add($this->id, "You gained $amount experience points.");
+    }
+
+    public function canPerformActivity(string $activity): bool
+    {
+        return $this->getActivitySkillLevel($activity) > 0;
+    }
+
+    public function getActivitySkillLevel(string $activity): int
+    {
+        switch ($activity) {
+            case Activity::NAME_LUMBERJACK:
+                return $this->getWoodcutting();
+            case Activity::NAME_FARMER:
+                return $this->getHarvesting();
+            case Activity::NAME_MINER:
+                return $this->getMining();
+            case Activity::NAME_GATHERER:
+                return $this->getGathering();
+            case Activity::NAME_CRAFTER:
+                return $this->getBlacksmith();
+            case Activity::NAME_ALCHEMIST:
+                return $this->getAlchemy();
+            default:
+                return 0;
+        }
+    }
+
+    public function startActivity(ActivityInterface $activity): ?Error
+    {
+        if (!$this->isInState(self::STATE_IDLE)) {
+            return new Error('Can not go for activities when not in protective zone');
+        }
+
+        $now = DbTimeFactory::createCurrentTimestamp();
+
+        $this->connection->execute('
+                        INSERT INTO activity(character_id, name, selected_option, started_at, checked_at, last_reward_at)
+                        VALUE (?, ?, ?, ?, ?, ?)
+        ', [$this->id, $activity->getName(), $activity->getOption(), $now, $now, $now]);
+
+        $this->moveToState(self::STATE_PERFORMING_ACTIVITY);
+
+        return null;
+    }
+
+    public function getCurrentActivity(): ?CharacterActivity
+    {
+        $data = $this->connection->fetchRow('SELECT name, selected_option, checked_at, last_reward_at FROM activity WHERE character_id=' . $this->id);
+        if ($data === []) {
+            return null;
+        }
+
+        return new CharacterActivity(
+            $data['name'],
+            $data['selected_option'],
+            DbTimeFactory::fromTimestamp($data['checked_at']),
+            DbTimeFactory::fromTimestamp($data['last_reward_at'])
+        );
+    }
+
+    public function stopActivity(): void
+    {
+        if (!$this->isInState(self::STATE_PERFORMING_ACTIVITY)) {
+            return;
+        }
+
+        $this->connection->execute('DELETE FROM activity WHERE character_id=' . $this->id);
+        $this->moveToState(self::STATE_IDLE);
     }
 
     public function getLevel(): int
@@ -220,9 +292,9 @@ class Player
         return (int) $this->getProperty('harvesting');
     }
 
-    public function getHerbalism(): int
+    public function getAlchemy(): int
     {
-        return (int) $this->getProperty('herbalism');
+        return (int) $this->getProperty('alchemy');
     }
 
     public function getBlacksmith(): int
@@ -238,24 +310,25 @@ class Player
         return $this->logger->readLogs($this->id, $amount);
     }
 
-    public function pickUp(Drop $drop): void
+    public function pickUp(Item $item): void
     {
-        $this->obtainItem($drop->item, $drop->quantity);
-        $this->logger->add($this->id, sprintf("You picked up %d %s", $drop->quantity, $drop->item->name));
+        $this->obtainItem($item);
+
+        $this->logger->add($this->id, sprintf('You picked up %d %s', $item->quantity, $item->name));
     }
 
-    public function obtainItem(ItemPrototype $item, int $quantity): void
+    public function obtainItem(Item $item): void
     {
         if ($this->getItemQuantity($item->id) === 0) {
             $this->connection
-                ->execute('INSERT INTO inventory (character_id, item_id, amount, worth) VALUES (?, ?, ?, ?)', [$this->id, $item->id, $quantity, $item->worth]);
+                ->execute('INSERT INTO inventory (character_id, item_id, amount, worth) VALUES (?, ?, ?, ?)', [$this->id, $item->id, $item->quantity, $item->worth]);
         } else {
             $this->connection
-                ->execute('UPDATE inventory SET amount = amount + ? WHERE item_id = ? AND character_id = ?', [$quantity, $item->id, $this->id]);
+                ->execute('UPDATE inventory SET amount = amount + ? WHERE item_id = ? AND character_id = ?', [$item->quantity, $item->id, $this->id]);
         }
     }
 
-    public function dropItem(ItemPrototype $item, int $quantity): Drop
+    public function dropItem(ItemPrototype $item, int $quantity): Item
     {
         $this->connection->transaction(function () use ($item, $quantity) {
             $this->connection->execute('UPDATE inventory SET amount = amount - ? WHERE item_id = ? AND character_id = ?', [$quantity, $item->id, $this->id]);
@@ -264,13 +337,10 @@ class Player
             if ($remainingItemsQuantity < 0) {
                 throw new \RuntimeException('Player does not have that many items');
             }
-
-            if ($remainingItemsQuantity === 0) {
-                $this->destroyItem($item);
-            }
+            $this->removeNonExistentItems();
         });
 
-        return new Drop($item, $quantity);
+        return new Item($item->id, $quantity);
     }
 
     public function destroyItem(ItemPrototype $item, int $quantity = null): void
@@ -352,7 +422,7 @@ class Player
         $this->connection->transaction(function () use ($offer) {
             // TODO drop returns actually dropped item which means that it can be used for actual trade player<=>seller
             $this->dropItem($offer->inExchange->prototype, $offer->inExchange->quantity);
-            $this->obtainItem($offer->item->prototype, $offer->item->quantity);
+            $this->obtainItem($offer->item);
         });
 
         return null;
@@ -366,6 +436,23 @@ class Player
         }
 
         return $result[$property];
+    }
+
+    private function isInState(int $state): bool
+    {
+        return (int) $this->getProperty('state') === $state;
+    }
+
+    private function moveToState(int $state): void
+    {
+        // Dummy state-machine. Check transitions before applying new state
+        if ($state === self::STATE_IN_COMBAT || $state === self::STATE_PERFORMING_ACTIVITY) {
+            if (!$this->isInState(self::STATE_IDLE)) {
+                throw new \DomainException('Impossible transition');
+            }
+        }
+
+        $this->connection->execute('UPDATE players SET state = ? WHERE id = ?', [$state, $this->id]);
     }
 
     private function getItemQuantity(int $itemId): int

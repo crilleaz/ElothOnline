@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\UI\Scene;
@@ -18,11 +19,11 @@ class Highscore extends AbstractScene
 
     public function run(InputInterface $input): string
     {
-        $player = $this->getCurrentPlayer();
+        $player     = $this->getCurrentPlayer();
         $topPlayers = $this->characterRepository->listTopCharacters(100);
 
         return $this->renderTemplate('highscores', [
-            'player' => $player,
+            'player'     => $player,
             'topPlayers' => $topPlayers,
         ]);
     }

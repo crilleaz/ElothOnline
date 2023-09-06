@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\UI\Scene\Input;
@@ -7,7 +8,6 @@ class HttpInput implements InputInterface
 {
     public function __construct()
     {
-
     }
 
     public function getInt(string $input): int

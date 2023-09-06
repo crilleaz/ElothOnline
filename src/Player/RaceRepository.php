@@ -1,14 +1,33 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Player;
 
 use Game\Utils\AbstractDataAccessor;
 
+/**
+ * @phpstan-type RawData array{
+ * id: int,
+ * name: string,
+ * description: string,
+ * stats: array{maxHealth: int, strength: int, defence: int},
+ * canCraft: bool,
+ * canMine: bool,
+ * canWoodcut: bool,
+ * canHarvest: bool,
+ * canGather: bool,
+ * canBrew: bool
+ * }
+ */
 class RaceRepository extends AbstractDataAccessor
 {
+    /**
+     * @return iterable<Race>
+     */
     public function listAll(): iterable
     {
+        /** @var RawData $race */
         foreach ($this->getData() as $race) {
             yield new Race(
                 $race['id'],
@@ -31,6 +50,11 @@ class RaceRepository extends AbstractDataAccessor
         }
     }
 
+    /**
+     * @param int $raceId
+     *
+     * @return Race
+     */
     public function getById(int $raceId): Race
     {
         foreach ($this->listAll() as $race) {

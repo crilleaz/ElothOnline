@@ -54,7 +54,12 @@
             </div>
             <div>
                 <p>Perks</p>
-                <p>Not implemented yet</p>
+                {% if race.perks.canCraft %}<p>Can craft items</p>{% endif %}
+                {% if race.perks.canMine %}<p>Can mine ore</p>{% endif %}
+                {% if race.perks.canGather %}<p>Can gather herbs</p>{% endif %}
+                {% if race.perks.canWoodcut %}<p>Can chop wood</p>{% endif %}
+                {% if race.perks.canHarvest %}<p>Can grow crops and vegetables</p>{% endif %}
+                {% if race.perks.canBrew %}<p>Can brew potions and beverages</p>{% endif %}
             </div>
         </div>
     {% endfor %}

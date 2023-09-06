@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Trade;
@@ -11,6 +12,10 @@ use Game\Utils\AbstractDataAccessor;
  */
 class StockRepository extends AbstractDataAccessor
 {
+    /**
+     * @param  int $shopId
+     * @return iterable<Offer>
+     */
     public function listShopStock(int $shopId): iterable
     {
         $stock = $this->getData()[$shopId] ?? [];
@@ -39,10 +44,14 @@ class StockRepository extends AbstractDataAccessor
         return 'shop_stock';
     }
 
+    /**
+     * @return array<int, array{shop_id: int, item_id: int, price_id: int, price_quantity: int}[]>
+     */
     protected function getData(): array
     {
         $data = [];
-        foreach(parent::getData() as $entry) {
+        /** @var array{shop_id: int, item_id: int, price_id: int, price_quantity: int} $entry */
+        foreach (parent::getData() as $entry) {
             $data[$entry['shop_id']][] = $entry;
         }
 

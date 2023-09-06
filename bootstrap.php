@@ -50,7 +50,7 @@ final class DI
     }
 
     /**
-     * @template T
+     * @template T of object
      *
      * @param class-string<T> $id
      * @return T
@@ -60,6 +60,8 @@ final class DI
         if (self::$container === null) {
             self::init();
         }
+
+        // @phpstan-ignore-next-line
         return self::$container->get($id);
     }
 }

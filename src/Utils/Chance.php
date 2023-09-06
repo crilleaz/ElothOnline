@@ -34,7 +34,7 @@ readonly class Chance
 
     public static function percentage(float $rate): self
     {
-        return new self($rate/100.0);
+        return new self($rate / 100.0);
     }
 
     public function roll(): bool

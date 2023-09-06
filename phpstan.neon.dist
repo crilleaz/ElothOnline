@@ -1,0 +1,14 @@
+parameters:
+  level: 9
+  tmpDir: '%currentWorkingDirectory%/.phpstan'
+  paths:
+    - src
+    - bootstrap.php
+  excludePaths:
+    - src/Engine/DBConnection.php
+  fileExtensions:
+    - php
+  parallel:
+    processTimeout: 60.0
+    maximumNumberOfProcesses: 4
+  reportUnmatchedIgnoredErrors: false

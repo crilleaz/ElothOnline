@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Dungeon;
@@ -13,13 +14,14 @@ readonly class DropChance
         public ItemPrototype $itemPrototype,
         public int $quantityMin,
         public int $quantityMax
-    ) {}
+    ) {
+    }
 
     /**
      * Returns quantity of items dropped.
      * 0 means nothing dropped.
      *
-     * @param int $attempts amount of accumulating retries.
+     * @param int $attempts Amount of accumulating retries.
      *
      * @return int
      */

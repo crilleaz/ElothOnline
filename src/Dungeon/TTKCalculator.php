@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Dungeon;
@@ -31,7 +32,7 @@ class TTKCalculator
             $mitigatedDamage = 1;
         }
 
-        $hitsRequired = (int)ceil($health / $mitigatedDamage);
+        $hitsRequired = (int) ceil($health / $mitigatedDamage);
 
         switch (self::ATTACK_PER) {
             case 'second':

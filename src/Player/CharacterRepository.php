@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Player;
@@ -6,9 +7,11 @@ namespace Game\Player;
 use Game\Engine\DBConnection;
 use Game\User;
 
-class CharacterRepository
+readonly class CharacterRepository
 {
-    public function __construct(private DBConnection $db) {}
+    public function __construct(private DBConnection $db)
+    {
+    }
 
     public function getByUser(User $user): Player
     {
@@ -50,6 +53,10 @@ class CharacterRepository
         return new Player($id, $this->db);
     }
 
+    /**
+     * @param  int $amount
+     * @return iterable<Player>
+     */
     public function listTopCharacters(int $amount): iterable
     {
         $topCharacters = $this->db->fetchRows('SELECT id FROM players ORDER BY level DESC LIMIT ' . $amount);

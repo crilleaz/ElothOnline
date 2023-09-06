@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Game\Engine;
@@ -16,5 +17,15 @@ class DbTimeFactory
     public static function createTimestamp(DateTimeInterface $from): string
     {
         return $from->format('Y-m-d H:i:s');
+    }
+
+    public static function fromTimestamp(string $dbTimeStamp): CarbonImmutable
+    {
+        $timestamp = strtotime($dbTimeStamp);
+        if ($timestamp === false) {
+            throw new \RuntimeException('Could not parse time');
+        }
+
+        return CarbonImmutable::createFromTimestamp($timestamp);
     }
 }

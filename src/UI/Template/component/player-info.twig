@@ -5,11 +5,19 @@
             <font size="2">HP: {{ player.currentHealth }}/{{ player.maxHealth }}</font>
             |
             {% if player.stamina < 50 %}
-                <font size="2">Stamina: <font color="yellow"> {{ player.stamina }}</font>/100</font>
+                <font size="2">Stamina: <font style="color:yellow; text-shadow: 1px 1px 1px black;"> {{ player.stamina }}</font>/100</font>
             {% elseif player.stamina < 10 %}
                 <font size="2">Stamina: <font color="red"> {{ player.stamina }}</font>/100</font>
             {% else %}
                 <font size="2">Stamina: {{ player.stamina }}/100</font>
+            {% endif %}
+
+            {% if player.isFighting %}
+                <p>Status: <img width="18" src="./images/combat.gif" title="Raiding {{ huntingDungeon.name }}"></p>
+            {% elseif player.getCurrentActivity %}
+                <p>Status: <img width="18" src="./images/pz.gif" title="Perorming activity"></p>
+            {% else %}
+                <p>Status: <img width="18" src="./images/pz.gif" title="In protective zone"></p>
             {% endif %}
             <hr>
             <center>
@@ -19,19 +27,6 @@
                 Magic: {{ player.magic }}<br>
                 Strength: {{ player.strength }}<br>
                 Defense: {{ player.defence }}<br>
-            </font>
-        </li>
-        <li class="list-group-item rounded">
-            <center>
-                <pre>Abilities</pre>
-            </center>
-            <font size="2">
-                Woodcutting: {{ player.woodcutting }}<br>
-                Mining: {{ player.mining }} <br>
-                Gathering: {{ player.gathering }} <br>
-                Harvesting: {{ player.harvesting }} <br>
-                Blacksmith: {{ player.blacksmith }} <br>
-                Herbalism: {{ player.herbalism }} <br>
             </font>
         </li>
         <li class="list-group-item rounded">
